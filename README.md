@@ -30,8 +30,8 @@ graph TD
     end
     
     subgraph Persistence [PostgreSQL + pgvector]
-        RelationalData[Relational Data\n(Articles, Authors)]
-        VectorData[Vector Embeddings\n(768 dims)]
+        RelationalData["Relational Data<br/>(Articles, Authors)"]
+        VectorData["Vector Embeddings<br/>(768 dims)"]
     end
     
     subgraph Pipeline [Data Ingestion Pipeline]
