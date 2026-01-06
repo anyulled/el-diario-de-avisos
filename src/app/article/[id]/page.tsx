@@ -50,15 +50,38 @@ export default async function ArticlePage({
     if (!article.content) return "Contenido no disponible";
     try {
       // Using iconv-lite to decode as Windows-1252 first to ensure 8-bit bytes are mapped to correct chars
-      const rtfString = Buffer.isBuffer(article.content)
+      const contentString = Buffer.isBuffer(article.content)
         ? iconv.decode(article.content, "win1252")
         : String(article.content);
 
+      console.log(`[Article ${id}] Content length:`, contentString.length);
+      console.log(`[Article ${id}] Content preview:`, contentString.substring(0, 200));
+
+      // Detect if content is RTF format (starts with {\rtf) or plain text
+      const isRtf = contentString.trim().startsWith("{\\rtf");
+      console.log(`[Article ${id}] Format:`, isRtf ? "RTF" : "Plain Text");
+
+      if (!isRtf) {
+        // Process plain text content
+        const paragraphs = contentString
+          .split(/\n\s*\n/)
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0);
+
+        const html = paragraphs
+          .map((p) => {
+            const formatted = p.replace(/\n/g, "<br>");
+            return `<p>${formatted}</p>`;
+          })
+          .join("\n");
+
+        console.log(`[Article ${id}] Plain text converted to ${paragraphs.length} paragraphs`);
+        return html;
+      }
+
+      // Process RTF content
       // HACK: Manually unescape RTF hex sequences for Latin1 characters (\'xx)
-      // The rtf-to-html library seems to fail to parse these standard escapes correctly
-      // (likely due to missing/default codepage handling), resulting in replacement characters.
-      // We convert \'e9 -> é, etc. assuming Windows-1252/Latin1 mapping for 0x80-0xFF.
-      const unescapedRtf = rtfString.replace(
+      const unescapedRtf = contentString.replace(
         /\\'([0-9a-fA-F]{2})/g,
         (match, hex) => {
           const code = parseInt(hex, 16);
@@ -72,15 +95,21 @@ export default async function ArticlePage({
       );
 
       // Allow bypassing the document structure (html/head/body) which adds unwanted margins
-      return await rtfToHtml(unescapedRtf, {
+      const html = await rtfToHtml(unescapedRtf, {
         template: (_doc: unknown, _defaults: unknown, content: string) =>
           content,
       });
+
+      console.log(`[Article ${id}] HTML length:`, html.length);
+      console.log(`[Article ${id}] HTML preview:`, html.substring(0, 200));
+
+      return html;
     } catch (e) {
-      console.error("Error converting RTF", e);
-      return Buffer.isBuffer(article.content)
+      console.error(`[Article ${id}] Error processing content:`, e);
+      const rawContent = Buffer.isBuffer(article.content)
         ? iconv.decode(article.content, "win1252")
         : String(article.content);
+      return `<pre>${rawContent}</pre>`;
     }
   })();
 
