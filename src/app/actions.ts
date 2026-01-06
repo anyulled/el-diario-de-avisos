@@ -20,12 +20,15 @@ export type SearchParams = {
   year?: number | null;
   text?: string | null;
   type?: number | null;
-  page?: number;
+  page?: number | string;
+  pageSize?: number | string;
+  sort?: string | null;
 };
 
 export async function getNews(params: SearchParams) {
-  const { year, text, type, page = 1 } = params;
-  const pageSize = 20;
+  const { year, text, type, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
+  const page = Number(rawPage);
+  const pageSize = Number(rawPageSize);
 
   const conditions = [];
 
@@ -76,12 +79,29 @@ export async function getNews(params: SearchParams) {
     ? query.where(and(...conditions))
     : query;
 
-  // Sort by relevance if searching, otherwise by date
-  const queryWithOrder = text
-    ? queryWithConditions.orderBy(sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`)
-    : queryWithConditions.orderBy(desc(articles.date));
+  // Determine sort order
+  let orderBy;
+  switch (sort) {
+    case "date_asc":
+      orderBy = [articles.date];
+      break;
+    case "date_desc":
+      orderBy = [desc(articles.date)];
+      break;
+    case "id_asc":
+      orderBy = [articles.id];
+      break;
+    case "id_desc":
+      orderBy = [desc(articles.id)];
+      break;
+    case "rank":
+      orderBy = text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
+      break;
+    default:
+      orderBy = text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
+  }
 
-  const data = await queryWithOrder.limit(pageSize).offset((page - 1) * pageSize);
+  const data = await queryWithConditions.orderBy(...orderBy).limit(pageSize).offset((page - 1) * pageSize);
 
   return {
     data,

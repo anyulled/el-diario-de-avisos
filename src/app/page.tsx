@@ -1,9 +1,9 @@
 import { Hero } from "@/components/hero";
+import { Navbar } from "@/components/navbar";
 import { NewsGrid } from "@/components/news-grid";
+import { Pagination } from "@/components/pagination";
 import { SearchFilters } from "@/components/search-filters";
 import { getNews, getNewsTypes, getYears, SearchParams } from "./actions";
-
-import { Navbar } from "@/components/navbar";
 
 export default async function Home({
   searchParams,
@@ -14,6 +14,9 @@ export default async function Home({
   const years = await getYears();
   const types = await getNewsTypes();
   const { data: news, total } = await getNews(params);
+
+  const currentPage = Number(params.page || 1);
+  const pageSize = Number(params.pageSize || 20);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-20 relative">
@@ -29,6 +32,12 @@ export default async function Home({
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
         </div>
         <NewsGrid news={news} />
+
+        <Pagination
+          total={total}
+          pageSize={pageSize}
+          currentPage={currentPage}
+        />
       </div>
     </main>
   );

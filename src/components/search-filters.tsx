@@ -18,14 +18,23 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
   const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout>>();
 
-  const handleSearch = (key: string, value: string | null) => {
+  const handleSearch = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
+
+    // Always reset page to 1 when any other filter changes, 
+    // unless we are explicitly setting the page (handled elsewhere maybe, but for now here)
+    if (!updates.page) {
+      params.set("page", "1");
     }
-    // Debounce could be good here for text, but keeping it simple
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+
     startTransition(() => {
       router.replace(`/?${params.toString()}`);
     });
@@ -33,7 +42,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
 
   return (
     <div className="w-full max-w-5xl mx-auto -mt-10 relative z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <div className="md:col-span-2 relative">
           <input
             type="text"
@@ -43,7 +52,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
             onChange={(e) => {
               const term = e.target.value;
               clearTimeout(timeoutId);
-              const id = setTimeout(() => handleSearch("text", term), 500);
+              const id = setTimeout(() => handleSearch({ text: term }), 500);
               setTimeoutId(id);
             }}
           />
@@ -53,7 +62,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
         <div className="relative">
           <select
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none appearance-none focus:ring-2 focus:ring-amber-600 cursor-pointer"
-            onChange={(e) => handleSearch("year", e.target.value)}
+            onChange={(e) => handleSearch({ year: e.target.value })}
             defaultValue={searchParams.get("year") || ""}
           >
             <option value="">Año</option>
@@ -78,9 +87,9 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
             onClick={() => setIsTypeExpanded(!isTypeExpanded)}
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-between text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
           >
-            <span>
+            <span className="truncate">
               {searchParams.get("type")
-                ? "Tipo Seleccionado"
+                ? types.find(t => String(t.id) === searchParams.get("type"))?.name || "Tipo Seleccionado"
                 : "Tipo de Noticia"}
             </span>
             {isTypeExpanded ? (
@@ -95,6 +104,42 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-600 border-t-transparent" />
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative">
+          <select
+            className="w-full h-11 pl-4 pr-10 rounded-lg bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 appearance-none focus:ring-2 focus:ring-amber-600 cursor-pointer text-sm"
+            onChange={(e) => handleSearch({ sort: e.target.value })}
+            defaultValue={searchParams.get("sort") || "rank"}
+          >
+            <option value="rank">Ordenar por: Relevancia</option>
+            <option value="date_desc">Ordenar por: Fecha (Reciente)</option>
+            <option value="date_asc">Ordenar por: Fecha (Antiguo)</option>
+            <option value="id_desc">Ordenar por: ID (Descendente)</option>
+            <option value="id_asc">Ordenar por: ID (Ascendente)</option>
+          </select>
+          <ChevronDown
+            className="absolute right-3 top-3.5 text-gray-400 pointer-events-none"
+            size={14}
+          />
+        </div>
+
+        <div className="relative">
+          <select
+            className="w-full h-11 pl-4 pr-10 rounded-lg bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 appearance-none focus:ring-2 focus:ring-amber-600 cursor-pointer text-sm"
+            onChange={(e) => handleSearch({ pageSize: e.target.value })}
+            defaultValue={searchParams.get("pageSize") || "20"}
+          >
+            <option value="20">Mostrar: 20 por página</option>
+            <option value="50">Mostrar: 50 por página</option>
+            <option value="100">Mostrar: 100 por página</option>
+          </select>
+          <ChevronDown
+            className="absolute right-3 top-3.5 text-gray-400 pointer-events-none"
+            size={14}
+          />
         </div>
       </div>
 
@@ -115,7 +160,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
                   value={type.id}
                   checked={searchParams.get("type") === String(type.id)}
                   onChange={(e) => {
-                    handleSearch("type", e.target.value);
+                    handleSearch({ type: e.target.value });
                     setIsTypeExpanded(false);
                   }}
                   className="text-amber-600 focus:ring-amber-500 border-gray-300"
@@ -130,7 +175,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
                 value=""
                 checked={!searchParams.get("type")}
                 onChange={() => {
-                  handleSearch("type", null);
+                  handleSearch({ type: null });
                   setIsTypeExpanded(false);
                 }}
                 className="text-amber-600 focus:ring-amber-500"
