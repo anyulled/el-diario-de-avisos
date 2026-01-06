@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.5",
-    "@ai-sdk/groq": "^3.0.3",
+    "@ai-sdk/groq": "^3.0.4",
     "@ai-sdk/react": "^3.0.11",
     "@cerebras/cerebras_cloud_sdk": "^1.64.1",
     "@google/generative-ai": "^0.24.1",
