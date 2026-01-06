@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { articles, members, publicationColumns, tutors } from "@/db/schema";
-import { and, desc, eq, like, or } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 export async function getYears() {
   const result = await db
@@ -35,25 +35,42 @@ export async function getNews(params: SearchParams) {
   if (type) {
     conditions.push(eq(articles.columnId, type));
   }
+
+  // Add full-text search condition if text is provided
   if (text) {
     conditions.push(
-      or(
-        like(articles.title, `%${text}%`),
-        like(articles.subtitle, `%${text}%`),
-        like(articles.content, `%${text}%`),
-      ),
+      sql`${articles.searchVector} @@ to_tsquery('spanish', ${text})`
     );
   }
 
+  // Build query with conditional fields and ordering
   const query = db
-    .select()
+    .select({
+      id: articles.id,
+      title: articles.title,
+      subtitle: articles.subtitle,
+      date: articles.date,
+      publicationYear: articles.publicationYear,
+      page: articles.page,
+      columnId: articles.columnId,
+      // Add relevance ranking when searching
+      ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, to_tsquery('spanish', ${text}))` } : {}),
+    })
     .from(articles)
-    .where(and(...conditions))
-    .orderBy(desc(articles.date))
-    .limit(pageSize)
-    .offset((page - 1) * pageSize);
+    .$dynamic();
 
-  return await query;
+  const queryWithConditions = conditions.length > 0
+    ? query.where(and(...conditions))
+    : query;
+
+  // Sort by relevance if searching, otherwise by date
+  const queryWithOrder = text
+    ? queryWithConditions.orderBy(sql`ts_rank(${articles.searchVector}, to_tsquery('spanish', ${text})) DESC`)
+    : queryWithConditions.orderBy(desc(articles.date));
+
+  const finalQuery = queryWithOrder.limit(pageSize).offset((page - 1) * pageSize);
+
+  return await finalQuery;
 }
 
 export async function getIntegrantes() {

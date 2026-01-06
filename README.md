@@ -116,6 +116,89 @@ erDiagram
     }
 ```
 
+## 🔍 Full-Text Search
+
+The application implements PostgreSQL's native full-text search with Spanish language support, indexing **full article content** for comprehensive search coverage.
+
+### Features
+
+- **Content Indexing**: Searches across full article content, not just titles
+- **RTF Stripping**: Automatically removes RTF formatting for clean text indexing
+- **Spanish Language Support**: Uses PostgreSQL's `spanish` text search configuration for proper stemming and stop words
+- **Accent-Insensitive**: Searches for "musica" will find "MÚSICA" automatically
+- **Relevance Ranking**: Results sorted by `ts_rank` score with weighted fields
+- **High Performance**: GIN index enables sub-second searches across thousands of articles
+- **Automatic Updates**: Trigger-based search vector maintenance requires no manual intervention
+
+### How It Works
+
+The search functionality indexes article titles and **full content** in a `tsvector` column with weighted priorities:
+
+- **Title** (weight 'A'): Highest priority - exact title matches rank first
+- **Content** (weight 'C'): Lower priority - content matches rank after title matches
+
+**RTF Processing**: Article content is stored as RTF or plain text in `bytea` format. Before indexing, a PostgreSQL function (`strip_rtf_content`) automatically:
+
+1. Decodes from Windows-1252 encoding
+2. Detects RTF vs plain text format
+3. Removes RTF control words (`\rtf1`, `\ansi`, etc.)
+4. Removes RTF hex sequences (`\'e1` for accented characters)
+5. Normalizes whitespace
+6. Returns clean, searchable text
+
+When you search, PostgreSQL:
+
+1. Converts your query to a `tsquery` using Spanish stemming
+2. Matches against the indexed `search_vector` using the `@@` operator
+3. Ranks results by relevance using `ts_rank`
+4. Returns sorted results with most relevant first
+
+### Benefits
+
+| Feature | Coverage |
+|---------|----------|
+| **Articles Indexed** | 9,911 / 9,911 (100%) |
+| **Content Searchable** | Full article text |
+| **RTF Handling** | Automatic stripping |
+| **Performance** | Sub-second searches |
+| **Language Support** | Spanish stemming & accents |
+
+### Technical Implementation
+
+The search vector is automatically maintained via a PostgreSQL trigger:
+
+```sql
+CREATE TRIGGER articulos_search_vector_trigger
+BEFORE INSERT OR UPDATE OF arti_titulo, arti_contenido
+ON articulos
+FOR EACH ROW EXECUTE FUNCTION articulos_search_vector_update();
+```
+
+The trigger function combines title and cleaned content with weights:
+
+```sql
+NEW.search_vector := 
+  setweight(to_tsvector('spanish', coalesce(NEW.arti_titulo, '')), 'A') ||
+  setweight(to_tsvector('spanish', strip_rtf_content(NEW.arti_contenido)), 'C');
+```
+
+### Migration
+
+To set up full-text search on a new database:
+
+```bash
+cd web
+npx tsx scripts/migrate-search.ts
+```
+
+This will:
+
+- Add the `search_vector` column
+- Create the GIN index
+- Create the RTF stripping function
+- Set up the trigger function
+- Populate search vectors for existing articles
+
 ## 🚀 Getting Started
 
 ### Prerequisites

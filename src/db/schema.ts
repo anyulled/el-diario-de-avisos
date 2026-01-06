@@ -8,12 +8,18 @@ import {
   serial,
   timestamp,
   varchar,
-  vector,
+  vector
 } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: unknown }>({
   dataType() {
     return "bytea";
+  },
+});
+
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return "tsvector";
   },
 });
 
@@ -37,6 +43,7 @@ export const articles = pgTable("articulos", {
   issueNumber: integer("arti_ejemplar"),
   series: integer("arti_serie"),
   microfilm: varchar("arti_microfilm", { length: 20 }),
+  searchVector: tsvector("search_vector"),
 });
 
 export const authors = pgTable("autores", {
