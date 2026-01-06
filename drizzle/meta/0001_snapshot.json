@@ -1,9 +1,135 @@
 {
-  "id": "00000000-0000-0000-0000-000000000000",
-  "prevId": "",
+  "id": "3cf5c90f-1785-4534-8e7a-aaadef56046d",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.articulos_embeddings": {
+      "name": "articulos_embeddings",
+      "schema": "",
+      "columns": {
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(768)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "articulos_embeddings_arti_cod_articulos_arti_cod_fk": {
+          "name": "articulos_embeddings_arti_cod_articulos_arti_cod_fk",
+          "tableFrom": "articulos_embeddings",
+          "tableTo": "articulos",
+          "columnsFrom": ["arti_cod"],
+          "columnsTo": ["arti_cod"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.articulos_imagenes": {
+      "name": "articulos_imagenes",
+      "schema": "",
+      "columns": {
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "img_cod": {
+          "name": "img_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pos_x": {
+          "name": "pos_x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pos_y": {
+          "name": "pos_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enunciado": {
+          "name": "enunciado",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "articulos_imagenes_pkey": {
+          "name": "articulos_imagenes_pkey",
+          "columns": ["arti_cod", "img_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.articulos_topicos": {
+      "name": "articulos_topicos",
+      "schema": "",
+      "columns": {
+        "mat_cod": {
+          "name": "mat_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sumario": {
+          "name": "sumario",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "articulos_topicos_pkey": {
+          "name": "articulos_topicos_pkey",
+          "columns": ["mat_cod", "arti_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.articulos": {
       "name": "articulos",
       "schema": "",
@@ -127,8 +253,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.autores": {
@@ -170,8 +296,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.descriptores": {
@@ -213,8 +339,92 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensayos_articulos": {
+      "name": "ensayos_articulos",
+      "schema": "",
+      "columns": {
+        "ensayo_cod": {
+          "name": "ensayo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "articulo_cod": {
+          "name": "articulo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "palabra_enlace": {
+          "name": "palabra_enlace",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ensayos_articulos_pkey": {
+          "name": "ensayos_articulos_pkey",
+          "columns": ["ensayo_cod", "articulo_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensayos_imagenes": {
+      "name": "ensayos_imagenes",
+      "schema": "",
+      "columns": {
+        "ensayo_cod": {
+          "name": "ensayo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "img_cod": {
+          "name": "img_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pos_x": {
+          "name": "pos_x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pos_y": {
+          "name": "pos_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enunciado": {
+          "name": "enunciado",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ensayos_imagenes_pkey": {
+          "name": "ensayos_imagenes_pkey",
+          "columns": ["ensayo_cod", "img_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.ensayos": {
@@ -262,8 +472,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.imagenes": {
@@ -293,8 +503,104 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.palabras_clave_indice": {
+      "name": "palabras_clave_indice",
+      "schema": "",
+      "columns": {
+        "pc_cod": {
+          "name": "pc_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "posicion": {
+          "name": "posicion",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "palabras_clave_indice_palabras_clave_indicepc_cod_idx": {
+          "name": "palabras_clave_indice_palabras_clave_indicepc_cod_idx",
+          "columns": [
+            {
+              "expression": "pc_cod",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "palabras_clave_indice_pkey": {
+          "name": "palabras_clave_indice_pkey",
+          "columns": ["pc_cod", "arti_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.palabras_clave": {
+      "name": "palabras_clave",
+      "schema": "",
+      "columns": {
+        "pc_cod": {
+          "name": "pc_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pc_denom": {
+          "name": "pc_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "topi_cod": {
+          "name": "topi_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alias_pc_cod": {
+          "name": "alias_pc_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "excepcion": {
+          "name": "excepcion",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.integrantes": {
@@ -348,8 +654,144 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones_columnas": {
+      "name": "publicaciones_columnas",
+      "schema": "",
+      "columns": {
+        "col_cod": {
+          "name": "col_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "col_denom": {
+          "name": "col_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones_ejemplares": {
+      "name": "publicaciones_ejemplares",
+      "schema": "",
+      "columns": {
+        "ejm_cod": {
+          "name": "ejm_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ejm_num": {
+          "name": "ejm_num",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ejm_fecha": {
+          "name": "ejm_fecha",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones_localidades": {
+      "name": "publicaciones_localidades",
+      "schema": "",
+      "columns": {
+        "localidad_cod": {
+          "name": "localidad_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "localidad_denom": {
+          "name": "localidad_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones": {
+      "name": "publicaciones",
+      "schema": "",
+      "columns": {
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pub_nombre": {
+          "name": "pub_nombre",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_fecha_fundacion": {
+          "name": "pub_fecha_fundacion",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_fecha_cierre": {
+          "name": "pub_fecha_cierre",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.materias": {
@@ -391,187 +833,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.palabras_clave": {
-      "name": "palabras_clave",
-      "schema": "",
-      "columns": {
-        "pc_cod": {
-          "name": "pc_cod",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "pc_denom": {
-          "name": "pc_denom",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "topi_cod": {
-          "name": "topi_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "alias_pc_cod": {
-          "name": "alias_pc_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "excepcion": {
-          "name": "excepcion",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.publicaciones": {
-      "name": "publicaciones",
-      "schema": "",
-      "columns": {
-        "pub_cod": {
-          "name": "pub_cod",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "pub_nombre": {
-          "name": "pub_nombre",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pub_fecha_fundacion": {
-          "name": "pub_fecha_fundacion",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pub_fecha_cierre": {
-          "name": "pub_fecha_cierre",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.publicaciones_columnas": {
-      "name": "publicaciones_columnas",
-      "schema": "",
-      "columns": {
-        "col_cod": {
-          "name": "col_cod",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "col_denom": {
-          "name": "col_denom",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pub_cod": {
-          "name": "pub_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.publicaciones_ejemplares": {
-      "name": "publicaciones_ejemplares",
-      "schema": "",
-      "columns": {
-        "ejm_cod": {
-          "name": "ejm_cod",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "pub_cod": {
-          "name": "pub_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ejm_num": {
-          "name": "ejm_num",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ejm_fecha": {
-          "name": "ejm_fecha",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.publicaciones_localidades": {
-      "name": "publicaciones_localidades",
-      "schema": "",
-      "columns": {
-        "localidad_cod": {
-          "name": "localidad_cod",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "localidad_denom": {
-          "name": "localidad_denom",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pub_cod": {
-          "name": "pub_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
       "isRLSEnabled": false
     },
     "public.tutores": {
@@ -601,229 +864,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.articulos_topicos": {
-      "name": "articulos_topicos",
-      "schema": "",
-      "columns": {
-        "mat_cod": {
-          "name": "mat_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "arti_cod": {
-          "name": "arti_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sumario": {
-          "name": "sumario",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "articulos_topicos_pkey": {
-          "name": "articulos_topicos_pkey",
-          "columns": ["mat_cod", "arti_cod"]
-        }
-      },
-      "uniqueConstraints": {},
       "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.ensayos_articulos": {
-      "name": "ensayos_articulos",
-      "schema": "",
-      "columns": {
-        "ensayo_cod": {
-          "name": "ensayo_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "articulo_cod": {
-          "name": "articulo_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "palabra_enlace": {
-          "name": "palabra_enlace",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "ensayos_articulos_pkey": {
-          "name": "ensayos_articulos_pkey",
-          "columns": ["ensayo_cod", "articulo_cod"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.palabras_clave_indice": {
-      "name": "palabras_clave_indice",
-      "schema": "",
-      "columns": {
-        "pc_cod": {
-          "name": "pc_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "arti_cod": {
-          "name": "arti_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "posicion": {
-          "name": "posicion",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "palabras_clave_indice_palabras_clave_indicepc_cod_idx": {
-          "name": "palabras_clave_indice_palabras_clave_indicepc_cod_idx",
-          "columns": [
-            {
-              "expression": "pc_cod",
-              "asc": true,
-              "nulls": "last",
-              "opclass": "int4_ops",
-              "isExpression": false
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "palabras_clave_indice_pkey": {
-          "name": "palabras_clave_indice_pkey",
-          "columns": ["pc_cod", "arti_cod"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.articulos_imagenes": {
-      "name": "articulos_imagenes",
-      "schema": "",
-      "columns": {
-        "arti_cod": {
-          "name": "arti_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "img_cod": {
-          "name": "img_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pos_x": {
-          "name": "pos_x",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pos_y": {
-          "name": "pos_y",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "enunciado": {
-          "name": "enunciado",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "articulos_imagenes_pkey": {
-          "name": "articulos_imagenes_pkey",
-          "columns": ["arti_cod", "img_cod"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.ensayos_imagenes": {
-      "name": "ensayos_imagenes",
-      "schema": "",
-      "columns": {
-        "ensayo_cod": {
-          "name": "ensayo_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "img_cod": {
-          "name": "img_cod",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pos_x": {
-          "name": "pos_x",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "pos_y": {
-          "name": "pos_y",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "enunciado": {
-          "name": "enunciado",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "ensayos_imagenes_pkey": {
-          "name": "ensayos_imagenes_pkey",
-          "columns": ["ensayo_cod", "img_cod"]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
       "isRLSEnabled": false
     }
   },
@@ -834,11 +876,8 @@
   "policies": {},
   "views": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "internal": {
     "tables": {}
   }
 }

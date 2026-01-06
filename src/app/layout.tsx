@@ -18,12 +18,12 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
 });
 
-
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
 });
 
+import { ChatWidget } from "@/components/chat-widget";
 import { MusicPlayer } from "@/components/music-player";
 import { getIntegrantes, getTutores } from "./actions";
 
@@ -34,9 +34,11 @@ export async function generateMetadata(): Promise<Metadata> {
   ]);
 
   const authors = [
-    ...integrantes.map(i => `${i.firstName} ${i.lastName}`),
-    ...tutores.map(t => t.names),
-  ].filter(Boolean).join(", ");
+    ...integrantes.map((i) => `${i.firstName} ${i.lastName}`),
+    ...tutores.map((t) => t.names),
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
@@ -63,9 +65,11 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     other: {
-      "project:integrants": integrantes.map(i => `${i.firstName} ${i.lastName}`).join(", "),
-      "project:tutors": tutores.map(t => t.names).join(", "),
-    }
+      "project:integrants": integrantes
+        .map((i) => `${i.firstName} ${i.lastName}`)
+        .join(", "),
+      "project:tutors": tutores.map((t) => t.names).join(", "),
+    },
   };
 }
 
@@ -81,6 +85,7 @@ export default function RootLayout({
       >
         {children}
         <MusicPlayer />
+        <ChatWidget />
       </body>
     </html>
   );

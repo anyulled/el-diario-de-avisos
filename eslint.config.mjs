@@ -6,7 +6,7 @@ import tsParser from "@typescript-eslint/parser";
 import globals from "globals";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import noGenericNames from './.eslint-rules/no-generic-names.js';
+import noGenericNames from "./.eslint-rules/no-generic-names.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,7 +36,7 @@ const eslintConfig = [
       "@typescript-eslint": tsPlugin,
       "@next/next": nextPlugin,
       "@eslint-community/eslint-comments": eslintComments,
-      "custom": {
+      custom: {
         rules: {
           "no-generic-names": noGenericNames,
         },
@@ -49,9 +49,16 @@ const eslintConfig = [
 
       // Custom rules
       "custom/no-generic-names": "error",
-      "@eslint-community/eslint-comments/no-use": ["error", {
-        allow: ["eslint-disable", "eslint-enable", "eslint-disable-next-line"]
-      }],
+      "@eslint-community/eslint-comments/no-use": [
+        "error",
+        {
+          allow: [
+            "eslint-disable",
+            "eslint-enable",
+            "eslint-disable-next-line",
+          ],
+        },
+      ],
 
       // No comments - forces self-documenting code
       "no-warning-comments": "off",
@@ -72,9 +79,12 @@ const eslintConfig = [
       ],
 
       // Complexity
-      "complexity": ["error", 12],
+      complexity: ["error", 12],
       "max-depth": ["error", 3],
-      "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
+      "max-lines": [
+        "error",
+        { max: 400, skipBlankLines: true, skipComments: true },
+      ],
 
       // Naming Conventions
       "@typescript-eslint/naming-convention": [
@@ -109,13 +119,19 @@ const eslintConfig = [
 
       // TypeScript overrides
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      "@typescript-eslint/ban-ts-comment": ["error", {
-        "ts-expect-error": "allow-with-description",
-        "ts-ignore": true,
-        "ts-nocheck": true,
-        "ts-check": false
-      }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        {
+          "ts-expect-error": "allow-with-description",
+          "ts-ignore": true,
+          "ts-nocheck": true,
+          "ts-check": false,
+        },
+      ],
 
       // Next.js specific tweaks
       "@next/next/no-html-link-for-pages": ["error", dirname(__filename)],
@@ -126,7 +142,12 @@ const eslintConfig = [
     },
   },
   {
-    files: ["src/__tests__/**/*.ts", "src/__tests__/**/*.tsx", "**/*.test.ts", "**/*.test.tsx"],
+    files: [
+      "src/__tests__/**/*.ts",
+      "src/__tests__/**/*.tsx",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+    ],
     rules: {
       "@typescript-eslint/consistent-type-assertions": "off",
       "@typescript-eslint/no-explicit-any": "off",
@@ -153,7 +174,7 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "no-undef": "off",
-    }
+    },
   },
   {
     ignores: [

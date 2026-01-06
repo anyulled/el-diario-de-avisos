@@ -1,11 +1,15 @@
-import { Hero } from '@/components/hero';
-import { NewsGrid } from '@/components/news-grid';
-import { SearchFilters } from '@/components/search-filters';
-import { getNews, getNewsTypes, getYears, SearchParams } from './actions';
+import { Hero } from "@/components/hero";
+import { NewsGrid } from "@/components/news-grid";
+import { SearchFilters } from "@/components/search-filters";
+import { getNews, getNewsTypes, getYears, SearchParams } from "./actions";
 
-import { Navbar } from '@/components/navbar';
+import { Navbar } from "@/components/navbar";
 
-export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const params = await searchParams;
   const years = await getYears();
   const types = await getNewsTypes();
@@ -19,7 +23,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
       <div className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Resultados de Búsqueda</h2>
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">
+            Resultados de Búsqueda
+          </h2>
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
         </div>
         <NewsGrid news={news} />
