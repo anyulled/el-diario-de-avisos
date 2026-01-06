@@ -66,6 +66,22 @@ async function processRtf(content: Buffer | string | null): Promise<string> {
 async function ingest() {
   console.log("🚀 Starting ingestion...");
 
+  // Count total articles without embeddings
+  const totalPendingResult = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(articles)
+    .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
+    .where(isNull(articleEmbeddings.articleId));
+
+  const totalPending = totalPendingResult[0]?.count ?? 0;
+
+  if (totalPending === 0) {
+    console.log("✅ All articles already have embeddings.");
+    return;
+  }
+
+  console.log(`📊 Total articles without embeddings: ${totalPending}`);
+
   // Find articles that don't have embeddings yet
   const pendingArticles = await db
     .select({
@@ -77,12 +93,8 @@ async function ingest() {
     .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
     .where(isNull(articleEmbeddings.articleId))
     .limit(500);
-  if (pendingArticles.length === 0) {
-    console.log("✅ All articles already have embeddings.");
-    return;
-  }
 
-  console.log(`📦 Processing ${pendingArticles.length} articles...`);
+  console.log(`📦 Processing ${pendingArticles.length} articles in this batch...`);
 
   const processedData = await Promise.all(
     pendingArticles.map(async (art) => {
@@ -135,6 +147,15 @@ async function ingest() {
     }
 
     console.log(`✨ Successfully ingested ${validData.length} embeddings.`);
+
+    // Show remaining count
+    const remaining = totalPending - validData.length;
+    if (remaining > 0) {
+      console.log(`📊 Remaining articles without embeddings: ${remaining}`);
+      console.log(`💡 Run 'npm run ingest' again to process the next batch.`);
+    } else {
+      console.log(`🎉 All articles now have embeddings!`);
+    }
   } catch (e) {
     console.error("❌ Batch ingestion failed:", e);
   }

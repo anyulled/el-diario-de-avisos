@@ -13,7 +13,7 @@ export default async function Home({
   const params = await searchParams;
   const years = await getYears();
   const types = await getNewsTypes();
-  const news = await getNews(params);
+  const { data: news, total } = await getNews(params);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-20 relative">
@@ -24,7 +24,7 @@ export default async function Home({
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">
-            Resultados de Búsqueda
+            Resultados de Búsqueda ({total})
           </h2>
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
         </div>

@@ -39,9 +39,22 @@ export async function getNews(params: SearchParams) {
   // Add full-text search condition if text is provided
   if (text) {
     conditions.push(
-      sql`${articles.searchVector} @@ to_tsquery('spanish', ${text})`
+      sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${text})`
     );
   }
+
+  // Count total results
+  const countQuery = db
+    .select({ count: sql<number>`count(*)` })
+    .from(articles)
+    .$dynamic();
+
+  const countWithConditions = conditions.length > 0
+    ? countQuery.where(and(...conditions))
+    : countQuery;
+
+  const [totalResult] = await countWithConditions;
+  const total = Number(totalResult?.count || 0);
 
   // Build query with conditional fields and ordering
   const query = db
@@ -54,7 +67,7 @@ export async function getNews(params: SearchParams) {
       page: articles.page,
       columnId: articles.columnId,
       // Add relevance ranking when searching
-      ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, to_tsquery('spanish', ${text}))` } : {}),
+      ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text}))` } : {}),
     })
     .from(articles)
     .$dynamic();
@@ -65,12 +78,15 @@ export async function getNews(params: SearchParams) {
 
   // Sort by relevance if searching, otherwise by date
   const queryWithOrder = text
-    ? queryWithConditions.orderBy(sql`ts_rank(${articles.searchVector}, to_tsquery('spanish', ${text})) DESC`)
+    ? queryWithConditions.orderBy(sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`)
     : queryWithConditions.orderBy(desc(articles.date));
 
-  const finalQuery = queryWithOrder.limit(pageSize).offset((page - 1) * pageSize);
+  const data = await queryWithOrder.limit(pageSize).offset((page - 1) * pageSize);
 
-  return await finalQuery;
+  return {
+    data,
+    total,
+  };
 }
 
 export async function getIntegrantes() {
