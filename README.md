@@ -8,6 +8,7 @@
 - **`scripts/`**: Utilities for extracting and transforming data from legacy MDB (Microsoft Access) files into a format suitable for PostgreSQL.
 - **`data/`**: Intermediate storage for extracted CSVs and SQL dumps.
 - **`music/`**: Assets for the application's audio playback features.
+- **`docs/`**: Technical documentation and Architecture Decision Records (ADRs).
 
 ## 🏗️ Architecture
 
@@ -198,6 +199,115 @@ This will:
 - Create the RTF stripping function
 - Set up the trigger function
 - Populate search vectors for existing articles
+
+## 🤖 Vector Embeddings & RAG
+
+The application implements **Retrieval-Augmented Generation (RAG)** using a **Hybrid Search** approach that combines:
+
+1. **Vector Search**: Semantic understanding using Google's `text-embedding-004` (768 dims).
+2. **Keyword Search**: Precise matching using PostgreSQL's `unaccent` and `tsvector`.
+
+This ensures the chatbot can answer questions about specific people (e.g., "José ánjel Montero") even if the semantic embedding is slightly off, while still handling abstract queries.
+
+### What is the Ingestion Script?
+
+The `npm run ingest` command runs a vector embedding generation pipeline that:
+
+1. **Identifies unprocessed articles** - Finds articles without embeddings (up to 500 per run)
+2. **Processes RTF content** - Converts RTF to clean plain text with proper character encoding
+3. **Generates AI embeddings** - Creates 768-dimensional vector representations using Google's `text-embedding-004` model
+4. **Stores in database** - Saves embeddings to the `article_embeddings` table for semantic search
+
+### How It Works
+
+```mermaid
+graph LR
+    A[Articles Table] -->|Find unprocessed| B[RTF Processing]
+    B -->|Clean text| C[Batch Processing]
+    C -->|100 articles/batch| D[Google AI API]
+    D -->|768-dim vectors| E[article_embeddings Table]
+    E -->|Enable| F[Semantic Search]
+```
+
+**Processing Pipeline:**
+
+1. **RTF to Plain Text** (`processRtf` function):
+   - Decodes Windows-1252 encoding for special characters (accents, ñ, etc.)
+   - Detects RTF format vs plain text
+   - Converts RTF escape sequences (e.g., `\'e1` → 'á')
+   - Strips HTML tags
+   - Combines title + content (max 8000 chars)
+
+2. **Embedding Generation** (`generateEmbeddingsBatch`):
+   - Processes in batches of 100 to respect API rate limits
+   - Uses Google Generative AI `text-embedding-004` model
+   - Returns 768-dimensional vectors representing semantic meaning
+
+3. **Database Storage**:
+   - Stores vectors in `article_embeddings` table
+   - Uses `pgvector` extension for efficient vector operations
+   - Handles conflicts with `onConflictDoUpdate` (safe to re-run)
+
+### When to Run
+
+Run the ingestion script when:
+
+- **After importing new articles** - New articles need embeddings for semantic search
+- **After database restoration** - Embeddings may be missing after restoring from backup
+- **To update existing embeddings** - Re-run to regenerate embeddings with improved models
+
+```bash
+cd web
+npm run ingest
+```
+
+The script is **idempotent** - it only processes articles without embeddings, so it's safe to run multiple times.
+
+### Requirements
+
+- **Environment Variable**: `GEMINI_KEY` in `.env`
+- **Database Extension**: PostgreSQL with `pgvector` extension enabled
+- **Network Access**: Requires internet connection to call Google AI API
+
+### Performance
+
+| Metric | Value |
+|--------|-------|
+| **Batch Size** | 100 articles per API call |
+| **Max Articles per Run** | 500 articles |
+| **Embedding Dimensions** | 768 |
+| **Processing Time** | ~2-5 seconds per 100 articles |
+
+### Semantic Search Benefits
+
+Vector embeddings enable searches like:
+
+- **Conceptual matching**: Search "obituary" finds articles about "necrología"
+- **Multilingual understanding**: Handles Spanish and English semantic similarity
+- **Context awareness**: Understands phrases and context, not just keywords
+- **Typo tolerance**: Similar vectors even with spelling variations
+
+### Troubleshooting
+
+**No articles processed:**
+
+```
+✅ All articles already have embeddings.
+```
+
+This is normal - all articles are already indexed.
+
+**API errors:**
+
+- Check `GEMINI_KEY` is set correctly in `.env`
+- Verify API quota hasn't been exceeded
+- Ensure network connectivity
+
+**Character encoding issues:**
+
+- The script handles Windows-1252 encoding automatically
+- RTF escape sequences are converted to proper characters
+- If you see garbled text, check the source RTF format
 
 ## 🚀 Getting Started
 
