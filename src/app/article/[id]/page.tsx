@@ -8,11 +8,7 @@ import { promisify } from "util";
 
 const rtfToHtml = promisify(fromString);
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<import("next").Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
   const { id } = await params;
   const article = await getArticleById(Number(id));
 
@@ -20,25 +16,17 @@ export async function generateMetadata({
 
   return {
     title: article.title || "Sin Título",
-    description:
-      article.subtitle ||
-      `Año ${article.publicationYear} - Página ${article.page}`,
+    description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
     openGraph: {
       title: article.title || "Sin Título",
-      description:
-        article.subtitle ||
-        `Año ${article.publicationYear} - Página ${article.page}`,
+      description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
       type: "article",
       publishedTime: article.date || undefined,
     },
   };
 }
 
-export default async function ArticlePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const article = await getArticleById(Number(id));
 
@@ -50,9 +38,7 @@ export default async function ArticlePage({
     if (!article.content) return "Contenido no disponible";
     try {
       // Using iconv-lite to decode as Windows-1252 first to ensure 8-bit bytes are mapped to correct chars
-      const contentString = Buffer.isBuffer(article.content)
-        ? iconv.decode(article.content, "win1252")
-        : String(article.content);
+      const contentString = Buffer.isBuffer(article.content) ? iconv.decode(article.content, "win1252") : String(article.content);
 
       console.log(`[Article ${id}] Content length:`, contentString.length);
       console.log(`[Article ${id}] Content preview:`, contentString.substring(0, 200));
@@ -81,23 +67,19 @@ export default async function ArticlePage({
 
       // Process RTF content
       // HACK: Manually unescape RTF hex sequences for Latin1 characters (\'xx)
-      const unescapedRtf = contentString.replace(
-        /\\'([0-9a-fA-F]{2})/g,
-        (match, hex) => {
-          const code = parseInt(hex, 16);
-          // Only decode extended ASCII range (128-255).
-          // Standard ASCII escapes (if any) might be handled slightly differently or not occur as \'xx often.
-          if (code >= 0x80 && code <= 0xff) {
-            return String.fromCharCode(code);
-          }
-          return match;
-        },
-      );
+      const unescapedRtf = contentString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
+        const code = parseInt(hex, 16);
+        // Only decode extended ASCII range (128-255).
+        // Standard ASCII escapes (if any) might be handled slightly differently or not occur as \'xx often.
+        if (code >= 0x80 && code <= 0xff) {
+          return String.fromCharCode(code);
+        }
+        return match;
+      });
 
       // Allow bypassing the document structure (html/head/body) which adds unwanted margins
       const html = await rtfToHtml(unescapedRtf, {
-        template: (_doc: unknown, _defaults: unknown, content: string) =>
-          content,
+        template: (_doc: unknown, _defaults: unknown, content: string) => content,
       });
 
       console.log(`[Article ${id}] HTML length:`, html.length);
@@ -106,9 +88,7 @@ export default async function ArticlePage({
       return html;
     } catch (e) {
       console.error(`[Article ${id}] Error processing content:`, e);
-      const rawContent = Buffer.isBuffer(article.content)
-        ? iconv.decode(article.content, "win1252")
-        : String(article.content);
+      const rawContent = Buffer.isBuffer(article.content) ? iconv.decode(article.content, "win1252") : String(article.content);
       return `<pre>${rawContent}</pre>`;
     }
   })();
@@ -122,16 +102,10 @@ export default async function ArticlePage({
         <div className="relative z-20 container mx-auto h-full flex items-end pb-12 px-4">
           <div className="max-w-4xl">
             <div className="mb-4 flex items-center gap-3">
-              <span className="bg-amber-600/90 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
-                Noticia
-              </span>
-              <span className="text-white/80 font-mono text-sm">
-                {article.date || `Año ${article.publicationYear}`}
-              </span>
+              <span className="bg-amber-600/90 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">Noticia</span>
+              <span className="text-white/80 font-mono text-sm">{article.date || `Año ${article.publicationYear}`}</span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">
-              {article.title || "Sin Título"}
-            </h1>
+            <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">{article.title || "Sin Título"}</h1>
           </div>
         </div>
       </div>

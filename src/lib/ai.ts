@@ -14,9 +14,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   return result.embedding.values;
 }
 
-export async function generateEmbeddingsBatch(
-  texts: string[],
-): Promise<number[][]> {
+export async function generateEmbeddingsBatch(texts: string[]): Promise<number[][]> {
   const result = await model.batchEmbedContents({
     requests: texts.map((text) => ({
       content: { role: "user", parts: [{ text }] },

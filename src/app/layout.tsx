@@ -28,17 +28,9 @@ import { MusicPlayer } from "@/components/music-player";
 import { getIntegrantes, getTutores } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores] = await Promise.all([
-    getIntegrantes(),
-    getTutores(),
-  ]);
+  const [integrantes, tutores] = await Promise.all([getIntegrantes(), getTutores()]);
 
-  const authors = [
-    ...integrantes.map((i) => `${i.firstName} ${i.lastName}`),
-    ...tutores.map((t) => t.names),
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const authors = [...integrantes.map((i) => `${i.firstName} ${i.lastName}`), ...tutores.map((t) => t.names)].filter(Boolean).join(", ");
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
@@ -65,9 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     other: {
-      "project:integrants": integrantes
-        .map((i) => `${i.firstName} ${i.lastName}`)
-        .join(", "),
+      "project:integrants": integrantes.map((i) => `${i.firstName} ${i.lastName}`).join(", "),
       "project:tutors": tutores.map((t) => t.names).join(", "),
     },
   };
@@ -80,9 +70,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} antialiased`}>
         {children}
         <MusicPlayer />
         <ChatWidget />

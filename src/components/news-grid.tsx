@@ -3,11 +3,7 @@ import Link from "next/link";
 
 export function NewsGrid({ news }: { news: (typeof articles.$inferSelect)[] }) {
   if (news.length === 0) {
-    return (
-      <div className="text-center py-20 text-gray-500 italic">
-        No se encontraron resultados para su búsqueda.
-      </div>
-    );
+    return <div className="text-center py-20 text-gray-500 italic">No se encontraron resultados para su búsqueda.</div>;
   }
 
   return (
@@ -27,9 +23,7 @@ export function NewsGrid({ news }: { news: (typeof articles.$inferSelect)[] }) {
             <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-gray-100 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">
               {item.title || "Sin Título"}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-4 leading-relaxed flex-1">
-              {item.subtitle}
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-4 leading-relaxed flex-1">{item.subtitle}</p>
           </div>
           <div className="bg-gray-50 dark:bg-zinc-950/50 p-4 border-t border-gray-100 dark:border-zinc-800">
             <div className="flex justify-between text-xs text-gray-400 uppercase tracking-wide font-medium">

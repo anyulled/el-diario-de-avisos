@@ -1,15 +1,4 @@
-import {
-  boolean,
-  customType,
-  index,
-  integer,
-  pgTable,
-  primaryKey,
-  serial,
-  timestamp,
-  varchar,
-  vector
-} from "drizzle-orm/pg-core";
+import { boolean, customType, index, integer, pgTable, primaryKey, serial, timestamp, varchar, vector } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: unknown }>({
   dataType() {
@@ -173,10 +162,7 @@ export const keywordIndex = pgTable(
     position: bytea("posicion"),
   },
   (table) => [
-    index("palabras_clave_indice_palabras_clave_indicepc_cod_idx").using(
-      "btree",
-      table.keywordId.asc().nullsLast().op("int4_ops"),
-    ),
+    index("palabras_clave_indice_palabras_clave_indicepc_cod_idx").using("btree", table.keywordId.asc().nullsLast().op("int4_ops")),
     primaryKey({
       columns: [table.keywordId, table.articleId],
       name: "palabras_clave_indice_pkey",

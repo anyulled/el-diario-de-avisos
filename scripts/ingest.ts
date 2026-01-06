@@ -20,9 +20,7 @@ function stripHtml(html: string): string {
 async function processRtf(content: Buffer | string | null): Promise<string> {
   if (!content) return "";
   try {
-    const contentString = Buffer.isBuffer(content)
-      ? iconv.decode(content, "win1252")
-      : String(content);
+    const contentString = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
 
     // Detect if content is RTF format (starts with {\rtf) or plain text
     const isRtf = contentString.trim().startsWith("{\\rtf");
@@ -39,13 +37,10 @@ async function processRtf(content: Buffer | string | null): Promise<string> {
 
     // Process RTF content
     // Minimal unescape for RAG quality
-    const unescapedRtf = contentString.replace(
-      /\\'([0-9a-fA-F]{2})/g,
-      (match, hex) => {
-        const code = parseInt(hex, 16);
-        return code >= 0x80 && code <= 0xff ? String.fromCharCode(code) : match;
-      },
-    );
+    const unescapedRtf = contentString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
+      const code = parseInt(hex, 16);
+      return code >= 0x80 && code <= 0xff ? String.fromCharCode(code) : match;
+    });
 
     const html = await rtfToHtml(unescapedRtf, {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,9 +51,7 @@ async function processRtf(content: Buffer | string | null): Promise<string> {
   } catch (e) {
     console.error("Content processing error:", e);
     // Fallback: return raw content if available
-    const fallback = Buffer.isBuffer(content)
-      ? iconv.decode(content, "win1252")
-      : String(content);
+    const fallback = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
     return fallback || "";
   }
 }
@@ -119,12 +112,8 @@ async function ingest() {
     // eslint-disable-next-line no-restricted-syntax
     for (let i = 0; i < validData.length; i += BATCH_SIZE) {
       const subBatch = validData.slice(i, i + BATCH_SIZE);
-      console.log(
-        `📡 Generating embeddings for sub-batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(validData.length / BATCH_SIZE)}...`,
-      );
-      const subEmbeddings = await generateEmbeddingsBatch(
-        subBatch.map((d) => d.text),
-      );
+      console.log(`📡 Generating embeddings for sub-batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(validData.length / BATCH_SIZE)}...`);
+      const subEmbeddings = await generateEmbeddingsBatch(subBatch.map((d) => d.text));
       allEmbeddings.push(...subEmbeddings);
     }
 

@@ -17,24 +17,24 @@ The system utilizes a Next.js App Router architecture integrated with a vector-c
 ```mermaid
 graph TD
     Client[Web Browser]
-    
+
     subgraph Frontend [Next.js Web App]
         Pages[App Router Pages]
         Components[Shadcn/UI Components]
         Providers[Context Providers]
     end
-    
+
     subgraph BackendLayer [Server Actions & Libs]
         ServerActions[Server Actions]
         VectorStore[Vector Store Lib]
         DrizzleClient[Drizzle Client]
     end
-    
+
     subgraph Persistence [PostgreSQL + pgvector]
         RelationalData["Relational Data<br/>(Articles, Authors)"]
         VectorData["Vector Embeddings<br/>(768 dims)"]
     end
-    
+
     subgraph Pipeline [Data Ingestion Pipeline]
         Legacy[Legacy MDB Files]
         Shell[Bash Scripts]
@@ -46,10 +46,10 @@ graph TD
     Pages --> ServerActions
     ServerActions --> DrizzleClient
     ServerActions --> VectorStore
-    
+
     DrizzleClient --> RelationalData
     VectorStore --> VectorData
-    
+
     Legacy --> Shell
     Shell --> Python
     Python --> RelationalData
@@ -66,15 +66,15 @@ erDiagram
     PUBLICATIONS ||--o{ ISSUES : "publishes"
     ISSUES ||--o{ ARTICLES : "contains"
     AUTHORS ||--o{ ARTICLES : "writes"
-    
+
     ARTICLES ||--o{ ARTICLE_TOPICS : "classified by"
     SUBJECTS ||--o{ ARTICLE_TOPICS : "defines"
-    
+
     ARTICLES ||--o{ ARTICLE_IMAGES : "includes"
     IMAGES ||--o{ ARTICLE_IMAGES : "displayed in"
-    
+
     ARTICLES ||--o| ARTICLE_EMBEDDINGS : "has vector"
-    
+
     MEMBERS ||--o{ ESSAYS : "authors"
     ESSAYS ||--o{ ESSAY_ARTICLES : "links to"
     ARTICLES ||--|{ ESSAY_ARTICLES : "linked from"
@@ -110,7 +110,7 @@ erDiagram
         varchar name
         boolean isSubject
     }
-    
+
     ARTICLE_EMBEDDINGS {
         int articleId FK
         vector embedding "768 dim"
@@ -156,13 +156,13 @@ When you search, PostgreSQL:
 
 ### Benefits
 
-| Feature | Coverage |
-|---------|----------|
-| **Articles Indexed** | 9,911 / 9,911 (100%) |
-| **Content Searchable** | Full article text |
-| **RTF Handling** | Automatic stripping |
-| **Performance** | Sub-second searches |
-| **Language Support** | Spanish stemming & accents |
+| Feature                | Coverage                   |
+| ---------------------- | -------------------------- |
+| **Articles Indexed**   | 9,911 / 9,911 (100%)       |
+| **Content Searchable** | Full article text          |
+| **RTF Handling**       | Automatic stripping        |
+| **Performance**        | Sub-second searches        |
+| **Language Support**   | Spanish stemming & accents |
 
 ### Technical Implementation
 
@@ -178,7 +178,7 @@ FOR EACH ROW EXECUTE FUNCTION articulos_search_vector_update();
 The trigger function combines title and cleaned content with weights:
 
 ```sql
-NEW.search_vector := 
+NEW.search_vector :=
   setweight(to_tsvector('spanish', coalesce(NEW.arti_titulo, '')), 'A') ||
   setweight(to_tsvector('spanish', strip_rtf_content(NEW.arti_contenido)), 'C');
 ```
@@ -271,12 +271,12 @@ The script is **idempotent** - it only processes articles without embeddings, so
 
 ### Performance
 
-| Metric | Value |
-|--------|-------|
-| **Batch Size** | 100 articles per API call |
-| **Max Articles per Run** | 500 articles |
-| **Embedding Dimensions** | 768 |
-| **Processing Time** | ~2-5 seconds per 100 articles |
+| Metric                   | Value                         |
+| ------------------------ | ----------------------------- |
+| **Batch Size**           | 100 articles per API call     |
+| **Max Articles per Run** | 500 articles                  |
+| **Embedding Dimensions** | 768                           |
+| **Processing Time**      | ~2-5 seconds per 100 articles |
 
 ### Semantic Search Benefits
 

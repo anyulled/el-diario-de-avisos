@@ -58,17 +58,16 @@ export default function ChatInterface({ className }: { className?: string }) {
 
   const getMessageContent = (m: UIMessage) => {
     return m.parts
-      .filter(
-        (part): part is { type: "text"; text: string } => part.type === "text",
-      )
+      .filter((part): part is { type: "text"; text: string } => part.type === "text")
       .map((part) => part.text)
       .join("");
   };
 
   return (
     <div
-      className={`flex flex-col border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 shadow-2xl ${className ?? "h-[600px] w-full max-w-4xl mx-auto"
-        }`}
+      className={`flex flex-col border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 shadow-2xl ${
+        className ?? "h-[600px] w-full max-w-4xl mx-auto"
+      }`}
     >
       {/* Header */}
       <div className="bg-amber-600 p-4 text-white flex justify-between items-center">
@@ -76,9 +75,7 @@ export default function ChatInterface({ className }: { className?: string }) {
           <Library className="w-6 h-6" />
           <div>
             <h3 className="font-bold leading-none">Asistente del Archivo</h3>
-            <p className="text-xs text-amber-100 mt-1">
-              Chat con la historia periodística
-            </p>
+            <p className="text-xs text-amber-100 mt-1">Chat con la historia periodística</p>
           </div>
         </div>
         <button
@@ -94,53 +91,36 @@ export default function ChatInterface({ className }: { className?: string }) {
       </div>
 
       {/* Messages Area */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth"
-      >
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-60">
             <Bot className="w-12 h-12 text-amber-600" />
             <div className="max-w-xs">
               <p className="font-medium text-lg">¿En qué puedo ayudarte hoy?</p>
-              <p className="text-sm">
-                Pregúntame sobre noticias antiguas, efemérides o personajes de
-                nuestros archivos.
-              </p>
+              <p className="text-sm">Pregúntame sobre noticias antiguas, efemérides o personajes de nuestros archivos.</p>
             </div>
           </div>
         )}
 
         {messages.map((m: UIMessage) => (
-          <div
-            key={m.id}
-            className={`flex gap-4 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-          >
-            <div
-              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${m.role === "user" ? "bg-zinc-800" : "bg-amber-600"
-                }`}
-            >
-              {m.role === "user" ? (
-                <User className="w-5 h-5 text-white" />
-              ) : (
-                <Bot className="w-5 h-5 text-white" />
-              )}
+          <div key={m.id} className={`flex gap-4 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${m.role === "user" ? "bg-zinc-800" : "bg-amber-600"}`}>
+              {m.role === "user" ? <User className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-white" />}
             </div>
 
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${m.role === "user"
-                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-tr-none"
-                : "bg-amber-50 dark:bg-amber-900/20 text-zinc-800 dark:text-zinc-200 border border-amber-100 dark:border-amber-900/30 rounded-tl-none"
-                }`}
+              className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
+                m.role === "user"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-tr-none"
+                  : "bg-amber-50 dark:bg-amber-900/20 text-zinc-800 dark:text-zinc-200 border border-amber-100 dark:border-amber-900/30 rounded-tl-none"
+              }`}
             >
               {m.role === "assistant" ? (
                 <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:font-medium hover:prose-a:text-blue-800 dark:hover:prose-a:text-blue-300">
                   <ReactMarkdown>{getMessageContent(m)}</ReactMarkdown>
                 </div>
               ) : (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {getMessageContent(m)}
-                </p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{getMessageContent(m)}</p>
               )}
             </div>
           </div>
@@ -163,10 +143,7 @@ export default function ChatInterface({ className }: { className?: string }) {
       </div>
 
       {/* Input Area */}
-      <form
-        onSubmit={handleSubmit}
-        className="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50"
-      >
+      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
         <div className="relative flex items-center">
           <input
             value={input}
@@ -183,8 +160,7 @@ export default function ChatInterface({ className }: { className?: string }) {
           </button>
         </div>
         <p className="text-[10px] text-gray-400 mt-2 text-center">
-          El asistente puede cometer errores. Verifique la información
-          importante con los artículos originales.
+          El asistente puede cometer errores. Verifique la información importante con los artículos originales.
         </p>
       </form>
     </div>

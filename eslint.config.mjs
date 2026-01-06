@@ -52,11 +52,7 @@ const eslintConfig = [
       "@eslint-community/eslint-comments/no-use": [
         "error",
         {
-          allow: [
-            "eslint-disable",
-            "eslint-enable",
-            "eslint-disable-next-line",
-          ],
+          allow: ["eslint-disable", "eslint-enable", "eslint-disable-next-line"],
         },
       ],
 
@@ -81,10 +77,7 @@ const eslintConfig = [
       // Complexity
       complexity: ["error", 12],
       "max-depth": ["error", 3],
-      "max-lines": [
-        "error",
-        { max: 400, skipBlankLines: true, skipComments: true },
-      ],
+      "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
 
       // Naming Conventions
       "@typescript-eslint/naming-convention": [
@@ -119,10 +112,7 @@ const eslintConfig = [
 
       // TypeScript overrides
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_" },
-      ],
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/ban-ts-comment": [
         "error",
         {
@@ -142,12 +132,7 @@ const eslintConfig = [
     },
   },
   {
-    files: [
-      "src/__tests__/**/*.ts",
-      "src/__tests__/**/*.tsx",
-      "**/*.test.ts",
-      "**/*.test.tsx",
-    ],
+    files: ["src/__tests__/**/*.ts", "src/__tests__/**/*.tsx", "**/*.test.ts", "**/*.test.tsx"],
     rules: {
       "@typescript-eslint/consistent-type-assertions": "off",
       "@typescript-eslint/no-explicit-any": "off",

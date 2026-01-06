@@ -5,10 +5,7 @@ import { articles, members, publicationColumns, tutors } from "@/db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 
 export async function getYears() {
-  const result = await db
-    .selectDistinct({ year: articles.publicationYear })
-    .from(articles)
-    .orderBy(desc(articles.publicationYear));
+  const result = await db.selectDistinct({ year: articles.publicationYear }).from(articles).orderBy(desc(articles.publicationYear));
   return result.map((r) => r.year).filter((y) => y != null) as number[];
 }
 
@@ -25,26 +22,43 @@ export type SearchParams = {
   sort?: string | null;
 };
 
-export async function getNews(params: SearchParams) {
-  const { year, text, type, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
-  const page = Number(rawPage);
-  const pageSize = Number(rawPageSize);
+function getNewsOrderBy(sort: string | null | undefined, text: string | null | undefined) {
+  switch (sort) {
+    case "date_asc":
+      return [articles.date];
+    case "date_desc":
+      return [desc(articles.date)];
+    case "id_asc":
+      return [articles.id];
+    case "id_desc":
+      return [desc(articles.id)];
+    case "rank":
+      return text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
+    default:
+      return text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
+  }
+}
 
+function getNewsConditions(year: number | null | undefined, type: number | null | undefined, text: string | null | undefined) {
   const conditions = [];
-
   if (year) {
     conditions.push(eq(articles.publicationYear, year));
   }
   if (type) {
     conditions.push(eq(articles.columnId, type));
   }
-
-  // Add full-text search condition if text is provided
   if (text) {
-    conditions.push(
-      sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${text})`
-    );
+    conditions.push(sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${text})`);
   }
+  return conditions;
+}
+
+export async function getNews(params: SearchParams) {
+  const { year, text, type, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
+  const page = Number(rawPage);
+  const pageSize = Number(rawPageSize);
+
+  const conditions = getNewsConditions(year, type, text);
 
   // Count total results
   const countQuery = db
@@ -52,9 +66,7 @@ export async function getNews(params: SearchParams) {
     .from(articles)
     .$dynamic();
 
-  const countWithConditions = conditions.length > 0
-    ? countQuery.where(and(...conditions))
-    : countQuery;
+  const countWithConditions = conditions.length > 0 ? countQuery.where(and(...conditions)) : countQuery;
 
   const [totalResult] = await countWithConditions;
   const total = Number(totalResult?.count || 0);
@@ -66,42 +78,36 @@ export async function getNews(params: SearchParams) {
       title: articles.title,
       subtitle: articles.subtitle,
       date: articles.date,
-      publicationYear: articles.publicationYear,
-      page: articles.page,
       columnId: articles.columnId,
+      pubId: articles.pubId,
+      issueId: articles.issueId,
+      page: articles.page,
+      content: articles.content,
+      cota: articles.cota,
+      code2: articles.code2,
+      authorId: articles.authorId,
+      isEditable: articles.isEditable,
+      observations: articles.observations,
+      publicationYear: articles.publicationYear,
+      publicationMonth: articles.publicationMonth,
+      issueNumber: articles.issueNumber,
+      series: articles.series,
+      microfilm: articles.microfilm,
+      searchVector: articles.searchVector,
       // Add relevance ranking when searching
       ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text}))` } : {}),
     })
     .from(articles)
     .$dynamic();
 
-  const queryWithConditions = conditions.length > 0
-    ? query.where(and(...conditions))
-    : query;
+  const queryWithConditions = conditions.length > 0 ? query.where(and(...conditions)) : query;
 
-  // Determine sort order
-  let orderBy;
-  switch (sort) {
-    case "date_asc":
-      orderBy = [articles.date];
-      break;
-    case "date_desc":
-      orderBy = [desc(articles.date)];
-      break;
-    case "id_asc":
-      orderBy = [articles.id];
-      break;
-    case "id_desc":
-      orderBy = [desc(articles.id)];
-      break;
-    case "rank":
-      orderBy = text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
-      break;
-    default:
-      orderBy = text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
-  }
+  const orderBy = getNewsOrderBy(sort, text);
 
-  const data = await queryWithConditions.orderBy(...orderBy).limit(pageSize).offset((page - 1) * pageSize);
+  const data = await queryWithConditions
+    .orderBy(...orderBy)
+    .limit(pageSize)
+    .offset((page - 1) * pageSize);
 
   return {
     data,
@@ -118,10 +124,6 @@ export async function getTutores() {
 }
 
 export async function getArticleById(id: number) {
-  const result = await db
-    .select()
-    .from(articles)
-    .where(eq(articles.id, id))
-    .limit(1);
+  const result = await db.select().from(articles).where(eq(articles.id, id)).limit(1);
   return result[0];
 }

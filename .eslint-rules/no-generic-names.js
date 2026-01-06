@@ -2,8 +2,7 @@ module.exports = {
   meta: {
     type: "problem",
     docs: {
-      description:
-        "Forbid generic names (Utils, Helper, Service, Handler, etc) in filenames, class names, and exports",
+      description: "Forbid generic names (Utils, Helper, Service, Handler, etc) in filenames, class names, and exports",
       recommended: true,
     },
   },
@@ -18,18 +17,13 @@ module.exports = {
       services: "Name by domain action (e.g., OrderSubmitter, PaymentGateway)",
       manager: "Name by responsibility (e.g., ConnectionPool, SessionStore)",
       managers: "Name by responsibility (e.g., ConnectionPool, SessionStore)",
-      processor:
-        "Name by what it processes (e.g., OrderFulfiller, EventDispatcher)",
-      processors:
-        "Name by what it processes (e.g., OrderFulfiller, EventDispatcher)",
+      processor: "Name by what it processes (e.g., OrderFulfiller, EventDispatcher)",
+      processors: "Name by what it processes (e.g., OrderFulfiller, EventDispatcher)",
       data: "Name by domain concept (e.g., OrderDetails, CustomerProfile)",
     };
 
     const forbiddenWords = Object.keys(forbiddenWordsWithSuggestions);
-    const forbiddenPattern = new RegExp(
-      `(^|/|-)(${forbiddenWords.join("|")})(-|[.]ts$|[.]tsx$|/|$)`,
-      "i",
-    );
+    const forbiddenPattern = new RegExp(`(^|/|-)(${forbiddenWords.join("|")})(-|[.]ts$|[.]tsx$|/|$)`, "i");
 
     const findForbiddenWord = (text) => {
       const lowerText = text.toLowerCase();
@@ -41,11 +35,7 @@ module.exports = {
 
       return forbiddenWords.some((word) => {
         const lowerName = name.toLowerCase();
-        return (
-          lowerName === word ||
-          lowerName.startsWith(word) ||
-          lowerName.endsWith(word)
-        );
+        return lowerName === word || lowerName.startsWith(word) || lowerName.endsWith(word);
       });
     };
 

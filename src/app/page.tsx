@@ -5,11 +5,7 @@ import { Pagination } from "@/components/pagination";
 import { SearchFilters } from "@/components/search-filters";
 import { getNews, getNewsTypes, getYears, SearchParams } from "./actions";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
+export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const years = await getYears();
   const types = await getNewsTypes();
@@ -26,18 +22,12 @@ export default async function Home({
       <div className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">
-            Resultados de Búsqueda ({total})
-          </h2>
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Resultados de Búsqueda ({total})</h2>
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
         </div>
         <NewsGrid news={news} />
 
-        <Pagination
-          total={total}
-          pageSize={pageSize}
-          currentPage={currentPage}
-        />
+        <Pagination total={total} pageSize={pageSize} currentPage={currentPage} />
       </div>
     </main>
   );

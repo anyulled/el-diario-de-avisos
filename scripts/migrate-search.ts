@@ -32,10 +32,7 @@ async function runMigration() {
     // Quick verification
     const queries = ["necrologia", "necrología"];
     for (const query of queries) {
-      const result = await client.query(
-        "SELECT COUNT(*) as count FROM articulos WHERE search_vector @@ to_tsquery('spanish_unaccent', $1)",
-        [query]
-      );
+      const result = await client.query("SELECT COUNT(*) as count FROM articulos WHERE search_vector @@ to_tsquery('spanish_unaccent', $1)", [query]);
       console.log(`   "${query}": ${result.rows[0].count} results`);
     }
 

@@ -17,9 +17,8 @@ async function testContentSearch() {
     LIMIT 5
   `);
 
-
   console.log(`  Found ${test1.rows.length} results:`);
-  test1.rows.forEach((row: any, i: number) => {
+  (test1.rows as Array<{ title: string; rank: number }>).forEach((row, i) => {
     console.log(`  ${i + 1}. "${row.title}" (rank: ${row.rank})`);
   });
 
@@ -36,7 +35,7 @@ async function testContentSearch() {
   `);
 
   console.log(`  Found ${test2.rows.length} results:`);
-  test2.rows.forEach((row: any, i: number) => {
+  (test2.rows as Array<{ title: string; rank: number }>).forEach((row, i) => {
     console.log(`  ${i + 1}. "${row.title}" (rank: ${row.rank})`);
   });
 
@@ -52,7 +51,7 @@ async function testContentSearch() {
 
   console.log(`  Total articles: ${stats.rows[0].total}`);
   console.log(`  With search vector: ${stats.rows[0].with_vector}`);
-  console.log(`  Avg vector length: ${Math.round(stats.rows[0].avg_vector_length)} chars`);
+  console.log(`  Avg vector length: ${Math.round(Number(stats.rows[0].avg_vector_length))} chars`);
 
   // Test 4: Sample a cleaned content
   console.log("\nTest 4: Sample cleaned content...");

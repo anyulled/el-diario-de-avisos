@@ -11,10 +11,7 @@ export interface SearchResult {
 }
 
 // Internal function for vector search
-async function findVectorArticles(
-  query: string,
-  limit = 5,
-): Promise<SearchResult[]> {
+async function findVectorArticles(query: string, limit = 5): Promise<SearchResult[]> {
   const embedding = await generateEmbedding(query);
 
   const similarity = sql<number>`1 - (${articleEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
@@ -29,17 +26,12 @@ async function findVectorArticles(
     .from(articleEmbeddings)
     .innerJoin(articles, eq(articleEmbeddings.articleId, articles.id))
     .where(sql`${similarity} > 0.5`)
-    .orderBy(
-      sql`${articleEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector`,
-    )
+    .orderBy(sql`${articleEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector`)
     .limit(limit);
 }
 
 // Internal function for keyword search
-async function findKeywordArticles(
-  query: string,
-  limit = 10,
-): Promise<SearchResult[]> {
+async function findKeywordArticles(query: string, limit = 10): Promise<SearchResult[]> {
   return await db
     .select({
       id: articles.id,
@@ -54,14 +46,12 @@ async function findKeywordArticles(
 }
 
 // Main hybrid search function
-export async function findSimilarArticles(
-  query: string,
-  limit = 5,
-): Promise<SearchResult[]> {
+export async function findSimilarArticles(query: string, limit = 5): Promise<SearchResult[]> {
   // Run both searches in parallel
   const [vectorResults, keywordResults] = await Promise.all([
     findVectorArticles(query, limit),
-    findKeywordArticles(query, 10) // Always fetch top 10 keyword matches
+    // Always fetch top 10 keyword matches
+    findKeywordArticles(query, 10),
   ]);
 
   // Combine and deduplicate
@@ -85,7 +75,7 @@ export async function findSimilarArticles(
       // We'll assign a high artificial similarity for keyword matches to ensure they are picked up in context
       combinedResults.push({
         ...res,
-        similarity: 0.95
+        similarity: 0.95,
       });
     }
   }
@@ -93,5 +83,6 @@ export async function findSimilarArticles(
   // Sort by similarity descending to ensure keyword matches (0.95) rise to the top
   combinedResults.sort((a, b) => b.similarity - a.similarity);
 
-  return combinedResults.slice(0, limit + 2); // Return a slightly larger set if mixed
+  // Return a slightly larger set if mixed
+  return combinedResults.slice(0, limit + 2);
 }

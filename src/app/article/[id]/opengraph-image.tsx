@@ -9,11 +9,7 @@ export const size = {
   height: 630,
 };
 
-export default async function Image({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const article = await getArticleById(Number(id));
 
@@ -35,9 +31,7 @@ export default async function Image({
           backgroundSize: "100% 100%",
         }}
       >
-        <h1 style={{ fontSize: "60px", fontFamily: "serif" }}>
-          Artículo no encontrado
-        </h1>
+        <h1 style={{ fontSize: "60px", fontFamily: "serif" }}>Artículo no encontrado</h1>
       </div>,
       { ...size },
     );
@@ -86,9 +80,7 @@ export default async function Image({
           >
             Noticia
           </span>
-          <span style={{ fontSize: "24px", color: "#64748b" }}>
-            {article.date || `Año ${article.publicationYear}`}
-          </span>
+          <span style={{ fontSize: "24px", color: "#64748b" }}>{article.date || `Año ${article.publicationYear}`}</span>
         </div>
         <h1
           style={{

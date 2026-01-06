@@ -10,22 +10,20 @@ export async function POST(req: Request) {
   const latestMessage = messages[messages.length - 1];
 
   // Extract text content from UIMessage parts
-  const latestContent = latestMessage.parts
-    ?.filter((part: { type: string }) => part.type === "text")
-    .map((part: { text: string }) => part.text)
-    .join("") || latestMessage.content || "";
+  const latestContent =
+    latestMessage.parts
+      ?.filter((part: { type: string }) => part.type === "text")
+      .map((part: { text: string }) => part.text)
+      .join("") ||
+    latestMessage.content ||
+    "";
 
   // 1. Find relevant context from the newspaper archives
   const contextArticles = await findSimilarArticles(latestContent, 3);
 
   const contextString =
     contextArticles.length > 0
-      ? contextArticles
-        .map(
-          (a) =>
-            `- "${a.title}" (${a.date}) [ID: ${a.id}] - Relevancia: ${Math.round(a.similarity * 100)}%`,
-        )
-        .join("\n")
+      ? contextArticles.map((a) => `- "${a.title}" (${a.date}) [ID: ${a.id}] - Relevancia: ${Math.round(a.similarity * 100)}%`).join("\n")
       : "No se encontraron artículos específicos en el archivo para esta consulta.";
 
   // 2. Augment the prompt
@@ -65,16 +63,15 @@ Si los datos arriba expuestos son de provecho, citad el título y fecha de la no
   });
 
   // Convert UIMessage format to CoreMessage format for streamText
-  const coreMessages = messages.map((msg: {
-    role: string;
-    parts?: Array<{ type: string; text?: string }>;
-    content?: string;
-  }) => {
+  const coreMessages = messages.map((msg: { role: string; parts?: Array<{ type: string; text?: string }>; content?: string }) => {
     // Extract text from parts if present, otherwise use content
-    const textContent = msg.parts
-      ?.filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("") || msg.content || "";
+    const textContent =
+      msg.parts
+        ?.filter((part) => part.type === "text")
+        .map((part) => part.text)
+        .join("") ||
+      msg.content ||
+      "";
 
     return {
       role: msg.role,

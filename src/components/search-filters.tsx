@@ -21,7 +21,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
   const handleSearch = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
 
-    // Always reset page to 1 when any other filter changes, 
+    // Always reset page to 1 when any other filter changes,
     // unless we are explicitly setting the page (handled elsewhere maybe, but for now here)
     if (!updates.page) {
       params.set("page", "1");
@@ -72,14 +72,8 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
               </option>
             ))}
           </select>
-          <Calendar
-            className="absolute left-3 top-3.5 text-gray-400"
-            size={18}
-          />
-          <ChevronDown
-            className="absolute right-3 top-4 text-gray-400 pointer-events-none"
-            size={16}
-          />
+          <Calendar className="absolute left-3 top-3.5 text-gray-400" size={18} />
+          <ChevronDown className="absolute right-3 top-4 text-gray-400 pointer-events-none" size={16} />
         </div>
 
         <div className="relative">
@@ -88,15 +82,9 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-between text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
           >
             <span className="truncate">
-              {searchParams.get("type")
-                ? types.find(t => String(t.id) === searchParams.get("type"))?.name || "Tipo Seleccionado"
-                : "Tipo de Noticia"}
+              {searchParams.get("type") ? types.find((t) => String(t.id) === searchParams.get("type"))?.name || "Tipo Seleccionado" : "Tipo de Noticia"}
             </span>
-            {isTypeExpanded ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
+            {isTypeExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           <Type className="absolute left-3 top-3.5 text-gray-400" size={18} />
           {isPending && (
@@ -120,10 +108,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
             <option value="id_desc">Ordenar por: ID (Descendente)</option>
             <option value="id_asc">Ordenar por: ID (Ascendente)</option>
           </select>
-          <ChevronDown
-            className="absolute right-3 top-3.5 text-gray-400 pointer-events-none"
-            size={14}
-          />
+          <ChevronDown className="absolute right-3 top-3.5 text-gray-400 pointer-events-none" size={14} />
         </div>
 
         <div className="relative">
@@ -136,24 +121,16 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
             <option value="50">Mostrar: 50 por página</option>
             <option value="100">Mostrar: 100 por página</option>
           </select>
-          <ChevronDown
-            className="absolute right-3 top-3.5 text-gray-400 pointer-events-none"
-            size={14}
-          />
+          <ChevronDown className="absolute right-3 top-3.5 text-gray-400 pointer-events-none" size={14} />
         </div>
       </div>
 
       {isTypeExpanded && (
         <div className="mt-4 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg animate-in fade-in slide-in-from-top-2 border border-gray-100 dark:border-zinc-700">
-          <h3 className="text-xs font-bold mb-3 text-gray-500 uppercase tracking-widest">
-            Filtrar por Tipo
-          </h3>
+          <h3 className="text-xs font-bold mb-3 text-gray-500 uppercase tracking-widest">Filtrar por Tipo</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {types.map((type) => (
-              <label
-                key={type.id}
-                className="flex items-center gap-2 cursor-pointer hover:bg-amber-50 dark:hover:bg-zinc-700 p-2 rounded transition-colors"
-              >
+              <label key={type.id} className="flex items-center gap-2 cursor-pointer hover:bg-amber-50 dark:hover:bg-zinc-700 p-2 rounded transition-colors">
                 <input
                   type="radio"
                   name="type"

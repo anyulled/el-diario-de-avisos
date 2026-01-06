@@ -29,12 +29,7 @@ export function MusicPlayer() {
       const saved = sessionStorage.getItem("da_music_player");
       if (saved) {
         try {
-          const {
-            track,
-            playing,
-            time,
-            volume: savedVolume,
-          } = JSON.parse(saved);
+          const { track, playing, time, volume: savedVolume } = JSON.parse(saved);
           setCurrentTrack(track);
           setIsPlaying(playing);
           if (savedVolume !== undefined) {
@@ -139,47 +134,25 @@ export function MusicPlayer() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black/90 text-white backdrop-blur-md border-t border-white/10 p-4 z-50">
       <div className="container mx-auto flex items-center justify-between">
-
-
         <div className="flex items-center gap-4 w-1/3">
           <div className="relative w-10 h-10 rounded overflow-hidden">
-            <Image
-              src="/icon.png"
-              alt="El Diario de Avisos Logo"
-              fill
-              className="object-cover"
-            />
+            <Image src="/icon.png" alt="El Diario de Avisos Logo" fill className="object-cover" />
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-sm">
-              {TRACKS[currentTrack].title}
-            </span>
+            <span className="font-semibold text-sm">{TRACKS[currentTrack].title}</span>
             <span className="text-xs text-gray-400">El Diario de Avisos</span>
           </div>
         </div>
 
         <div className="flex flex-col items-center gap-2 w-1/3">
           <div className="flex items-center gap-6">
-            <button
-              onClick={prevTrack}
-              className="hover:text-amber-500 transition-colors"
-            >
+            <button onClick={prevTrack} className="hover:text-amber-500 transition-colors">
               <SkipBack size={20} />
             </button>
-            <button
-              onClick={togglePlay}
-              className="p-3 bg-white text-black rounded-full hover:scale-105 transition-transform"
-            >
-              {isPlaying ? (
-                <Pause size={20} fill="currentColor" />
-              ) : (
-                <Play size={20} fill="currentColor" className="ml-0.5" />
-              )}
+            <button onClick={togglePlay} className="p-3 bg-white text-black rounded-full hover:scale-105 transition-transform">
+              {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
             </button>
-            <button
-              onClick={nextTrack}
-              className="hover:text-amber-500 transition-colors"
-            >
+            <button onClick={nextTrack} className="hover:text-amber-500 transition-colors">
               <SkipForward size={20} />
             </button>
           </div>
@@ -198,12 +171,7 @@ export function MusicPlayer() {
           />
         </div>
 
-        <audio
-          ref={audioRef}
-          src={TRACKS[currentTrack].src}
-          onEnded={nextTrack}
-          onLoadedMetadata={handleLoadedMetadata}
-        />
+        <audio ref={audioRef} src={TRACKS[currentTrack].src} onEnded={nextTrack} onLoadedMetadata={handleLoadedMetadata} />
       </div>
     </div>
   );
