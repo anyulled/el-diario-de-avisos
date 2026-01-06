@@ -24,27 +24,30 @@ export function MusicPlayer() {
 
     // Load state from session storage on mount
     useEffect(() => {
-        const saved = sessionStorage.getItem('da_music_player');
-        if (saved) {
-            try {
-                const { track, playing, time, volume: savedVolume } = JSON.parse(saved);
-                setCurrentTrack(track);
-                setIsPlaying(playing);
-                if (savedVolume !== undefined) {
-                    setVolume(savedVolume);
+        const loadSavedState = () => {
+            const saved = sessionStorage.getItem('da_music_player');
+            if (saved) {
+                try {
+                    const { track, playing, time, volume: savedVolume } = JSON.parse(saved);
+                    setCurrentTrack(track);
+                    setIsPlaying(playing);
+                    if (savedVolume !== undefined) {
+                        setVolume(savedVolume);
+                    }
+                    if (typeof time === 'number') {
+                        setRestoredTime(time);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse saved music state", e);
+                    setIsPlaying(true);
                 }
-                if (typeof time === 'number') {
-                    setRestoredTime(time);
-                }
-            } catch (e) {
-                console.error("Failed to parse saved music state", e);
-                // Fallback if parsing fails
+            } else {
                 setIsPlaying(true);
             }
-        } else {
-            setIsPlaying(true);
-        }
-        setHasLoaded(true);
+            setHasLoaded(true);
+        };
+
+        loadSavedState();
     }, []);
 
     // Save state to session storage periodically
@@ -78,12 +81,14 @@ export function MusicPlayer() {
     };
 
     const nextTrack = () => {
-        setRestoredTime(null); // Clear restored time on manual track change
+        // Clear restored time on manual track change
+        setRestoredTime(null);
         setCurrentTrack((prev) => (prev + 1) % TRACKS.length);
     };
 
     const prevTrack = () => {
-        setRestoredTime(null); // Clear restored time on manual track change
+        // Clear restored time on manual track change
+        setRestoredTime(null);
         setCurrentTrack((prev) => (prev - 1 + TRACKS.length) % TRACKS.length);
     };
 
@@ -110,13 +115,15 @@ export function MusicPlayer() {
         } else {
             audio.pause();
         }
-    }, [isPlaying, hasLoaded, currentTrack]); // Trigger when track changes or play state changes
+        // Trigger when track changes, play state changes or volume changes
+    }, [isPlaying, hasLoaded, currentTrack, volume]);
 
     // Handle Metadata Loaded to restore time
     const handleLoadedMetadata = () => {
         if (audioRef.current && restoredTime !== null) {
             audioRef.current.currentTime = restoredTime;
-            setRestoredTime(null); // Reset after applying
+            // Reset after applying
+            setRestoredTime(null);
         }
     };
 

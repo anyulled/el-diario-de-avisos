@@ -1,7 +1,7 @@
 import { getArticleById } from "@/app/actions";
 import { Navbar } from "@/components/navbar";
 import { notFound } from "next/navigation";
-// @ts-ignore
+// @ts-expect-error - rtf-to-html type definitions are missing or incomplete
 import { fromString } from '@iarna/rtf-to-html';
 import iconv from 'iconv-lite';
 import { promisify } from 'util';
@@ -34,22 +34,19 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         notFound();
     }
 
-    let htmlContent = "Contenido no disponible";
-    if (article.content) {
+    const htmlContent = await (async () => {
+        if (!article.content) return "Contenido no disponible";
         try {
             // Using iconv-lite to decode as Windows-1252 first to ensure 8-bit bytes are mapped to correct chars
-            let rtfString = '';
-            if (Buffer.isBuffer(article.content)) {
-                rtfString = iconv.decode(article.content, 'win1252');
-            } else {
-                rtfString = String(article.content);
-            }
+            const rtfString = Buffer.isBuffer(article.content)
+                ? iconv.decode(article.content, 'win1252')
+                : String(article.content);
 
             // HACK: Manually unescape RTF hex sequences for Latin1 characters (\'xx)
             // The rtf-to-html library seems to fail to parse these standard escapes correctly 
             // (likely due to missing/default codepage handling), resulting in replacement characters.
             // We convert \'e9 -> é, etc. assuming Windows-1252/Latin1 mapping for 0x80-0xFF.
-            rtfString = rtfString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
+            const unescapedRtf = rtfString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
                 const code = parseInt(hex, 16);
                 // Only decode extended ASCII range (128-255). 
                 // Standard ASCII escapes (if any) might be handled slightly differently or not occur as \'xx often.
@@ -60,18 +57,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             });
 
             // Allow bypassing the document structure (html/head/body) which adds unwanted margins
-            htmlContent = await rtfToHtml(rtfString, {
-                template: (_doc: any, _defaults: any, content: string) => content
+            return await rtfToHtml(unescapedRtf, {
+                template: (_doc: unknown, _defaults: unknown, content: string) => content
             });
         } catch (e) {
             console.error("Error converting RTF", e);
-            if (Buffer.isBuffer(article.content)) {
-                htmlContent = iconv.decode(article.content, 'win1252');
-            } else {
-                htmlContent = String(article.content);
-            }
+            return Buffer.isBuffer(article.content)
+                ? iconv.decode(article.content, 'win1252')
+                : String(article.content);
         }
-    }
+    })();
 
     return (
         <main className="min-h-screen bg-white dark:bg-zinc-950 pb-20">

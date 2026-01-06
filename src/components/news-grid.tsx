@@ -1,6 +1,7 @@
+import { articles } from "@/db/schema";
 import Link from "next/link";
 
-export function NewsGrid({ news }: { news: any[] }) {
+export function NewsGrid({ news }: { news: (typeof articles.$inferSelect)[] }) {
     if (news.length === 0) {
         return <div className="text-center py-20 text-gray-500 italic">No se encontraron resultados para su búsqueda.</div>
     }
