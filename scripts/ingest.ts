@@ -20,12 +20,26 @@ function stripHtml(html: string): string {
 async function processRtf(content: Buffer | string | null): Promise<string> {
   if (!content) return "";
   try {
-    const rtfString = Buffer.isBuffer(content)
+    const contentString = Buffer.isBuffer(content)
       ? iconv.decode(content, "win1252")
       : String(content);
 
+    // Detect if content is RTF format (starts with {\rtf) or plain text
+    const isRtf = contentString.trim().startsWith("{\\rtf");
+
+    if (!isRtf) {
+      // For plain text, just return it cleaned up
+      // Remove excessive whitespace but preserve paragraph structure
+      return contentString
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0)
+        .join("\n\n");
+    }
+
+    // Process RTF content
     // Minimal unescape for RAG quality
-    const unescapedRtf = rtfString.replace(
+    const unescapedRtf = contentString.replace(
       /\\'([0-9a-fA-F]{2})/g,
       (match, hex) => {
         const code = parseInt(hex, 16);
@@ -40,8 +54,12 @@ async function processRtf(content: Buffer | string | null): Promise<string> {
 
     return stripHtml(html);
   } catch (e) {
-    console.error("RTF processing error:", e);
-    return "";
+    console.error("Content processing error:", e);
+    // Fallback: return raw content if available
+    const fallback = Buffer.isBuffer(content)
+      ? iconv.decode(content, "win1252")
+      : String(content);
+    return fallback || "";
   }
 }
 
