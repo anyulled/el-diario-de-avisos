@@ -8,6 +8,24 @@ import { promisify } from 'util';
 
 const rtfToHtml = promisify(fromString);
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
+    const { id } = await params;
+    const article = await getArticleById(Number(id));
+
+    if (!article) return {};
+
+    return {
+        title: article.title || "Sin Título",
+        description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
+        openGraph: {
+            title: article.title || "Sin Título",
+            description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
+            type: "article",
+            publishedTime: article.date || undefined,
+        },
+    };
+}
+
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const article = await getArticleById(Number(id));
