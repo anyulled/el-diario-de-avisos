@@ -17,6 +17,12 @@ jobs:
   quality-assurance:
     name: Build, Test, and Lint
     runs-on: ubuntu-latest
+    env:
+      GROQ_KEY: "dummy_value"
+      CEREBRAS_KEY: "dummy_value"
+      GEMINI_KEY: "dummy_value"
+      DATABASE_URL: "postgresql://user:password@localhost:5432/db"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
