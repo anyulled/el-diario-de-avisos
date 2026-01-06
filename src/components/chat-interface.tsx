@@ -4,14 +4,40 @@ import { useChat } from "@ai-sdk/react";
 import { type UIMessage } from "ai";
 import { Bot, Library, Send, Trash2, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+
+const CHAT_STORAGE_KEY = "chat-history";
 
 export default function ChatInterface({ className }: { className?: string }) {
   const { messages, sendMessage, setMessages, status } = useChat();
   const [input, setInput] = useState("");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const isLoading = status === "submitted" || status === "streaming";
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Load messages from session storage on mount
+  useEffect(() => {
+    const savedMessages = sessionStorage.getItem(CHAT_STORAGE_KEY);
+    if (savedMessages) {
+      try {
+        const parsed = JSON.parse(savedMessages);
+        setMessages(parsed);
+      } catch (error) {
+        console.error("Failed to parse saved messages:", error);
+      }
+    }
+    setIsHydrated(true);
+  }, [setMessages]);
+
+  // Save messages to session storage whenever they change
+  useEffect(() => {
+    if (isHydrated && messages.length > 0) {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    }
+  }, [messages, isHydrated]);
+
+  // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -56,7 +82,10 @@ export default function ChatInterface({ className }: { className?: string }) {
           </div>
         </div>
         <button
-          onClick={() => setMessages([])}
+          onClick={() => {
+            setMessages([]);
+            sessionStorage.removeItem(CHAT_STORAGE_KEY);
+          }}
           className="p-2 hover:bg-amber-700 rounded-full transition-colors"
           title="Limpiar conversación"
         >
@@ -104,9 +133,15 @@ export default function ChatInterface({ className }: { className?: string }) {
                 : "bg-amber-50 dark:bg-amber-900/20 text-zinc-800 dark:text-zinc-200 border border-amber-100 dark:border-amber-900/30 rounded-tl-none"
                 }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {getMessageContent(m)}
-              </p>
+              {m.role === "assistant" ? (
+                <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:font-medium hover:prose-a:text-blue-800 dark:hover:prose-a:text-blue-300">
+                  <ReactMarkdown>{getMessageContent(m)}</ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {getMessageContent(m)}
+                </p>
+              )}
             </div>
           </div>
         ))}

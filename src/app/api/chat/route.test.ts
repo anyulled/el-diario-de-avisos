@@ -215,4 +215,60 @@ describe("Chat API Route", () => {
         // Verify the correct model is used
         expect(mockGroqModel).toHaveBeenCalledWith("llama-3.3-70b-versatile");
     });
+
+    it("should include article IDs and linking instructions in system prompt", async () => {
+        const { findSimilarArticles } = await import("@/lib/vector-store");
+        const { createGroq } = await import("@ai-sdk/groq");
+        const { streamText } = await import("ai");
+
+        // Mock similar articles with IDs
+        vi.mocked(findSimilarArticles).mockResolvedValue([
+            {
+                id: 42,
+                title: "Gran Concierto de Ópera",
+                date: "1887-05-10",
+                similarity: 0.92,
+            },
+        ]);
+
+        const mockGroqModel = vi.fn();
+        vi.mocked(createGroq).mockReturnValue(mockGroqModel as never);
+
+        const mockStreamResponse = {
+            toUIMessageStreamResponse: vi.fn().mockReturnValue(
+                new Response("mock stream", {
+                    headers: { "Content-Type": "text/event-stream" },
+                }),
+            ),
+        };
+        vi.mocked(streamText).mockReturnValue(mockStreamResponse as never);
+
+        const mockRequest = new Request("http://localhost:3000/api/chat", {
+            method: "POST",
+            body: JSON.stringify({
+                messages: [
+                    {
+                        role: "user",
+                        parts: [{ type: "text", text: "Tell me about opera" }],
+                    },
+                ],
+            }),
+        });
+
+        await POST(mockRequest);
+
+        expect(streamText).toHaveBeenCalled();
+        const callArgs = vi.mocked(streamText).mock.calls[0][0];
+
+        // Verify article ID is included in context
+        expect(callArgs.system).toContain("[ID: 42]");
+        expect(callArgs.system).toContain("Gran Concierto de Ópera");
+
+        // Verify linking instructions are present
+        expect(callArgs.system).toContain("CITACIÓN DE FUENTES");
+        expect(callArgs.system).toContain("[Título del artículo](/article/ID)");
+        expect(callArgs.system).toContain(
+            "INCLUYE el enlace al artículo usando el formato",
+        );
+    });
 });

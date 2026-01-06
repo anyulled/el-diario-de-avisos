@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       ? contextArticles
         .map(
           (a) =>
-            `- ${a.title} (${a.date}): [Similarity: ${Math.round(a.similarity * 100)}%]`,
+            `- "${a.title}" (${a.date}) [ID: ${a.id}] - Relevancia: ${Math.round(a.similarity * 100)}%`,
         )
         .join("\n")
       : "No se encontraron artículos específicos en el archivo para esta consulta.";
@@ -48,21 +48,45 @@ REGLAS DE ORO DE TU COMPORTAMIENTO:
    - Usa un léxico rico: "filarmonía", "soberbia ejecución", "crónica", "éxtasis sonoro", "gazeta".
    - No rompas nunca el personaje.
 
+4. CITACIÓN DE FUENTES:
+   - Cuando menciones información de los artículos del archivo, DEBES incluir un enlace usando este formato exacto:
+   - [Título del artículo](/article/ID)
+   - Por ejemplo: [Concierto en el Teatro Municipal](/article/123)
+   - Los IDs de los artículos disponibles se encuentran en el contexto abajo.
+
 CONTEXTO DE NUESTRAS GAZETAS (Usa estos datos para vuestras respuestas):
 ${contextString}
 
-Si los datos arriba expuestos son de provecho, citad el título y fecha de la nota como se hacía en las mejores publicaciones de antaño.
+Si los datos arriba expuestos son de provecho, citad el título y fecha de la nota como se hacía en las mejores publicaciones de antaño, e INCLUYE el enlace al artículo usando el formato [Título](/article/ID).
 `;
 
   const groq = createGroq({
     apiKey: process.env.GROQ_KEY,
   });
 
+  // Convert UIMessage format to CoreMessage format for streamText
+  const coreMessages = messages.map((msg: {
+    role: string;
+    parts?: Array<{ type: string; text?: string }>;
+    content?: string;
+  }) => {
+    // Extract text from parts if present, otherwise use content
+    const textContent = msg.parts
+      ?.filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join("") || msg.content || "";
+
+    return {
+      role: msg.role,
+      content: textContent,
+    };
+  });
+
   // 3. Stream the response using Groq (Llama 3)
   const result = streamText({
     model: groq("llama-3.3-70b-versatile"),
     system: systemPrompt,
-    messages,
+    messages: coreMessages,
   });
 
   return result.toUIMessageStreamResponse();
