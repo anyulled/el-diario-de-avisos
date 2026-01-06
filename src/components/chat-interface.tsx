@@ -6,8 +6,7 @@ import { Bot, Library, Send, Trash2, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function ChatInterface({ className }: { className?: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { messages, append, setMessages, status } = useChat() as any;
+  const { messages, sendMessage, setMessages, status } = useChat();
   const [input, setInput] = useState("");
 
   const isLoading = status === "submitted" || status === "streaming";
@@ -27,7 +26,7 @@ export default function ChatInterface({ className }: { className?: string }) {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    append({ role: "user", content: input });
+    sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
     setInput("");
   };
 

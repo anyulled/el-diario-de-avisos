@@ -7,10 +7,16 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
-  const latestMessage = messages[messages.length - 1].content;
+  const latestMessage = messages[messages.length - 1];
+
+  // Extract text content from UIMessage parts
+  const latestContent = latestMessage.parts
+    ?.filter((part: { type: string }) => part.type === "text")
+    .map((part: { text: string }) => part.text)
+    .join("") || latestMessage.content || "";
 
   // 1. Find relevant context from the newspaper archives
-  const contextArticles = await findSimilarArticles(latestMessage, 3);
+  const contextArticles = await findSimilarArticles(latestContent, 3);
 
   const contextString =
     contextArticles.length > 0

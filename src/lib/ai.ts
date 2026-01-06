@@ -8,7 +8,9 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
 
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const result = await model.embedContent(text);
+  const result = await model.embedContent({
+    content: { role: "user", parts: [{ text }] },
+  });
   return result.embedding.values;
 }
 

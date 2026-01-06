@@ -1,0 +1,218 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { POST } from "./route";
+
+// Mock dependencies
+vi.mock("@/lib/vector-store", () => ({
+    findSimilarArticles: vi.fn(),
+}));
+
+vi.mock("@ai-sdk/groq", () => ({
+    createGroq: vi.fn(),
+}));
+
+vi.mock("ai", () => ({
+    streamText: vi.fn(),
+}));
+
+describe("Chat API Route", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it("should process chat request with context from vector store", async () => {
+        const { findSimilarArticles } = await import("@/lib/vector-store");
+        const { createGroq } = await import("@ai-sdk/groq");
+        const { streamText } = await import("ai");
+
+        // Mock similar articles
+        vi.mocked(findSimilarArticles).mockResolvedValue([
+            {
+                id: 1,
+                title: "Concierto en el Teatro Municipal",
+                date: "1885-03-15",
+                similarity: 0.85,
+            },
+            {
+                id: 2,
+                title: "Ópera Italiana en Caracas",
+                date: "1886-07-20",
+                similarity: 0.78,
+            },
+        ]);
+
+        // Mock Groq client
+        const mockGroqModel = vi.fn();
+        vi.mocked(createGroq).mockReturnValue(mockGroqModel as never);
+
+        // Mock streamText response
+        const mockStreamResponse = {
+            toUIMessageStreamResponse: vi.fn().mockReturnValue(
+                new Response("mock stream", {
+                    headers: { "Content-Type": "text/event-stream" },
+                }),
+            ),
+        };
+        vi.mocked(streamText).mockReturnValue(mockStreamResponse as never);
+
+        // Create mock request
+        const mockRequest = new Request("http://localhost:3000/api/chat", {
+            method: "POST",
+            body: JSON.stringify({
+                messages: [
+                    {
+                        role: "user",
+                        parts: [{ type: "text", text: "¿Qué conciertos hubo en 1885?" }],
+                    },
+                ],
+            }),
+        });
+
+        const response = await POST(mockRequest);
+
+        // Verify vector store was called
+        expect(findSimilarArticles).toHaveBeenCalledWith(
+            "¿Qué conciertos hubo en 1885?",
+            3,
+        );
+
+        // Verify Groq was initialized
+        expect(createGroq).toHaveBeenCalledWith({
+            apiKey: "test-groq-key",
+        });
+
+        // Verify streamText was called with proper context
+        expect(streamText).toHaveBeenCalled();
+        const callArgs = vi.mocked(streamText).mock.calls[0][0];
+
+        // Verify the system prompt includes the context articles
+        expect(callArgs.system).toContain("Concierto en el Teatro Municipal");
+        expect(callArgs.system).toContain("1885-03-15");
+        expect(callArgs.messages).toBeDefined();
+
+        // Verify response
+        expect(response).toBeInstanceOf(Response);
+        expect(response.headers.get("Content-Type")).toBe("text/event-stream");
+    });
+
+    it("should handle requests with no similar articles found", async () => {
+        const { findSimilarArticles } = await import("@/lib/vector-store");
+        const { createGroq } = await import("@ai-sdk/groq");
+        const { streamText } = await import("ai");
+
+        // Mock empty results
+        vi.mocked(findSimilarArticles).mockResolvedValue([]);
+
+        const mockGroqModel = vi.fn();
+        vi.mocked(createGroq).mockReturnValue(mockGroqModel as never);
+
+        const mockStreamResponse = {
+            toUIMessageStreamResponse: vi.fn().mockReturnValue(
+                new Response("mock stream", {
+                    headers: { "Content-Type": "text/event-stream" },
+                }),
+            ),
+        };
+        vi.mocked(streamText).mockReturnValue(mockStreamResponse as never);
+
+        const mockRequest = new Request("http://localhost:3000/api/chat", {
+            method: "POST",
+            body: JSON.stringify({
+                messages: [
+                    {
+                        role: "user",
+                        parts: [{ type: "text", text: "Random query" }],
+                    },
+                ],
+            }),
+        });
+
+        await POST(mockRequest);
+
+        // Verify system prompt includes fallback message
+        expect(streamText).toHaveBeenCalledWith(
+            expect.objectContaining({
+                system: expect.stringContaining(
+                    "No se encontraron artículos específicos",
+                ),
+            }),
+        );
+    });
+
+    it("should extract content from UIMessage parts correctly", async () => {
+        const { findSimilarArticles } = await import("@/lib/vector-store");
+        const { createGroq } = await import("@ai-sdk/groq");
+        const { streamText } = await import("ai");
+
+        vi.mocked(findSimilarArticles).mockResolvedValue([]);
+
+        const mockGroqModel = vi.fn();
+        vi.mocked(createGroq).mockReturnValue(mockGroqModel as never);
+
+        const mockStreamResponse = {
+            toUIMessageStreamResponse: vi.fn().mockReturnValue(
+                new Response("mock stream", {
+                    headers: { "Content-Type": "text/event-stream" },
+                }),
+            ),
+        };
+        vi.mocked(streamText).mockReturnValue(mockStreamResponse as never);
+
+        const mockRequest = new Request("http://localhost:3000/api/chat", {
+            method: "POST",
+            body: JSON.stringify({
+                messages: [
+                    {
+                        role: "user",
+                        parts: [
+                            { type: "text", text: "First part " },
+                            { type: "text", text: "second part" },
+                        ],
+                    },
+                ],
+            }),
+        });
+
+        await POST(mockRequest);
+
+        // The content extraction should handle the parts array
+        // This is a regression test for the UIMessage.parts structure
+        expect(findSimilarArticles).toHaveBeenCalled();
+    });
+
+    it("should use Groq llama-3.3-70b-versatile model", async () => {
+        const { findSimilarArticles } = await import("@/lib/vector-store");
+        const { createGroq } = await import("@ai-sdk/groq");
+        const { streamText } = await import("ai");
+
+        vi.mocked(findSimilarArticles).mockResolvedValue([]);
+
+        const mockGroqModel = vi.fn();
+        vi.mocked(createGroq).mockReturnValue(mockGroqModel as never);
+
+        const mockStreamResponse = {
+            toUIMessageStreamResponse: vi.fn().mockReturnValue(
+                new Response("mock stream", {
+                    headers: { "Content-Type": "text/event-stream" },
+                }),
+            ),
+        };
+        vi.mocked(streamText).mockReturnValue(mockStreamResponse as never);
+
+        const mockRequest = new Request("http://localhost:3000/api/chat", {
+            method: "POST",
+            body: JSON.stringify({
+                messages: [
+                    {
+                        role: "user",
+                        parts: [{ type: "text", text: "Test" }],
+                    },
+                ],
+            }),
+        });
+
+        await POST(mockRequest);
+
+        // Verify the correct model is used
+        expect(mockGroqModel).toHaveBeenCalledWith("llama-3.3-70b-versatile");
+    });
+});
