@@ -25,6 +25,7 @@ const lora = Lora({
 
 import { ChatWidget } from "@/components/chat-widget";
 import { MusicPlayer } from "@/components/music-player";
+import { Analytics } from "@vercel/analytics/react";
 import { getIntegrantes, getTutores } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -72,6 +73,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} antialiased`}>
         {children}
+        <Analytics />
         <MusicPlayer />
         <ChatWidget />
       </body>
