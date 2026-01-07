@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { articles, members, publicationColumns, tutors } from "@/db/schema";
+import { articles, essays, members, publicationColumns, tutors } from "@/db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 
 export async function getYears() {
@@ -126,5 +126,14 @@ export async function getTutores() {
 
 export async function getArticleById(id: number) {
   const result = await db.select().from(articles).where(eq(articles.id, id)).limit(1);
+  return result[0];
+}
+
+export async function getEssays() {
+  return await db.select({ id: essays.id, title: essays.title }).from(essays);
+}
+
+export async function getEssayById(id: number) {
+  const result = await db.select().from(essays).where(eq(essays.id, id)).limit(1);
   return result[0];
 }
