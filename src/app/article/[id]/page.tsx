@@ -103,7 +103,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           <div className="max-w-4xl">
             <div className="mb-4 flex items-center gap-3">
               <span className="bg-amber-600/90 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">Noticia</span>
-              <span className="text-white/80 font-mono text-sm">{article.date || `Año ${article.publicationYear}`}</span>
+              <span className="text-white/80 font-mono text-sm">
+                {article.date
+                  ? new Date(article.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" })
+                  : `Año ${article.publicationYear}`}
+              </span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">{article.title || "Sin Título"}</h1>
           </div>

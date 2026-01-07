@@ -17,7 +17,7 @@ export function NewsGrid({ news }: { news: (typeof articles.$inferSelect)[] }) {
           <div className="p-6 flex-1 flex flex-col">
             <div className="flex justify-between items-start mb-4">
               <span className="text-xs font-mono text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded border border-amber-100 dark:border-amber-900/50">
-                {item.date || item.publicationYear}
+                {item.date ? new Date(item.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" }) : item.publicationYear}
               </span>
             </div>
             <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-gray-100 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">
