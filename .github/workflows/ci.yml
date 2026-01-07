@@ -18,10 +18,10 @@ jobs:
     name: Build, Test, and Lint
     runs-on: ubuntu-latest
     env:
-      GROQ_KEY: "dummy_value"
-      CEREBRAS_KEY: "dummy_value"
-      GEMINI_KEY: "dummy_value"
-      DATABASE_URL: "postgresql://user:password@localhost:5432/db"
+      GROQ_KEY: ${{ secrets.GROQ_KEY }}
+      CEREBRAS_KEY: ${{ secrets.CEREBRAS_KEY }}
+      GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout repository
