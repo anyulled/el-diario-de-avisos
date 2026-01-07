@@ -4,10 +4,7 @@ import { db } from "@/db";
 import { articles, essays, members, publicationColumns, tutors } from "@/db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 
-export async function getYears() {
-  const result = await db.selectDistinct({ year: articles.publicationYear }).from(articles).orderBy(desc(articles.publicationYear));
-  return result.map((r) => r.year).filter((y) => y != null) as number[];
-}
+// getYears removed
 
 export async function getNewsTypes() {
   return await db.select().from(publicationColumns);
@@ -17,6 +14,7 @@ export type SearchParams = {
   year?: number | null;
   text?: string | null;
   type?: number | null;
+  date?: string | null;
   page?: number | string;
   pageSize?: number | string;
   sort?: string | null;
@@ -39,7 +37,7 @@ function getNewsOrderBy(sort: string | null | undefined, text: string | null | u
   }
 }
 
-function getNewsConditions(year: number | null | undefined, type: number | null | undefined, text: string | null | undefined) {
+function getNewsConditions(year: number | null | undefined, type: number | null | undefined, text: string | null | undefined, date: string | null | undefined) {
   const conditions = [];
   if (year) {
     conditions.push(eq(articles.publicationYear, year));
@@ -50,15 +48,18 @@ function getNewsConditions(year: number | null | undefined, type: number | null 
   if (text) {
     conditions.push(sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${text})`);
   }
+  if (date) {
+    conditions.push(sql`DATE(${articles.date}) = ${date}`);
+  }
   return conditions;
 }
 
 export async function getNews(params: SearchParams) {
-  const { year, text, type, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
+  const { year, text, type, date, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
   const page = Number(rawPage);
   const pageSize = Number(rawPageSize);
 
-  const conditions = getNewsConditions(year, type, text);
+  const conditions = getNewsConditions(year, type, text, date);
 
   // Count total results
   const countQuery = db

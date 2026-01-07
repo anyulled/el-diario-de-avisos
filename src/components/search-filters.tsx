@@ -7,11 +7,10 @@ import { useState, useTransition } from "react";
 import { publicationColumns } from "@/db/schema";
 
 interface SearchFiltersProps {
-  years: number[];
   types: (typeof publicationColumns.$inferSelect)[];
 }
 
-export function SearchFilters({ years, types }: SearchFiltersProps) {
+export function SearchFilters({ types }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -22,9 +21,15 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
     const params = new URLSearchParams(searchParams);
 
     // Always reset page to 1 when any other filter changes,
-    // unless we are explicitly setting the page (handled elsewhere maybe, but for now here)
+    // unless we are explicitly setting the page
     if (!updates.page) {
       params.set("page", "1");
+    }
+
+    // If date is selected, we might want to ensure clarity, but without year filter, no conflict logic needed for year.
+    // If we want to clear legacy 'year' param if it exists when 'date' is set:
+    if (updates.date) {
+      params.delete("year");
     }
 
     Object.entries(updates).forEach(([key, value]) => {
@@ -41,7 +46,7 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto -mt-10 relative z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-6">
+    <div className="w-full max-w-7xl mx-auto -mt-10 relative z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <div className="md:col-span-2 relative">
           <input
@@ -60,20 +65,13 @@ export function SearchFilters({ years, types }: SearchFiltersProps) {
         </div>
 
         <div className="relative">
-          <select
-            className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none appearance-none focus:ring-2 focus:ring-amber-600 cursor-pointer"
-            onChange={(e) => handleSearch({ year: e.target.value })}
-            defaultValue={searchParams.get("year") || ""}
-          >
-            <option value="">Año</option>
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-          <Calendar className="absolute left-3 top-3.5 text-gray-400" size={18} />
-          <ChevronDown className="absolute right-3 top-4 text-gray-400 pointer-events-none" size={16} />
+          <input
+            type="date"
+            className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all text-gray-500 dark:text-gray-400"
+            onChange={(e) => handleSearch({ date: e.target.value })}
+            value={searchParams.get("date") || ""}
+          />
+          <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
         </div>
 
         <div className="relative">

@@ -3,11 +3,10 @@ import { Navbar } from "@/components/navbar";
 import { NewsGrid } from "@/components/news-grid";
 import { Pagination } from "@/components/pagination";
 import { SearchFilters } from "@/components/search-filters";
-import { getNews, getNewsTypes, getYears, SearchParams } from "./actions";
+import { getNews, getNewsTypes, SearchParams } from "./actions";
 
 export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
-  const years = await getYears();
   const types = await getNewsTypes();
   const { data: news, total } = await getNews(params);
 
@@ -18,7 +17,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-20 relative">
       <Navbar />
       <Hero />
-      <SearchFilters years={years} types={types} />
+      <SearchFilters types={types} />
       <div className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
