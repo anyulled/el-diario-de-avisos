@@ -2,6 +2,8 @@
 
 **El Diario de Avisos** is a comprehensive digital archive and semantic search platform designed to preserve and make accessible historical publications, essays, and articles. The project modernizes a legacy database system into a performant, vector-enabled web application.
 
+[![CI](https://github.com/anyulled/el-diario-de-avisos/actions/workflows/ci.yml/badge.svg)](https://github.com/anyulled/el-diario-de-avisos/actions/workflows/ci.yml)
+
 ## 📂 Project Structure
 
 - **`web/`**: The modern Next.js web application. Handles the UI, database queries via Drizzle ORM, and AI/Vector search logic.
