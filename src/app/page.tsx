@@ -2,6 +2,7 @@ import { Hero } from "@/components/hero";
 import { Navbar } from "@/components/navbar";
 import { NewsGrid } from "@/components/news-grid";
 import { Pagination } from "@/components/pagination";
+import { ScrollToResults } from "@/components/scroll-to-results";
 import { SearchFilters } from "@/components/search-filters";
 import { getNews, getNewsTypes, SearchParams } from "./actions";
 
@@ -18,7 +19,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
       <Navbar />
       <Hero />
       <SearchFilters types={types} />
-      <div className="mt-8 container mx-auto px-4">
+      <ScrollToResults shouldScroll={total > 0} />
+      <div id="search-results" className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Resultados de Búsqueda ({total})</h2>
