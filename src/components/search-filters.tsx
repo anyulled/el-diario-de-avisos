@@ -152,7 +152,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
           <select
             className="w-full h-11 pl-4 pr-10 rounded-lg bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 appearance-none focus:ring-2 focus:ring-amber-600 cursor-pointer text-sm"
             onChange={(e) => handleSearch({ sort: e.target.value })}
-            defaultValue={searchParams.get("sort") || "rank"}
+            defaultValue={searchParams.get("sort") || "date_asc"}
           >
             <option value="rank">Ordenar por: Relevancia</option>
             <option value="date_desc">Ordenar por: Fecha (Reciente)</option>

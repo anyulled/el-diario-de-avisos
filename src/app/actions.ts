@@ -3,7 +3,8 @@
 import { db } from "@/db";
 import { articles, essays, members, publicationColumns, tutors } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { getNewsOrderBy } from "@/lib/news-order";
+import { and, eq, sql } from "drizzle-orm";
 
 // getYears removed
 
@@ -21,23 +22,6 @@ export type SearchParams = {
   pageSize?: number | string;
   sort?: string | null;
 };
-
-function getNewsOrderBy(sort: string | null | undefined, text: string | null | undefined) {
-  switch (sort) {
-    case "date_asc":
-      return [articles.date];
-    case "date_desc":
-      return [desc(articles.date)];
-    case "id_asc":
-      return [articles.id];
-    case "id_desc":
-      return [desc(articles.id)];
-    case "rank":
-      return text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
-    default:
-      return text ? [sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text})) DESC`] : [desc(articles.date)];
-  }
-}
 
 function getNewsConditions(
   year: number | null | undefined,

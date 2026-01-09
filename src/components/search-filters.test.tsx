@@ -94,4 +94,87 @@ describe("SearchFilters date range", () => {
 
     expect(screen.getByRole("button", { name: /Noticias/i })).toBeTruthy();
   });
+
+  it("defaults to oldest-first sorting when no sort param is present", () => {
+    render(
+      <SearchFilters
+        types={[
+          {
+            id: 1,
+            name: "Noticias",
+            pubId: 1,
+          },
+        ]}
+      />,
+    );
+
+    const [sortSelect] = screen.getAllByRole("combobox");
+
+    expect((sortSelect as HTMLSelectElement).value).toBe("date_asc");
+  });
+
+  it("debounces text search updates", () => {
+    vi.useFakeTimers();
+
+    render(
+      <SearchFilters
+        types={[
+          {
+            id: 1,
+            name: "Noticias",
+            pubId: 1,
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "agua" } });
+
+    vi.advanceTimersByTime(500);
+
+    expect(replaceMock).toHaveBeenCalled();
+    const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+    const url = new URL(lastCall, "http://localhost");
+
+    expect(url.searchParams.get("text")).toBe("agua");
+
+    vi.useRealTimers();
+  });
+
+  it("updates sort, page size, and type filters", () => {
+    render(
+      <SearchFilters
+        types={[
+          {
+            id: 1,
+            name: "Noticias",
+            pubId: 1,
+          },
+        ]}
+      />,
+    );
+
+    const [sortSelect, pageSizeSelect] = screen.getAllByRole("combobox");
+
+    fireEvent.change(sortSelect, { target: { value: "date_desc" } });
+    let lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+    let url = new URL(lastCall, "http://localhost");
+
+    expect(url.searchParams.get("sort")).toBe("date_desc");
+
+    fireEvent.change(pageSizeSelect, { target: { value: "50" } });
+    lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+    url = new URL(lastCall, "http://localhost");
+    expect(url.searchParams.get("pageSize")).toBe("50");
+
+    const typeToggle = screen.getByRole("button", { name: /Tipo de Noticia/i });
+    fireEvent.click(typeToggle);
+
+    const typeRadio = screen.getByRole("radio", { name: "Noticias" });
+    fireEvent.click(typeRadio);
+
+    lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+    url = new URL(lastCall, "http://localhost");
+    expect(url.searchParams.get("type")).toBe("1");
+  });
 });
