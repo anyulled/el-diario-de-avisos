@@ -5,9 +5,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { publicationColumns } from "@/db/schema";
+import { normalizeDateRange } from "@/lib/date-range";
 
 interface SearchFiltersProps {
   types: (typeof publicationColumns.$inferSelect)[];
+}
+
+function getTypeLabel(types: SearchFiltersProps["types"], selectedType: string | null) {
+  if (!selectedType) {
+    return "Tipo de Noticia";
+  }
+
+  return types.find((type) => String(type.id) === selectedType)?.name || "Tipo Seleccionado";
 }
 
 export function SearchFilters({ types }: SearchFiltersProps) {
@@ -16,6 +25,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   const [isPending, startTransition] = useTransition();
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
   const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout>>();
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const handleSearch = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
@@ -28,7 +38,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
 
     // If date is selected, we might want to ensure clarity, but without year filter, no conflict logic needed for year.
     // If we want to clear legacy 'year' param if it exists when 'date' is set:
-    if (updates.date) {
+    if (updates.dateFrom || updates.dateTo) {
       params.delete("year");
     }
 
@@ -45,9 +55,21 @@ export function SearchFilters({ types }: SearchFiltersProps) {
     });
   };
 
+  const handleDateRangeChange = (nextStart: string | null, nextEnd: string | null) => {
+    const { start, end, isValidRange } = normalizeDateRange({ start: nextStart, end: nextEnd });
+
+    if (!isValidRange) {
+      setDateError("La fecha inicial no puede ser posterior a la fecha final.");
+      return;
+    }
+
+    setDateError(null);
+    handleSearch({ dateFrom: start, dateTo: end });
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto -mt-10 relative z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
         <div className="md:col-span-2 relative">
           <input
             type="text"
@@ -67,9 +89,21 @@ export function SearchFilters({ types }: SearchFiltersProps) {
         <div className="relative">
           <input
             type="date"
+            aria-label="Fecha desde"
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all text-gray-500 dark:text-gray-400"
-            onChange={(e) => handleSearch({ date: e.target.value })}
-            value={searchParams.get("date") || ""}
+            onChange={(e) => handleDateRangeChange(e.target.value || null, searchParams.get("dateTo"))}
+            value={searchParams.get("dateFrom") || ""}
+          />
+          <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
+        </div>
+
+        <div className="relative">
+          <input
+            type="date"
+            aria-label="Fecha hasta"
+            className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all text-gray-500 dark:text-gray-400"
+            onChange={(e) => handleDateRangeChange(searchParams.get("dateFrom"), e.target.value || null)}
+            value={searchParams.get("dateTo") || ""}
           />
           <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
         </div>
@@ -79,9 +113,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
             onClick={() => setIsTypeExpanded(!isTypeExpanded)}
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-between text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
           >
-            <span className="truncate">
-              {searchParams.get("type") ? types.find((t) => String(t.id) === searchParams.get("type"))?.name || "Tipo Seleccionado" : "Tipo de Noticia"}
-            </span>
+            <span className="truncate">{getTypeLabel(types, searchParams.get("type"))}</span>
             {isTypeExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           <Type className="absolute left-3 top-3.5 text-gray-400" size={18} />
@@ -92,6 +124,8 @@ export function SearchFilters({ types }: SearchFiltersProps) {
           )}
         </div>
       </div>
+
+      {dateError && <p className="mt-2 text-sm text-red-600">{dateError}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
