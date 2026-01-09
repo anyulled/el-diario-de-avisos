@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { articles, essays, members, publicationColumns, tutors } from "@/db/schema";
+import { normalizeDateRange } from "@/lib/date-range";
 import { and, desc, eq, sql } from "drizzle-orm";
 
 // getYears removed
@@ -14,7 +15,8 @@ export type SearchParams = {
   year?: number | null;
   text?: string | null;
   type?: number | null;
-  date?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
   page?: number | string;
   pageSize?: number | string;
   sort?: string | null;
@@ -37,7 +39,13 @@ function getNewsOrderBy(sort: string | null | undefined, text: string | null | u
   }
 }
 
-function getNewsConditions(year: number | null | undefined, type: number | null | undefined, text: string | null | undefined, date: string | null | undefined) {
+function getNewsConditions(
+  year: number | null | undefined,
+  type: number | null | undefined,
+  text: string | null | undefined,
+  dateFrom: string | null | undefined,
+  dateTo: string | null | undefined,
+) {
   const conditions = [];
   if (year) {
     conditions.push(eq(articles.publicationYear, year));
@@ -48,18 +56,24 @@ function getNewsConditions(year: number | null | undefined, type: number | null 
   if (text) {
     conditions.push(sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${text})`);
   }
-  if (date) {
-    conditions.push(sql`DATE(${articles.date}) = ${date}`);
+  const { start, end, isValidRange } = normalizeDateRange({ start: dateFrom, end: dateTo });
+  if (isValidRange) {
+    if (start) {
+      conditions.push(sql`DATE(${articles.date}) >= ${start}`);
+    }
+    if (end) {
+      conditions.push(sql`DATE(${articles.date}) <= ${end}`);
+    }
   }
   return conditions;
 }
 
 export async function getNews(params: SearchParams) {
-  const { year, text, type, date, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
+  const { year, text, type, dateFrom, dateTo, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
   const page = Number(rawPage);
   const pageSize = Number(rawPageSize);
 
-  const conditions = getNewsConditions(year, type, text, date);
+  const conditions = getNewsConditions(year, type, text, dateFrom, dateTo);
 
   // Count total results
   const countQuery = db
