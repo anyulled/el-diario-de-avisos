@@ -26,10 +26,10 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   const dateToParam = searchParams.get("dateTo") || "";
   const [isPending, startTransition] = useTransition();
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout>>();
   const [dateError, setDateError] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState(dateFromParam);
   const [dateTo, setDateTo] = useState(dateToParam);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("text") || "");
 
   useEffect(() => {
     setDateFrom(dateFromParam);
@@ -38,6 +38,10 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   useEffect(() => {
     setDateTo(dateToParam);
   }, [dateToParam]);
+
+  useEffect(() => {
+    setSearchTerm(searchParams.get("text") || "");
+  }, [searchParams]);
 
   const handleSearch = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
@@ -79,23 +83,33 @@ export function SearchFilters({ types }: SearchFiltersProps) {
     handleSearch({ dateFrom: start, dateTo: end });
   };
 
+  const handleDateRangeBlur = () => {
+    handleDateRangeChange(dateFrom || null, dateTo || null);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto -mt-10 relative z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-        <div className="md:col-span-2 relative">
-          <input
-            type="text"
-            placeholder="Buscar por palabra clave o texto..."
-            className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all"
-            defaultValue={searchParams.get("text") || ""}
-            onChange={(e) => {
-              const term = e.target.value;
-              clearTimeout(timeoutId);
-              const id = setTimeout(() => handleSearch({ text: term }), 500);
-              setTimeoutId(id);
-            }}
-          />
-          <Search className="absolute left-3 top-3.5 text-gray-400" size={18} />
+        <div className="md:col-span-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Buscar por palabra clave o texto..."
+              className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="absolute left-3 top-3.5 text-gray-400" size={18} />
+          </div>
+          <button
+            type="button"
+            aria-label="Buscar"
+            onClick={() => handleSearch({ text: searchTerm })}
+            className="h-12 px-4 rounded-lg bg-amber-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-amber-700 transition-colors"
+          >
+            <Search size={18} />
+            <span>Buscar</span>
+          </button>
         </div>
 
         <div className="relative">
@@ -106,8 +120,8 @@ export function SearchFilters({ types }: SearchFiltersProps) {
             onChange={(e) => {
               const nextValue = e.target.value;
               setDateFrom(nextValue);
-              handleDateRangeChange(nextValue || null, dateTo || null);
             }}
+            onBlur={handleDateRangeBlur}
             value={dateFrom}
           />
           <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
@@ -121,8 +135,8 @@ export function SearchFilters({ types }: SearchFiltersProps) {
             onChange={(e) => {
               const nextValue = e.target.value;
               setDateTo(nextValue);
-              handleDateRangeChange(dateFrom || null, nextValue || null);
             }}
+            onBlur={handleDateRangeBlur}
             value={dateTo}
           />
           <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
