@@ -2,7 +2,7 @@
 
 import { Calendar, ChevronDown, ChevronUp, Search, Type } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { publicationColumns } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
@@ -22,10 +22,22 @@ function getTypeLabel(types: SearchFiltersProps["types"], selectedType: string |
 export function SearchFilters({ types }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dateFromParam = searchParams.get("dateFrom") || "";
+  const dateToParam = searchParams.get("dateTo") || "";
   const [isPending, startTransition] = useTransition();
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
   const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout>>();
   const [dateError, setDateError] = useState<string | null>(null);
+  const [dateFrom, setDateFrom] = useState(dateFromParam);
+  const [dateTo, setDateTo] = useState(dateToParam);
+
+  useEffect(() => {
+    setDateFrom(dateFromParam);
+  }, [dateFromParam]);
+
+  useEffect(() => {
+    setDateTo(dateToParam);
+  }, [dateToParam]);
 
   const handleSearch = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams);
@@ -91,8 +103,12 @@ export function SearchFilters({ types }: SearchFiltersProps) {
             type="date"
             aria-label="Fecha desde"
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all text-gray-500 dark:text-gray-400"
-            onChange={(e) => handleDateRangeChange(e.target.value || null, searchParams.get("dateTo"))}
-            value={searchParams.get("dateFrom") || ""}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              setDateFrom(nextValue);
+              handleDateRangeChange(nextValue || null, dateTo || null);
+            }}
+            value={dateFrom}
           />
           <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
         </div>
@@ -102,8 +118,12 @@ export function SearchFilters({ types }: SearchFiltersProps) {
             type="date"
             aria-label="Fecha hasta"
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all text-gray-500 dark:text-gray-400"
-            onChange={(e) => handleDateRangeChange(searchParams.get("dateFrom"), e.target.value || null)}
-            value={searchParams.get("dateTo") || ""}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              setDateTo(nextValue);
+              handleDateRangeChange(dateFrom || null, nextValue || null);
+            }}
+            value={dateTo}
           />
           <Calendar className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
         </div>
