@@ -44,21 +44,25 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   }, [searchParams]);
 
   const handleSearch = (updates: Record<string, string | null>) => {
+    const trimmedUpdates = {
+      ...updates,
+      text: updates.text?.trim() ?? updates.text,
+    };
     const params = new URLSearchParams(searchParams);
 
     // Always reset page to 1 when any other filter changes,
     // unless we are explicitly setting the page
-    if (!updates.page) {
+    if (!trimmedUpdates.page) {
       params.set("page", "1");
     }
 
     // If date is selected, we might want to ensure clarity, but without year filter, no conflict logic needed for year.
     // If we want to clear legacy 'year' param if it exists when 'date' is set:
-    if (updates.dateFrom || updates.dateTo) {
+    if (trimmedUpdates.dateFrom || trimmedUpdates.dateTo) {
       params.delete("year");
     }
 
-    Object.entries(updates).forEach(([key, value]) => {
+    Object.entries(trimmedUpdates).forEach(([key, value]) => {
       if (value) {
         params.set(key, value);
       } else {

@@ -127,7 +127,7 @@ describe("SearchFilters date range", () => {
       />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "agua" } });
+    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "  agua  " } });
     expect(replaceMock).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
