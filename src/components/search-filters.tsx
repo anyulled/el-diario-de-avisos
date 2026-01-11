@@ -108,7 +108,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
           <button
             type="button"
             aria-label="Buscar"
-            onClick={() => handleSearch({ text: searchTerm })}
+            onClick={() => handleSearch({ text: searchTerm.trim() })}
             className="h-12 px-4 rounded-lg bg-amber-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-amber-700 transition-colors"
           >
             <Search size={18} />

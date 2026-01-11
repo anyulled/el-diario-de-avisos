@@ -139,6 +139,28 @@ describe("SearchFilters date range", () => {
     expect(url.searchParams.get("text")).toBe("agua");
   });
 
+  it("clears text search when the trimmed value is empty", () => {
+    render(
+      <SearchFilters
+        types={[
+          {
+            id: 1,
+            name: "Noticias",
+            pubId: 1,
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "   " } });
+    fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
+
+    const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+    const url = new URL(lastCall, "http://localhost");
+
+    expect(url.searchParams.get("text")).toBeNull();
+  });
+
   it("updates sort, page size, and type filters", () => {
     render(
       <SearchFilters
