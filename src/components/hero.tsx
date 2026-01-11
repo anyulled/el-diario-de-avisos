@@ -18,7 +18,7 @@ export function Hero() {
         </div>
         <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter mb-6 drop-shadow-2xl">El Diario de Avisos</h1>
         <p className="text-lg md:text-2xl text-zinc-300 max-w-2xl font-light leading-relaxed">
-          Un viaje a través del tiempo, descubriendo las noticias que marcaron nuestra historia.
+          Un viaje a través del tiempo, descubriendo las noticias que marcaron la historia musical venezolana.
         </p>
       </div>
     </div>
