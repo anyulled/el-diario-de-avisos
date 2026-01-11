@@ -11,9 +11,15 @@ describe("ScrollToResults", () => {
     container.scrollIntoView = scrollIntoView;
     document.body.appendChild(container);
 
-    render(<ScrollToResults shouldScroll />);
+    const { rerender } = render(<ScrollToResults shouldScroll scrollKey="q=agua" />);
 
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
+
+    rerender(<ScrollToResults shouldScroll scrollKey="q=agua" />);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+    rerender(<ScrollToResults shouldScroll scrollKey="q=agua&type=1" />);
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
     container.remove();
   });
 
@@ -24,7 +30,7 @@ describe("ScrollToResults", () => {
     container.scrollIntoView = scrollIntoView;
     document.body.appendChild(container);
 
-    render(<ScrollToResults shouldScroll={false} />);
+    render(<ScrollToResults shouldScroll={false} scrollKey="q=agua" />);
 
     expect(scrollIntoView).not.toHaveBeenCalled();
     container.remove();

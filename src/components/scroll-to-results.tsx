@@ -1,23 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 interface ScrollToResultsProps {
   shouldScroll: boolean;
+  scrollKey: string;
 }
 
-export function ScrollToResults({ shouldScroll }: ScrollToResultsProps) {
-  const hasScrolledRef = useRef(false);
-
+export function ScrollToResults({ shouldScroll, scrollKey }: ScrollToResultsProps) {
   useEffect(() => {
-    if (!shouldScroll || hasScrolledRef.current) {
+    if (!shouldScroll) {
       return;
     }
 
     const resultsSection = document.getElementById("search-results");
     resultsSection?.scrollIntoView({ behavior: "smooth", block: "start" });
-    hasScrolledRef.current = true;
-  }, [shouldScroll]);
+  }, [shouldScroll, scrollKey]);
 
   return null;
 }

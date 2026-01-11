@@ -13,13 +13,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
   const currentPage = Number(params.page || 1);
   const pageSize = Number(params.pageSize || 20);
+  const scrollParams = { ...params };
+  delete scrollParams.page;
+  const scrollKey = new URLSearchParams(
+    Object.entries(scrollParams)
+      .filter(([, value]) => value !== undefined && value !== null && value !== "")
+      .map(([key, value]) => [key, String(value)]),
+  ).toString();
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-20 relative">
       <Navbar />
       <Hero />
       <SearchFilters types={types} />
-      <ScrollToResults shouldScroll={total > 0} />
+      <ScrollToResults shouldScroll={total > 0} scrollKey={scrollKey} />
       <div id="search-results" className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
