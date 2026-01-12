@@ -19,7 +19,7 @@ describe("SearchFilters date range", () => {
     currentSearchParams = new URLSearchParams();
   });
 
-  it("uses local date state when sending the range", async () => {
+  it("uses local date state when sending the range on click", async () => {
     render(
       <SearchFilters
         types={[
@@ -35,6 +35,15 @@ describe("SearchFilters date range", () => {
     fireEvent.change(screen.getByLabelText("Fecha desde"), { target: { value: "2024-02-01" } });
     fireEvent.change(screen.getByLabelText("Fecha hasta"), { target: { value: "2024-02-10" } });
 
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    fireEvent.blur(screen.getByLabelText("Fecha hasta"));
+
+    // Blur should not trigger search
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
+
     await waitFor(() => {
       expect(replaceMock).toHaveBeenCalled();
     });
@@ -47,7 +56,7 @@ describe("SearchFilters date range", () => {
     expect(params.get("dateTo")).toBe("2024-02-10");
   });
 
-  it("shows an error when the range is invalid", async () => {
+  it("shows an error when the range is invalid on blur", async () => {
     render(
       <SearchFilters
         types={[
@@ -61,14 +70,11 @@ describe("SearchFilters date range", () => {
     );
 
     fireEvent.change(screen.getByLabelText("Fecha desde"), { target: { value: "2024-03-05" } });
-
-    await waitFor(() => {
-      expect(replaceMock).toHaveBeenCalled();
-    });
-
-    replaceMock.mockClear();
-
     fireEvent.change(screen.getByLabelText("Fecha hasta"), { target: { value: "2024-03-01" } });
+
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    fireEvent.blur(screen.getByLabelText("Fecha hasta"));
 
     await waitFor(() => {
       expect(screen.getByText("La fecha inicial no puede ser posterior a la fecha final.")).toBeTruthy();
@@ -113,9 +119,7 @@ describe("SearchFilters date range", () => {
     expect((sortSelect as HTMLSelectElement).value).toBe("date_asc");
   });
 
-  it("debounces text search updates", () => {
-    vi.useFakeTimers();
-
+  it("only updates text search when the search button is pressed", () => {
     render(
       <SearchFilters
         types={[
@@ -128,17 +132,39 @@ describe("SearchFilters date range", () => {
       />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "agua" } });
+    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "  agua  " } });
+    expect(replaceMock).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(500);
+    fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
 
     expect(replaceMock).toHaveBeenCalled();
     const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
     const url = new URL(lastCall, "http://localhost");
 
     expect(url.searchParams.get("text")).toBe("agua");
+  });
 
-    vi.useRealTimers();
+  it("clears text search when the trimmed value is empty", () => {
+    render(
+      <SearchFilters
+        types={[
+          {
+            id: 1,
+            name: "Noticias",
+            pubId: 1,
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "   " } });
+    fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
+
+    expect(replaceMock).toHaveBeenCalled();
+    const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+    const url = new URL(lastCall, "http://localhost");
+
+    expect(url.searchParams.get("text")).toBeNull();
   });
 
   it("updates sort, page size, and type filters", () => {
@@ -172,6 +198,8 @@ describe("SearchFilters date range", () => {
 
     const typeRadio = screen.getByRole("radio", { name: "Noticias" });
     fireEvent.click(typeRadio);
+
+    expect(replaceMock).toHaveBeenCalledTimes(3);
 
     lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
     url = new URL(lastCall, "http://localhost");
