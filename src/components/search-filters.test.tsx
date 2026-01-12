@@ -19,7 +19,7 @@ describe("SearchFilters date range", () => {
     currentSearchParams = new URLSearchParams();
   });
 
-  it("uses local date state when sending the range on blur", async () => {
+  it("uses local date state when sending the range on click", async () => {
     render(
       <SearchFilters
         types={[
@@ -38,6 +38,11 @@ describe("SearchFilters date range", () => {
     expect(replaceMock).not.toHaveBeenCalled();
 
     fireEvent.blur(screen.getByLabelText("Fecha hasta"));
+
+    // Blur should not trigger search
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
 
     await waitFor(() => {
       expect(replaceMock).toHaveBeenCalled();
@@ -155,6 +160,7 @@ describe("SearchFilters date range", () => {
     fireEvent.change(screen.getByPlaceholderText("Buscar por palabra clave o texto..."), { target: { value: "   " } });
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
 
+    expect(replaceMock).toHaveBeenCalled();
     const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
     const url = new URL(lastCall, "http://localhost");
 
@@ -192,6 +198,8 @@ describe("SearchFilters date range", () => {
 
     const typeRadio = screen.getByRole("radio", { name: "Noticias" });
     fireEvent.click(typeRadio);
+
+    expect(replaceMock).toHaveBeenCalledTimes(3);
 
     lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
     url = new URL(lastCall, "http://localhost");
