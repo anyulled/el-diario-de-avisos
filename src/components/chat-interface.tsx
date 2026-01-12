@@ -117,7 +117,20 @@ export default function ChatInterface({ className }: { className?: string }) {
             >
               {m.role === "assistant" ? (
                 <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:font-medium hover:prose-a:text-blue-800 dark:hover:prose-a:text-blue-300">
-                  <ReactMarkdown>{getMessageContent(m)}</ReactMarkdown>
+                  <ReactMarkdown
+                    components={{
+                      a: ({ node: _node, ...props }) => (
+                        <a
+                          {...props}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline font-medium"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      ),
+                    }}
+                  >
+                    {getMessageContent(m)}
+                  </ReactMarkdown>
                 </div>
               ) : (
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{getMessageContent(m)}</p>
