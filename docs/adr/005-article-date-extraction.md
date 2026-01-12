@@ -16,12 +16,16 @@ We decided to implement a date extraction and transformation strategy:
 
 ### 1. PostgreSQL Date Extraction Function
 
-Created a function `extract_article_date(bytea)` that:
+Created a function `extract_article_date(bytea)` that implements robust and fuzzy extraction logic:
 
-- **Decodes content**: Converts from Windows-1252 encoding (legacy charset).
-- **Sanitizes RTF**: Strips RTF control codes and converts hex sequences to proper characters.
-- **Pattern matching**: Uses regex to find Spanish date patterns: `DD de MONTH de YYYY`.
-- **Date construction**: Converts Spanish month names (enero, febrero, etc.) to numeric values and constructs a valid `TIMESTAMP`.
+- **Decodes content**: Converts from Windows-1252 to UTF-8.
+- **Sanitizes RTF**: Explicitly replaces RTF hex sequences (e.g., `\'e9` → `é`) and strips control words.
+- **Fuzzy Pattern Matching**: Uses regex to find dates with:
+  - **Archaic spellings**: "setiembre" (matches `septiembre`).
+  - **Common typos**: "cotubre" (octubre), "abirl" (abril).
+  - **Loose spacing**: Matches dates even with intervening characters (up to 12 chars).
+  - **Formats**: Supports `DD de MONTH de YYYY`, `MONTH DD YYYY`, and `MONTH YYYY` (defaulting to day 1).
+- **Date Construction**: Maps month names (including archaic/typo variants) to unaccented integers and constructs a valid `TIMESTAMP`.
 
 ### 2. Data Migration Strategy
 

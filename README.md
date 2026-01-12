@@ -12,6 +12,13 @@
 - **`music/`**: Assets for the application's audio playback features.
 - **`docs/`**: Technical documentation and Architecture Decision Records (ADRs).
 
+## ✨ Key Features
+
+- **Historical Search**: Full-text and semantic search across 19th-century articles.
+- **AI Historian**: RAG-powered chatbot that answers questions based on archive content.
+- **Essays & Collections**: Curated essays linking to relevant historical articles.
+- **Audio Experience**: Background music playback for immersive reading.
+
 ## 🏗️ Architecture
 
 The system utilizes a Next.js App Router architecture integrated with a vector-capable PostgreSQL database for semantic search capabilities.
@@ -207,7 +214,8 @@ This will:
 The application implements **Retrieval-Augmented Generation (RAG)** using a **Hybrid Search** approach that combines:
 
 1. **Vector Search**: Semantic understanding using Google's `text-embedding-004` (768 dims).
-2. **Keyword Search**: Precise matching using PostgreSQL's `unaccent` and `tsvector`.
+2. **Keyword Search**: Precise matching using PostgreSQL's `unaccent` and `tsvector` (see [ADR-001](docs/adr/001-hybrid-search-and-unaccent.md)).
+3. **LLM Generation**: Answers are synthesized by **Llama 3** (via Groq) using the retrieved context.
 
 This ensures the chatbot can answer questions about specific people (e.g., "José ánjel Montero") even if the semantic embedding is slightly off, while still handling abstract queries.
 
@@ -355,20 +363,16 @@ To populate the database from legacy sources:
    ./extract_mdb_data.sh
    ```
 
-2. **Process Dates**:
-   Normalize historical date formats.
-
-   ```bash
-   python3 extract_dates.py
-   ```
-
-3. **Seed Database**:
-   Use Drizzle or the SQL scripts to load data.
+2. **Database Migration & Seeding**:
+   The project uses Drizzle ORM for schema management and seeding.
 
    ```bash
    # From web directory
    npm run db:push
    ```
+
+3. **Date Normalization**:
+   Historical dates are extracted from article content using a custom PostgreSQL function (see [ADR-005](docs/adr/005-article-date-extraction.md)). This happens automatically during migration.
 
 4. **Generate Embeddings**:
    Process RTF content and generate vector embeddings for semantic search.
