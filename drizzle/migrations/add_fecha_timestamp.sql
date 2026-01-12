@@ -66,10 +66,10 @@ BEGIN
 
   -- Pattern 1: DD de MONTH de YYYY (Highly flexible but distance-limited)
   -- Handles: "30 de junio de de 1883", "14 de mayo1875", "17 de cotubre é 1877", etc.
-  -- Relaxed month start to handle joined words like "24 dediciembre".
+  -- Relaxed month start for joined words, and relaxed year start for joined years.
   date_match := regexp_match(
     cleaned_text,
-    '(\d{1,2})(?:º|°)?\s*.{0,12}?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre).*?\m(\d{4})\M',
+    '(\d{1,2})(?:º|°)?\s*.{0,12}?(enero|febrero|marzo|abril|abirl|mayo|junio|julio|agosto|septiembre|setiembre|setimbre|siembre|octubre|cotubre|noviembre|diciembre).*?(\d{4})\M',
     'i'
   );
 
@@ -81,7 +81,7 @@ BEGIN
     -- Pattern 2: MONTH DD YYYY (Flexible)
     date_match := regexp_match(
       cleaned_text,
-      '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre).*?(\d{1,2})\M.{0,12}?\m(\d{4})\M',
+      '(enero|febrero|marzo|abril|abirl|mayo|junio|julio|agosto|septiembre|setiembre|setimbre|siembre|octubre|cotubre|noviembre|diciembre).*?(\d{1,2})\M.{0,12}?(\d{4})\M',
       'i'
     );
     
@@ -93,7 +93,7 @@ BEGIN
       -- Pattern 3: MONTH YYYY (Flexible fallback)
       date_match := regexp_match(
         cleaned_text,
-        '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre).*?\m(\d{4})\M',
+        '(enero|febrero|marzo|abril|abirl|mayo|junio|julio|agosto|septiembre|setiembre|setimbre|siembre|octubre|cotubre|noviembre|diciembre).*?(\d{4})\M',
         'i'
       );
       
@@ -113,12 +113,15 @@ BEGIN
     WHEN 'febrero' THEN 2
     WHEN 'marzo' THEN 3
     WHEN 'abril' THEN 4
+    WHEN 'abirl' THEN 4 -- Common typo
     WHEN 'mayo' THEN 5
     WHEN 'junio' THEN 6
     WHEN 'julio' THEN 7
     WHEN 'agosto' THEN 8
     WHEN 'septiembre' THEN 9
     WHEN 'setiembre' THEN 9
+    WHEN 'setimbre' THEN 9 -- Common typo
+    WHEN 'siembre' THEN 12 -- Usually mangled "diciembre" or "septiembre"
     WHEN 'octubre' THEN 10
     WHEN 'cotubre' THEN 10
     WHEN 'noviembre' THEN 11
