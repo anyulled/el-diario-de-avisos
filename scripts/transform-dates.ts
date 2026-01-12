@@ -93,10 +93,10 @@ async function verifyTransformation(pool: Pool): Promise<TransformResult> {
       arti_cod as id,
       arti_fecha as old_date,
       arti_fecha_timestamp as new_date,
-      substring(convert_from(arti_contenido, 'WIN1252'), 1, 150) as content_preview
+      substring(convert_from(decode(replace(encode(arti_contenido, 'hex'), '00', ''), 'hex'), 'WIN1252'), 1, 150) as content_preview
     FROM articulos
     WHERE arti_fecha_timestamp IS NOT NULL
-    ORDER BY arti_fecha_timestamp
+    ORDER BY arti_fecha_timestamp DESC
     LIMIT 10
   `);
 

@@ -6,7 +6,10 @@
 ALTER TABLE articulos ADD COLUMN IF NOT EXISTS arti_fecha_timestamp TIMESTAMP WITHOUT TIME ZONE;
 
 -- Step 2: Create function to extract Spanish dates from article content
--- Pattern: "DD de MONTH de YYYY" (e.g., "6 de febrero de 1874")
+-- Patterns: 
+-- 1. "DD de MONTH de YYYY" (e.g., "6 de febrero de 1874")
+-- 2. "1º de MONTH de YYYY" (e.g., "1º de setiembre de 1875")
+-- 3. "MONTH YYYY" (e.g., "Setiembre 1886")
 CREATE OR REPLACE FUNCTION extract_article_date(content bytea) RETURNS timestamp AS $$
 DECLARE
   decoded_text text;
@@ -17,19 +20,24 @@ DECLARE
   year_str text;
   month_num integer;
   result_date date;
+  safe_content bytea;
 BEGIN
   -- Return NULL if content is null
   IF content IS NULL THEN
     RETURN NULL;
   END IF;
 
+  -- Step 0: Remove null bytes from bytea to prevent convert_from failure
+  -- PostgreSQL text cannot contain null characters (\0)
+  safe_content := decode(replace(encode(content, 'hex'), '00', ''), 'hex');
+
   -- Decode from Windows-1252 encoding
   BEGIN
-    decoded_text := convert_from(content, 'WIN1252');
+    decoded_text := convert_from(safe_content, 'WIN1252');
   EXCEPTION WHEN OTHERS THEN
     -- Fallback to LATIN1 if WIN1252 fails
     BEGIN
-      decoded_text := convert_from(content, 'LATIN1');
+      decoded_text := convert_from(safe_content, 'LATIN1');
     EXCEPTION WHEN OTHERS THEN
       RETURN NULL;
     END;
@@ -56,24 +64,49 @@ BEGIN
   -- Convert to lowercase for matching
   cleaned_text := lower(cleaned_text);
 
-  -- Match pattern: DD de MONTH de YYYY
-  -- Using regex to capture: day, month name, year
+  -- Pattern 1: DD de MONTH de YYYY (with optional º and handling double "de")
   date_match := regexp_match(
     cleaned_text,
-    '(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\s+de\s+(\d{4})',
+    '(\d{1,2})(?:º|°)?\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre)\s+(?:de\s+)?(?:de\s+)?(\d{4})',
     'i'
   );
 
-  IF date_match IS NULL THEN
-    RETURN NULL;
+  IF date_match IS NOT NULL THEN
+    day_str := date_match[1];
+    month_str := date_match[2];
+    year_str := date_match[3];
+  ELSE
+    -- Pattern 2: MONTH DD de YYYY (e.g., "octubre 17 de 1877")
+    date_match := regexp_match(
+      cleaned_text,
+      '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre)\s+(\d{1,2})(?:\s+de)?\s+(\d{4})',
+      'i'
+    );
+    
+    IF date_match IS NOT NULL THEN
+      day_str := date_match[2];
+      month_str := date_match[1];
+      year_str := date_match[3];
+    ELSE
+      -- Pattern 3: MONTH YYYY or MONTH de YYYY (no day)
+      date_match := regexp_match(
+        cleaned_text,
+        '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre)(?:\s+de)?\s+(\d{4})',
+        'i'
+      );
+      
+      IF date_match IS NOT NULL THEN
+        day_str := '1'; -- Default to first of month
+        month_str := date_match[1];
+        year_str := date_match[2];
+      ELSE
+        RETURN NULL;
+      END IF;
+    END IF;
   END IF;
 
-  day_str := date_match[1];
-  month_str := date_match[2];
-  year_str := date_match[3];
-
   -- Convert month name to number
-  month_num := CASE lower(month_str)
+  month_num := CASE month_str
     WHEN 'enero' THEN 1
     WHEN 'febrero' THEN 2
     WHEN 'marzo' THEN 3
@@ -83,8 +116,9 @@ BEGIN
     WHEN 'julio' THEN 7
     WHEN 'agosto' THEN 8
     WHEN 'septiembre' THEN 9
-    WHEN 'setiembre' THEN 9  -- Alternative spelling
+    WHEN 'setiembre' THEN 9
     WHEN 'octubre' THEN 10
+    WHEN 'cotubre' THEN 10 -- OCR error common in some records
     WHEN 'noviembre' THEN 11
     WHEN 'diciembre' THEN 12
     ELSE NULL
@@ -105,10 +139,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
--- Step 3: Populate arti_fecha_timestamp by extracting dates from content
-UPDATE articulos 
-SET arti_fecha_timestamp = extract_article_date(arti_contenido)
-WHERE arti_fecha_timestamp IS NULL;
+-- Step 3: Populate arti_fecha_timestamp (or arti_fecha if already renamed)
+-- We try to update both just in case the migration is run at different stages
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'articulos' AND column_name = 'arti_fecha_timestamp') THEN
+        UPDATE articulos SET arti_fecha_timestamp = extract_article_date(arti_contenido) WHERE arti_fecha_timestamp IS NULL;
+    END IF;
+    
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'articulos' AND column_name = 'arti_fecha') THEN
+        UPDATE articulos SET arti_fecha = extract_article_date(arti_contenido) WHERE arti_fecha IS NULL;
+    END IF;
+END $$;
 
 -- Step 4: Create index on the new timestamp column for date-based queries
 CREATE INDEX IF NOT EXISTS idx_articulos_fecha_timestamp 
