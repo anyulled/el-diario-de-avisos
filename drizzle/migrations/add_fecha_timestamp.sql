@@ -64,10 +64,12 @@ BEGIN
   -- Convert to lowercase for matching
   cleaned_text := lower(cleaned_text);
 
-  -- Pattern 1: DD de MONTH de YYYY (with optional º and handling double "de")
+  -- Pattern 1: DD de MONTH de YYYY (Highly flexible but distance-limited)
+  -- Handles: "30 de junio de de 1883", "14 de mayo1875", "17 de cotubre é 1877", etc.
+  -- Relaxed month start to handle joined words like "24 dediciembre".
   date_match := regexp_match(
     cleaned_text,
-    '(\d{1,2})(?:º|°)?\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre)\s+(?:de\s+)?(?:de\s+)?(\d{4})',
+    '(\d{1,2})(?:º|°)?\s*.{0,12}?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre).*?\m(\d{4})\M',
     'i'
   );
 
@@ -76,10 +78,10 @@ BEGIN
     month_str := date_match[2];
     year_str := date_match[3];
   ELSE
-    -- Pattern 2: MONTH DD de YYYY (e.g., "octubre 17 de 1877")
+    -- Pattern 2: MONTH DD YYYY (Flexible)
     date_match := regexp_match(
       cleaned_text,
-      '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre)\s+(\d{1,2})(?:\s+de)?\s+(\d{4})',
+      '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre).*?(\d{1,2})\M.{0,12}?\m(\d{4})\M',
       'i'
     );
     
@@ -88,10 +90,10 @@ BEGIN
       month_str := date_match[1];
       year_str := date_match[3];
     ELSE
-      -- Pattern 3: MONTH YYYY or MONTH de YYYY (no day)
+      -- Pattern 3: MONTH YYYY (Flexible fallback)
       date_match := regexp_match(
         cleaned_text,
-        '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre)(?:\s+de)?\s+(\d{4})',
+        '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|cotubre|noviembre|diciembre).*?\m(\d{4})\M',
         'i'
       );
       
@@ -118,7 +120,7 @@ BEGIN
     WHEN 'septiembre' THEN 9
     WHEN 'setiembre' THEN 9
     WHEN 'octubre' THEN 10
-    WHEN 'cotubre' THEN 10 -- OCR error common in some records
+    WHEN 'cotubre' THEN 10
     WHEN 'noviembre' THEN 11
     WHEN 'diciembre' THEN 12
     ELSE NULL
@@ -128,27 +130,37 @@ BEGIN
     RETURN NULL;
   END IF;
 
+  -- Handle suspicious days (likely OCR/transcription errors)
+  IF day_str::integer > 31 THEN
+    day_str := '1';
+  END IF;
+
   -- Construct date
   BEGIN
     result_date := make_date(year_str::integer, month_num, day_str::integer);
     RETURN result_date::timestamp;
   EXCEPTION WHEN OTHERS THEN
-    -- Invalid date (e.g., Feb 30)
-    RETURN NULL;
+    -- Fallback to first of month if specific day is invalid (e.g., Feb 30)
+    BEGIN
+      result_date := make_date(year_str::integer, month_num, 1);
+      RETURN result_date::timestamp;
+    EXCEPTION WHEN OTHERS THEN
+      RETURN NULL;
+    END;
   END;
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
 -- Step 3: Populate arti_fecha_timestamp (or arti_fecha if already renamed)
--- We try to update both just in case the migration is run at different stages
+-- Clear previous results and re-run to ensure we use the most accurate logic
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'articulos' AND column_name = 'arti_fecha_timestamp') THEN
-        UPDATE articulos SET arti_fecha_timestamp = extract_article_date(arti_contenido) WHERE arti_fecha_timestamp IS NULL;
+        UPDATE articulos SET arti_fecha_timestamp = extract_article_date(arti_contenido);
     END IF;
     
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'articulos' AND column_name = 'arti_fecha') THEN
-        UPDATE articulos SET arti_fecha = extract_article_date(arti_contenido) WHERE arti_fecha IS NULL;
+        UPDATE articulos SET arti_fecha = extract_article_date(arti_contenido);
     END IF;
 END $$;
 
