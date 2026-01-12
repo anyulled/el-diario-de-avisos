@@ -24,6 +24,7 @@ const lora = Lora({
 });
 
 import { ChatWidget } from "@/components/chat-widget";
+import { Footer } from "@/components/footer";
 import { MusicPlayer } from "@/components/music-player";
 import { Analytics } from "@vercel/analytics/react";
 import { getIntegrantes, getTutores } from "./actions";
@@ -73,6 +74,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} antialiased`}>
         {children}
+        <Footer />
         <Analytics />
         <MusicPlayer />
         <ChatWidget />
