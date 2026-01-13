@@ -78,3 +78,40 @@ Sample extractions:
 ## Status
 
 Accepted. Implemented on 2026-01-07.
+
+---
+
+## Update: Edition Number Confusion Fix (2026-01-13)
+
+### Issue Discovered
+
+44 articles (IDs 2927-2971) from 1879 had incorrect dates where the **edition number (Número)** was captured instead of the actual year.
+
+**Example:**
+
+```
+Content: "Sábado 15 de noviembre de 1879. ( Año VII, Mes 7, Número 1897)"
+Extracted: 1897-11-15 ❌ (edition number)
+Correct:   1879-11-15 ✓
+```
+
+### Root Cause
+
+The original regex `.*?(\\d{4})` was too lenient, allowing the pattern to skip over the year (1879) and capture the edition number (1897) instead.
+
+### Fix Applied
+
+1. **Stricter regex patterns**: Updated `extract_article_date` to prioritize the year immediately after `de [month] de` with only whitespace allowed between.
+2. **Explicit lookahead**: Year must be followed by period, space, or parenthesis to prevent matching edition numbers.
+3. **Pattern priority**: Strict patterns tried first, relaxed patterns as fallback.
+
+### Migration
+
+Applied via [fix_edition_number_dates.sql](file:///Users/anyulled/Downloads/El%20Diario%20de%20Avisos/web/drizzle/migrations/fix_edition_number_dates.sql):
+
+- Fixed 44 affected articles
+- Updated `extract_article_date` function
+
+### Lesson Learned
+
+When extracting dates from structured content, be aware of **metadata patterns** (like edition numbers) that may contain valid-looking years. Use stricter boundary conditions and verify extracted years against expected publication date ranges.
