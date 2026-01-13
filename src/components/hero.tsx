@@ -16,7 +16,7 @@ export function Hero() {
         <div className="mb-4 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full backdrop-blur-sm">
           <span className="text-amber-200 text-xs font-semibold tracking-widest uppercase">Archivo Histórico</span>
         </div>
-        <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter mb-6 drop-shadow-2xl">El Diario de Avisos</h1>
+        <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter mb-6 drop-shadow-2xl">Noticias Musicales en el Diario de Avisos</h1>
         <p className="text-lg md:text-2xl text-zinc-300 max-w-2xl font-light leading-relaxed">
           Un viaje a través del tiempo, descubriendo las noticias que marcaron la historia musical venezolana.
         </p>

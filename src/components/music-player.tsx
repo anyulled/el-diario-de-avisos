@@ -136,11 +136,11 @@ export function MusicPlayer() {
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4 w-1/3">
           <div className="relative w-10 h-10 rounded overflow-hidden">
-            <Image src="/icon.png" alt="El Diario de Avisos Logo" fill className="object-cover" />
+            <Image src="/icon.png" alt="Noticias Musicales Logo" fill className="object-cover" />
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-sm">{TRACKS[currentTrack].title}</span>
-            <span className="text-xs text-gray-400">El Diario de Avisos</span>
+            <span className="text-xs text-gray-400">Noticias Musicales en el Diario de Avisos</span>
           </div>
         </div>
 

@@ -39,8 +39,8 @@ export function NavbarUI({ essays }: NavbarUIProps) {
   return (
     <nav className="absolute top-0 left-0 right-0 z-50 py-4 md:py-6 text-white/90">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link href="/" className="font-bold text-xl tracking-tighter hover:text-white transition-colors z-50 relative">
-          DIARIO DE AVISOS
+        <Link href="/" className="font-bold text-xl tracking-tighter hover:text-white transition-colors z-50 relative uppercase">
+          Noticias Musicales
         </Link>
 
         {/* Desktop Navigation */}

@@ -37,22 +37,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
     title: {
-      default: "El Diario de Avisos",
-      template: "%s | El Diario de Avisos",
+      default: "Noticias Musicales en el Diario de Avisos",
+      template: "%s | Noticias Musicales en el Diario de Avisos",
     },
-    description: `Archivo histórico del periódico El Diario de Avisos. Explora la historia de las Islas Canarias a través de sus noticias. Un proyecto realizado por: ${authors}.`,
+    description: `Noticias Musicales en el Diario de Avisos. Explora la historia de Caracas a través de sus noticias musicales. Un proyecto realizado por: ${authors}.`,
     openGraph: {
-      title: "El Diario de Avisos",
-      description: "Archivo histórico del periódico El Diario de Avisos",
+      title: "Noticias Musicales en el Diario de Avisos",
+      description: "Archivo histórico de noticias musicales de El Diario de Avisos",
       url: "https://diariodeavisos-archivo.vercel.app",
-      siteName: "El Diario de Avisos",
+      siteName: "Noticias Musicales en el Diario de Avisos",
       locale: "es_ES",
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: "El Diario de Avisos",
-      description: "Archivo histórico del periódico El Diario de Avisos",
+      title: "Noticias Musicales en el Diario de Avisos",
+      description: "Archivo histórico de noticias musicales de El Diario de Avisos",
     },
     robots: {
       index: true,

@@ -2,7 +2,7 @@ import ChatInterface from "@/components/chat-interface";
 import { Navbar } from "@/components/navbar";
 
 export const metadata = {
-  title: "Asistente del Archivo | El Diario de Avisos",
+  title: "Asistente del Archivo | Noticias Musicales en el Diario de Avisos",
   description: "Conversa con la historia de nuestros archivos a través de nuestro asistente inteligente.",
 };
 

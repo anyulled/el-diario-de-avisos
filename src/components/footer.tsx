@@ -6,7 +6,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider mb-2">El Diario de Avisos</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider mb-2">Noticias Musicales en el Diario de Avisos</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
               Un archivo histórico digital dedicado a la preservación y difusión de la memoria musical venezolana.
             </p>
@@ -34,7 +34,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
-          <p>© {new Date().getFullYear()} El Diario de Avisos. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Noticias Musicales en el Diario de Avisos. Todos los derechos reservados.</p>
           <p>Universidad Central de Venezuela</p>
         </div>
       </div>
