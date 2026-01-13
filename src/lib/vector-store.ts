@@ -55,8 +55,9 @@ async function getContentSnippet(content: Buffer | string | null, maxLength = 10
     });
 
     return stripHtml(html).slice(0, maxLength);
-  } catch {
+  } catch (error) {
     // Fallback to raw content
+    console.debug("Content snippet extraction failed, using fallback:", error);
     const raw = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
     return raw.slice(0, maxLength);
   }
@@ -185,26 +186,29 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
     fetchEssayContent(essayCandidates.map((e) => e.id)),
   ]);
 
-  // Build final results with content snippets
-  const finalResults: SearchResult[] = [];
-
-  for (const article of articleCandidates) {
+  // Build final results with content snippets (parallel processing)
+  const articleResultsPromises = articleCandidates.map(async (article) => {
     const content = articleContentMap.get(article.id) ?? null;
     const snippet = await getContentSnippet(content);
-    finalResults.push({
+    return {
       ...article,
       contentSnippet: snippet,
-    });
-  }
+    };
+  });
 
-  for (const essay of essayCandidates) {
+  const essayResultsPromises = essayCandidates.map(async (essay) => {
     const content = essayContentMap.get(essay.id) ?? null;
     const snippet = await getContentSnippet(content);
-    finalResults.push({
+    return {
       ...essay,
       contentSnippet: snippet,
-    });
-  }
+    };
+  });
+
+  // Wait for all snippet generation to complete in parallel
+  const [processedArticles, processedEssays] = await Promise.all([Promise.all(articleResultsPromises), Promise.all(essayResultsPromises)]);
+
+  const finalResults: SearchResult[] = [...processedArticles, ...processedEssays];
 
   // Sort by similarity descending
   finalResults.sort((a, b) => b.similarity - a.similarity);

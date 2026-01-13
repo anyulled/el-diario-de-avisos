@@ -10,6 +10,9 @@ import { promisify } from "util";
 
 const rtfToHtml = promisify(fromString);
 
+/**
+ * Strips HTML tags from a string and returns plain text
+ */
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>?/gm, " ")
@@ -17,6 +20,9 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+/**
+ * Processes RTF or plain text content and returns clean plain text
+ */
 async function processRtf(content: Buffer | string | null): Promise<string> {
   if (!content) return "";
   try {
@@ -56,45 +62,62 @@ async function processRtf(content: Buffer | string | null): Promise<string> {
   }
 }
 
-async function ingestArticles() {
-  console.log("🚀 Starting Articles Ingestion...");
+/**
+ * Configuration for ingesting different entity types
+ */
+interface IngestConfig {
+  entityName: string;
+  entityTable: typeof articles | typeof essays;
+  embeddingTable: typeof articleEmbeddings | typeof essayEmbeddings;
+  entityIdColumn: typeof articles.id | typeof essays.id;
+  embeddingIdColumn: typeof articleEmbeddings.articleId | typeof essayEmbeddings.essayId;
+  batchLimit: number;
+  embeddingBatchSize: number;
+}
 
-  // Count total articles without embeddings
+/**
+ * Generic ingestion function that handles both articles and essays
+ */
+async function ingestEntities(config: IngestConfig) {
+  console.log(`🚀 Starting ${config.entityName} Ingestion...`);
+
+  // Count total entities without embeddings
   const totalPendingResult = await db
     .select({ count: sql<number>`count(*)::int` })
-    .from(articles)
-    .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
-    .where(isNull(articleEmbeddings.articleId));
+    .from(config.entityTable)
+    .leftJoin(config.embeddingTable, eq(config.entityIdColumn, config.embeddingIdColumn))
+    .where(isNull(config.embeddingIdColumn));
 
   const totalPending = totalPendingResult[0]?.count ?? 0;
 
   if (totalPending === 0) {
-    console.log("✅ All articles already have embeddings.");
+    console.log(`✅ All ${config.entityName.toLowerCase()} already have embeddings.`);
     return;
   }
 
-  console.log(`📊 Total articles without embeddings: ${totalPending}`);
+  console.log(`📊 Total ${config.entityName.toLowerCase()} without embeddings: ${totalPending}`);
 
-  // Find articles that don't have embeddings yet
-  const pendingArticles = await db
+  // Find entities that don't have embeddings yet
+  const pendingEntities = await db
     .select({
-      id: articles.id,
-      title: articles.title,
-      content: articles.content,
+      id: config.entityIdColumn,
+      title: config.entityTable.title,
+      content: config.entityTable.content,
     })
-    .from(articles)
-    .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
-    .where(isNull(articleEmbeddings.articleId))
-    .limit(500);
+    .from(config.entityTable)
+    .leftJoin(config.embeddingTable, eq(config.entityIdColumn, config.embeddingIdColumn))
+    .where(isNull(config.embeddingIdColumn))
+    .limit(config.batchLimit);
 
-  console.log(`📦 Processing ${pendingArticles.length} articles in this batch...`);
+  console.log(`📦 Processing ${pendingEntities.length} ${config.entityName.toLowerCase()} in this batch...`);
 
+  // Process content to plain text
   const processedData = await Promise.all(
-    pendingArticles.map(async (art) => {
-      const plainText = await processRtf(art.content as Buffer);
+    pendingEntities.map(async (entity) => {
+      const plainText = await processRtf(entity.content as Buffer);
       // Combine title and content for better context
-      const fullText = `${art.title || ""}\n${plainText}`.slice(0, 8000);
-      return { id: art.id, text: fullText };
+      const fullText = `${entity.title || ""}\n${plainText}`.slice(0, 8000);
+      return { id: entity.id, text: fullText };
     }),
   );
 
@@ -106,28 +129,31 @@ async function ingestArticles() {
   }
 
   try {
-    const BATCH_SIZE = 100;
     const allEmbeddings: number[][] = [];
 
+    // Generate embeddings in sub-batches
     // eslint-disable-next-line no-restricted-syntax
-    for (let i = 0; i < validData.length; i += BATCH_SIZE) {
-      const subBatch = validData.slice(i, i + BATCH_SIZE);
-      console.log(`📡 Generating embeddings for sub-batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(validData.length / BATCH_SIZE)}...`);
+    for (let i = 0; i < validData.length; i += config.embeddingBatchSize) {
+      const subBatch = validData.slice(i, i + config.embeddingBatchSize);
+      const batchNumber = Math.floor(i / config.embeddingBatchSize) + 1;
+      const totalBatches = Math.ceil(validData.length / config.embeddingBatchSize);
+      console.log(`📡 Generating embeddings for sub-batch ${batchNumber}/${totalBatches}...`);
       const subEmbeddings = await generateEmbeddingsBatch(subBatch.map((d) => d.text));
       allEmbeddings.push(...subEmbeddings);
     }
 
     console.log("💾 Saving embeddings to database...");
 
-    for (const [i, article] of validData.entries()) {
+    // Save embeddings to database
+    for (const [i, entity] of validData.entries()) {
       await db
-        .insert(articleEmbeddings)
+        .insert(config.embeddingTable)
         .values({
-          articleId: article.id,
+          [config.embeddingIdColumn.name]: entity.id,
           embedding: allEmbeddings[i],
         })
         .onConflictDoUpdate({
-          target: articleEmbeddings.articleId,
+          target: config.embeddingIdColumn,
           set: {
             embedding: allEmbeddings[i],
             updatedAt: sql`now()`,
@@ -140,97 +166,49 @@ async function ingestArticles() {
     // Show remaining count
     const remaining = totalPending - validData.length;
     if (remaining > 0) {
-      console.log(`📊 Remaining articles without embeddings: ${remaining}`);
+      console.log(`📊 Remaining ${config.entityName.toLowerCase()} without embeddings: ${remaining}`);
       console.log(`💡 Run 'npm run ingest' again to process the next batch.`);
     } else {
-      console.log(`🎉 All articles now have embeddings!`);
+      console.log(`🎉 All ${config.entityName.toLowerCase()} now have embeddings!`);
     }
   } catch (e) {
-    console.error("❌ Batch ingestion failed:", e);
+    console.error(`❌ ${config.entityName} ingestion failed:`, e);
   }
 }
 
+/**
+ * Ingest articles using the generic function
+ */
+async function ingestArticles() {
+  await ingestEntities({
+    entityName: "Articles",
+    entityTable: articles,
+    embeddingTable: articleEmbeddings,
+    entityIdColumn: articles.id,
+    embeddingIdColumn: articleEmbeddings.articleId,
+    batchLimit: 500,
+    embeddingBatchSize: 100,
+  });
+}
+
+/**
+ * Ingest essays using the generic function
+ */
 async function ingestEssays() {
-  console.log("🚀 Starting Essays Ingestion...");
-
-  // Count total essays without embeddings
-  const totalPendingEssaysResult = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(essays)
-    .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
-    .where(isNull(essayEmbeddings.essayId));
-
-  const totalPendingEssays = totalPendingEssaysResult[0]?.count ?? 0;
-
-  if (totalPendingEssays === 0) {
-    console.log("✅ All essays already have embeddings.");
-    return;
-  }
-
-  console.log(`📊 Total essays without embeddings: ${totalPendingEssays}`);
-
-  // Find essays that don't have embeddings yet
-  const pendingEssays = await db
-    .select({
-      id: essays.id,
-      title: essays.title,
-      content: essays.content,
-    })
-    .from(essays)
-    .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
-    .where(isNull(essayEmbeddings.essayId))
-    .limit(100);
-
-  console.log(`📦 Processing ${pendingEssays.length} essays in this batch...`);
-
-  const processedEssays = await Promise.all(
-    pendingEssays.map(async (essay) => {
-      const plainText = await processRtf(essay.content as Buffer);
-      const fullText = `${essay.title || ""}\n${plainText}`.slice(0, 8000);
-      return { id: essay.id, text: fullText };
-    }),
-  );
-
-  const validEssays = processedEssays.filter((d) => d.text.trim().length > 10);
-  const BATCH_SIZE = 100;
-
-  if (validEssays.length > 0) {
-    try {
-      // eslint-disable-next-line no-restricted-syntax
-      for (let i = 0; i < validEssays.length; i += BATCH_SIZE) {
-        const subBatch = validEssays.slice(i, i + BATCH_SIZE);
-        console.log(`📡 Generating embeddings for essay sub-batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(validEssays.length / BATCH_SIZE)}...`);
-        const subEmbeddings = await generateEmbeddingsBatch(subBatch.map((d) => d.text));
-
-        console.log("💾 Saving essay embeddings to database...");
-
-        await Promise.all(
-          subBatch.map((essay, j) =>
-            db
-              .insert(essayEmbeddings)
-              .values({
-                essayId: essay.id,
-                embedding: subEmbeddings[j],
-              })
-              .onConflictDoUpdate({
-                target: essayEmbeddings.essayId,
-                set: {
-                  embedding: subEmbeddings[j],
-                  updatedAt: sql`now()`,
-                },
-              }),
-          ),
-        );
-      }
-      console.log(`✨ Successfully ingested ${validEssays.length} essay embeddings.`);
-    } catch (e) {
-      console.error("❌ Essay ingestion failed:", e);
-    }
-  } else {
-    console.log("⚠️ No valid essay content found in this batch.");
-  }
+  await ingestEntities({
+    entityName: "Essays",
+    entityTable: essays,
+    embeddingTable: essayEmbeddings,
+    entityIdColumn: essays.id,
+    embeddingIdColumn: essayEmbeddings.essayId,
+    batchLimit: 100,
+    embeddingBatchSize: 100,
+  });
 }
 
+/**
+ * Main ingestion function that processes both articles and essays
+ */
 async function ingest() {
   await ingestArticles();
   console.log("--------------------------------");
