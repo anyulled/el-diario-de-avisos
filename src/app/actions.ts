@@ -137,3 +137,8 @@ export async function getEssayById(id: number) {
   const result = await db.select().from(essays).where(eq(essays.id, id)).limit(1);
   return result[0];
 }
+
+export async function getArticleSection(columnId: number) {
+  const result = await db.select().from(publicationColumns).where(eq(publicationColumns.id, columnId)).limit(1);
+  return result[0];
+}

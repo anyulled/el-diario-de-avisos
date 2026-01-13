@@ -1,4 +1,4 @@
-import { getArticleById } from "@/app/actions";
+import { getArticleById, getArticleSection } from "@/app/actions";
 import { Navbar } from "@/components/navbar";
 import { processRtfContent } from "@/lib/rtf-html-converter";
 import { notFound } from "next/navigation";
@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const article = await getArticleById(Number(id));
+  const section = article.columnId ? await getArticleSection(article.columnId) : null;
 
   if (!article) {
     notFound();
@@ -40,7 +41,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         <div className="relative z-20 container mx-auto h-full flex items-end pb-12 px-4">
           <div className="max-w-4xl">
             <div className="mb-4 flex items-center gap-3">
-              <span className="bg-amber-600/90 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">Noticia</span>
+              <span className="bg-amber-600/90 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">{section?.name || "Noticia"}</span>
               <span className="text-white/80 font-mono text-sm">
                 {article.date
                   ? new Date(article.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" })
