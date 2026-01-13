@@ -30,7 +30,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "groq-sdk": "^0.37.0",
-    "iconv-lite": "^0.7.1",
+    "iconv-lite": "^0.7.2",
     "lucide-react": "^0.562.0",
     "luxon": "^3.7.2",
     "next": "16.1.1",
