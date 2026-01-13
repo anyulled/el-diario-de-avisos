@@ -55,6 +55,22 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
 
+      - name: Verify SonarQube Configuration
+        shell: bash
+        run: |
+          echo "Verifying SonarQube configuration..."
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "::error::SONAR_TOKEN secret is missing"
+            exit 1
+          fi
+          if [ ! -f "sonar-project.properties" ]; then
+            echo "::error::sonar-project.properties file not found"
+            exit 1
+          fi
+          grep -q "^sonar.projectKey=" sonar-project.properties || (echo "::error::sonar.projectKey is missing in sonar-project.properties" && exit 1)
+          grep -q "^sonar.organization=" sonar-project.properties || (echo "::error::sonar.organization is missing in sonar-project.properties" && exit 1)
+          echo "SonarQube configuration verified."
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v7
         env:
