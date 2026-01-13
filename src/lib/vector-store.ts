@@ -1,13 +1,8 @@
 import { db } from "@/db";
 import { articleEmbeddings, articles, essayEmbeddings, essays } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
-import iconv from "iconv-lite";
 import { generateEmbedding } from "./ai";
-// @ts-expect-error - rtf-to-html type definitions are missing
-import { fromString } from "@iarna/rtf-to-html";
-import { promisify } from "util";
-
-const rtfToHtml = promisify(fromString);
+import { processRtfContent } from "./rtf-content-converter";
 
 export interface SearchResult {
   id: number;
@@ -18,49 +13,9 @@ export interface SearchResult {
   contentSnippet: string;
 }
 
-// Helper to strip HTML tags for plain text snippets
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>?/gm, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 // Helper to process RTF/plain text content and return a plain text snippet
 async function getContentSnippet(content: Buffer | string | null, maxLength = 1000): Promise<string> {
-  if (!content) return "";
-  try {
-    const contentString = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
-    const isRtf = contentString.trim().startsWith("{\\rtf");
-
-    if (!isRtf) {
-      // Plain text: just clean up and truncate
-      return contentString
-        .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0)
-        .join(" ")
-        .slice(0, maxLength);
-    }
-
-    // RTF: convert to HTML then strip tags
-    const unescapedRtf = contentString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
-      const code = parseInt(hex, 16);
-      return code >= 0x80 && code <= 0xff ? String.fromCharCode(code) : match;
-    });
-
-    const html = await rtfToHtml(unescapedRtf, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      template: (_doc: any, _defaults: any, content: string) => content,
-    });
-
-    return stripHtml(html).slice(0, maxLength);
-  } catch (error) {
-    // Fallback to raw content
-    console.debug("Content snippet extraction failed, using fallback:", error);
-    const raw = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
-    return raw.slice(0, maxLength);
-  }
+  return processRtfContent(content, { maxLength, preserveParagraphs: false });
 }
 
 // Internal type for initial DB results (without content snippet)
@@ -72,9 +27,7 @@ interface RawSearchResult {
 }
 
 // Internal function for vector search of articles
-async function findVectorArticles(query: string, limit = 5): Promise<RawSearchResult[]> {
-  const embedding = await generateEmbedding(query);
-
+async function findVectorArticles(embedding: number[], limit = 5): Promise<RawSearchResult[]> {
   const similarity = sql<number>`1 - (${articleEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
 
   return await db
@@ -92,9 +45,7 @@ async function findVectorArticles(query: string, limit = 5): Promise<RawSearchRe
 }
 
 // Internal function for essay vector search
-async function findVectorEssays(query: string, limit = 5): Promise<RawSearchResult[]> {
-  const embedding = await generateEmbedding(query);
-
+async function findVectorEssays(embedding: number[], limit = 5): Promise<RawSearchResult[]> {
   const similarity = sql<number>`1 - (${essayEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
 
   return await db
@@ -142,10 +93,13 @@ async function fetchEssayContent(ids: number[]): Promise<Map<number, Buffer | nu
 
 // Main hybrid search function
 export async function findSimilarArticles(query: string, limit = 5): Promise<SearchResult[]> {
-  // Run both searches in parallel
+  // Generate embedding once for reuse in both vector searches
+  const embedding = await generateEmbedding(query);
+
+  // Run all searches in parallel
   const [vectorResults, essayResults, keywordResults] = await Promise.all([
-    findVectorArticles(query, limit),
-    findVectorEssays(query, limit),
+    findVectorArticles(embedding, limit),
+    findVectorEssays(embedding, limit),
     findKeywordArticles(query, 10),
   ]);
 

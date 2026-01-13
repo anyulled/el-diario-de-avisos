@@ -1,66 +1,9 @@
 import "dotenv/config";
 import { eq, isNull, sql } from "drizzle-orm";
-import iconv from "iconv-lite";
 import { db } from "../src/db";
 import { articleEmbeddings, articles, essayEmbeddings, essays } from "../src/db/schema";
 import { generateEmbeddingsBatch } from "../src/lib/ai";
-// @ts-expect-error - rtf-to-html type definitions are missing
-import { fromString } from "@iarna/rtf-to-html";
-import { promisify } from "util";
-
-const rtfToHtml = promisify(fromString);
-
-/**
- * Strips HTML tags from a string and returns plain text
- */
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>?/gm, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/**
- * Processes RTF or plain text content and returns clean plain text
- */
-async function processRtf(content: Buffer | string | null): Promise<string> {
-  if (!content) return "";
-  try {
-    const contentString = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
-
-    // Detect if content is RTF format (starts with {\rtf) or plain text
-    const isRtf = contentString.trim().startsWith("{\\rtf");
-
-    if (!isRtf) {
-      // For plain text, just return it cleaned up
-      // Remove excessive whitespace but preserve paragraph structure
-      return contentString
-        .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0)
-        .join("\n\n");
-    }
-
-    // Process RTF content
-    // Minimal unescape for RAG quality
-    const unescapedRtf = contentString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
-      const code = parseInt(hex, 16);
-      return code >= 0x80 && code <= 0xff ? String.fromCharCode(code) : match;
-    });
-
-    const html = await rtfToHtml(unescapedRtf, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      template: (_doc: any, _defaults: any, content: string) => content,
-    });
-
-    return stripHtml(html);
-  } catch (e) {
-    console.error("Content processing error:", e);
-    // Fallback: return raw content if available
-    const fallback = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
-    return fallback || "";
-  }
-}
+import { processRtfContent } from "../src/lib/rtf-content-converter";
 
 /**
  * Configuration for ingesting different entity types
@@ -114,7 +57,7 @@ async function ingestEntities(config: IngestConfig) {
   // Process content to plain text
   const processedData = await Promise.all(
     pendingEntities.map(async (entity) => {
-      const plainText = await processRtf(entity.content as Buffer);
+      const plainText = await processRtfContent(entity.content as Buffer);
       // Combine title and content for better context
       const fullText = `${entity.title || ""}\n${plainText}`.slice(0, 8000);
       return { id: entity.id, text: fullText };
