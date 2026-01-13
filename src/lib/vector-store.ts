@@ -189,7 +189,7 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
   const finalResults: SearchResult[] = [];
 
   for (const article of articleCandidates) {
-    const content = articleContentMap.get(article.id);
+    const content = articleContentMap.get(article.id) ?? null;
     const snippet = await getContentSnippet(content);
     finalResults.push({
       ...article,
@@ -198,7 +198,7 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
   }
 
   for (const essay of essayCandidates) {
-    const content = essayContentMap.get(essay.id);
+    const content = essayContentMap.get(essay.id) ?? null;
     const snippet = await getContentSnippet(content);
     finalResults.push({
       ...essay,
