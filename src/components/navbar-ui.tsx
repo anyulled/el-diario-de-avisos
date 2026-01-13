@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/styles";
-import { BookOpen, Info, Menu, MessageSquare, Search, X } from "lucide-react";
+import { BookOpen, Calendar, Info, Menu, MessageSquare, Search, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,6 +66,11 @@ export function NavbarUI({ essays }: NavbarUIProps) {
             </div>
           </div>
 
+          <Link href="/tal-dia-como-hoy" className="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-full transition-colors backdrop-blur-sm">
+            <Calendar size={16} />
+            <span className="text-sm font-medium">Tal día como hoy</span>
+          </Link>
+
           <Link href="/chat" className="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-full transition-colors backdrop-blur-sm">
             <MessageSquare size={16} />
             <span className="text-sm font-medium">Asistente</span>
@@ -112,6 +117,14 @@ export function NavbarUI({ essays }: NavbarUIProps) {
                 {essays.length === 0 && <span className="text-white/40 italic">No hay ensayos disponibles</span>}
               </div>
             </div>
+
+            <Link
+              href="/tal-dia-como-hoy"
+              className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10"
+            >
+              <Calendar size={24} />
+              Tal día como hoy
+            </Link>
 
             <Link href="/chat" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
               <MessageSquare size={24} />

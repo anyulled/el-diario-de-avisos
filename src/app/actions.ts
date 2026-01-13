@@ -142,3 +142,21 @@ export async function getArticleSection(columnId: number) {
   const result = await db.select().from(publicationColumns).where(eq(publicationColumns.id, columnId)).limit(1);
   return result[0];
 }
+
+import { processRtfContent } from "@/lib/rtf-content-converter";
+
+export async function getArticlesOnThisDay(day: number, month: number) {
+  const news = await db
+    .select()
+    .from(articles)
+    .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`)
+    .orderBy(sql`RANDOM()`)
+    .limit(10);
+
+  return await Promise.all(
+    news.map(async (item) => ({
+      ...item,
+      extract: await processRtfContent(item.content as Buffer | null, { maxLength: 500 }),
+    })),
+  );
+}
