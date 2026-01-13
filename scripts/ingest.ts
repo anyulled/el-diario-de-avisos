@@ -2,7 +2,7 @@ import "dotenv/config";
 import { eq, isNull, sql } from "drizzle-orm";
 import iconv from "iconv-lite";
 import { db } from "../src/db";
-import { articleEmbeddings, articles } from "../src/db/schema";
+import { articleEmbeddings, articles, essayEmbeddings, essays } from "../src/db/schema";
 import { generateEmbeddingsBatch } from "../src/lib/ai";
 // @ts-expect-error - rtf-to-html type definitions are missing
 import { fromString } from "@iarna/rtf-to-html";
@@ -56,8 +56,8 @@ async function processRtf(content: Buffer | string | null): Promise<string> {
   }
 }
 
-async function ingest() {
-  console.log("🚀 Starting ingestion...");
+async function ingestArticles() {
+  console.log("🚀 Starting Articles Ingestion...");
 
   // Count total articles without embeddings
   const totalPendingResult = await db
@@ -148,6 +148,93 @@ async function ingest() {
   } catch (e) {
     console.error("❌ Batch ingestion failed:", e);
   }
+}
+
+async function ingestEssays() {
+  console.log("🚀 Starting Essays Ingestion...");
+
+  // Count total essays without embeddings
+  const totalPendingEssaysResult = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(essays)
+    .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
+    .where(isNull(essayEmbeddings.essayId));
+
+  const totalPendingEssays = totalPendingEssaysResult[0]?.count ?? 0;
+
+  if (totalPendingEssays === 0) {
+    console.log("✅ All essays already have embeddings.");
+    return;
+  }
+
+  console.log(`📊 Total essays without embeddings: ${totalPendingEssays}`);
+
+  // Find essays that don't have embeddings yet
+  const pendingEssays = await db
+    .select({
+      id: essays.id,
+      title: essays.title,
+      content: essays.content,
+    })
+    .from(essays)
+    .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
+    .where(isNull(essayEmbeddings.essayId))
+    .limit(100);
+
+  console.log(`📦 Processing ${pendingEssays.length} essays in this batch...`);
+
+  const processedEssays = await Promise.all(
+    pendingEssays.map(async (essay) => {
+      const plainText = await processRtf(essay.content as Buffer);
+      const fullText = `${essay.title || ""}\n${plainText}`.slice(0, 8000);
+      return { id: essay.id, text: fullText };
+    }),
+  );
+
+  const validEssays = processedEssays.filter((d) => d.text.trim().length > 10);
+  const BATCH_SIZE = 100;
+
+  if (validEssays.length > 0) {
+    try {
+      // eslint-disable-next-line no-restricted-syntax
+      for (let i = 0; i < validEssays.length; i += BATCH_SIZE) {
+        const subBatch = validEssays.slice(i, i + BATCH_SIZE);
+        console.log(`📡 Generating embeddings for essay sub-batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(validEssays.length / BATCH_SIZE)}...`);
+        const subEmbeddings = await generateEmbeddingsBatch(subBatch.map((d) => d.text));
+
+        console.log("💾 Saving essay embeddings to database...");
+
+        await Promise.all(
+          subBatch.map((essay, j) =>
+            db
+              .insert(essayEmbeddings)
+              .values({
+                essayId: essay.id,
+                embedding: subEmbeddings[j],
+              })
+              .onConflictDoUpdate({
+                target: essayEmbeddings.essayId,
+                set: {
+                  embedding: subEmbeddings[j],
+                  updatedAt: sql`now()`,
+                },
+              }),
+          ),
+        );
+      }
+      console.log(`✨ Successfully ingested ${validEssays.length} essay embeddings.`);
+    } catch (e) {
+      console.error("❌ Essay ingestion failed:", e);
+    }
+  } else {
+    console.log("⚠️ No valid essay content found in this batch.");
+  }
+}
+
+async function ingest() {
+  await ingestArticles();
+  console.log("--------------------------------");
+  await ingestEssays();
 }
 
 // Run if called directly
