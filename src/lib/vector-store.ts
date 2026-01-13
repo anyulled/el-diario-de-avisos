@@ -1,19 +1,33 @@
 import { db } from "@/db";
-import { articleEmbeddings, articles } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { articleEmbeddings, articles, essayEmbeddings, essays } from "@/db/schema";
+import { eq, inArray, sql } from "drizzle-orm";
 import { generateEmbedding } from "./ai";
+import { processRtfContent } from "./rtf-content-converter";
 
 export interface SearchResult {
   id: number;
   title: string | null;
   date: string | null;
   similarity: number;
+  type: "article" | "essay";
+  contentSnippet: string;
 }
 
-// Internal function for vector search
-async function findVectorArticles(query: string, limit = 5): Promise<SearchResult[]> {
-  const embedding = await generateEmbedding(query);
+// Helper to process RTF/plain text content and return a plain text snippet
+async function getContentSnippet(content: Buffer | string | null, maxLength = 1000): Promise<string> {
+  return processRtfContent(content, { maxLength, preserveParagraphs: false });
+}
 
+// Internal type for initial DB results (without content snippet)
+interface RawSearchResult {
+  id: number;
+  title: string | null;
+  date: string | null;
+  similarity: number;
+}
+
+// Internal function for vector search of articles
+async function findVectorArticles(embedding: number[], limit = 5): Promise<RawSearchResult[]> {
   const similarity = sql<number>`1 - (${articleEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
 
   return await db
@@ -30,8 +44,26 @@ async function findVectorArticles(query: string, limit = 5): Promise<SearchResul
     .limit(limit);
 }
 
+// Internal function for essay vector search
+async function findVectorEssays(embedding: number[], limit = 5): Promise<RawSearchResult[]> {
+  const similarity = sql<number>`1 - (${essayEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
+
+  return await db
+    .select({
+      id: essays.id,
+      title: essays.title,
+      date: sql<null>`null`.as("date"),
+      similarity,
+    })
+    .from(essayEmbeddings)
+    .innerJoin(essays, eq(essayEmbeddings.essayId, essays.id))
+    .where(sql`${similarity} > 0.45`)
+    .orderBy(sql`${essayEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector`)
+    .limit(limit);
+}
+
 // Internal function for keyword search
-async function findKeywordArticles(query: string, limit = 10): Promise<SearchResult[]> {
+async function findKeywordArticles(query: string, limit = 10): Promise<RawSearchResult[]> {
   return await db
     .select({
       id: articles.id,
@@ -45,44 +77,96 @@ async function findKeywordArticles(query: string, limit = 10): Promise<SearchRes
     .limit(limit);
 }
 
+// Fetch content for articles by IDs
+async function fetchArticleContent(ids: number[]): Promise<Map<number, Buffer | null>> {
+  if (ids.length === 0) return new Map();
+  const rows = await db.select({ id: articles.id, content: articles.content }).from(articles).where(inArray(articles.id, ids));
+  return new Map(rows.map((r) => [r.id, r.content as Buffer | null]));
+}
+
+// Fetch content for essays by IDs
+async function fetchEssayContent(ids: number[]): Promise<Map<number, Buffer | null>> {
+  if (ids.length === 0) return new Map();
+  const rows = await db.select({ id: essays.id, content: essays.content }).from(essays).where(inArray(essays.id, ids));
+  return new Map(rows.map((r) => [r.id, r.content as Buffer | null]));
+}
+
 // Main hybrid search function
 export async function findSimilarArticles(query: string, limit = 5): Promise<SearchResult[]> {
-  // Run both searches in parallel
-  const [vectorResults, keywordResults] = await Promise.all([
-    findVectorArticles(query, limit),
-    // Always fetch top 10 keyword matches
+  // Generate embedding once for reuse in both vector searches
+  const embedding = await generateEmbedding(query);
+
+  // Run all searches in parallel
+  const [vectorResults, essayResults, keywordResults] = await Promise.all([
+    findVectorArticles(embedding, limit),
+    findVectorEssays(embedding, limit),
     findKeywordArticles(query, 10),
   ]);
 
-  // Combine and deduplicate
-  const seenIds = new Set<number>();
-  const combinedResults: SearchResult[] = [];
+  // Track seen IDs by type to avoid duplicates within the same type
+  const seenArticleIds = new Set<number>();
+  const seenEssayIds = new Set<number>();
 
-  // Prioritize vector results but ensure we mix in keyword results
-  // Strategy: Add all vector results, then add non-duplicate keyword results
+  const articleCandidates: Array<RawSearchResult & { type: "article" }> = [];
+  const essayCandidates: Array<RawSearchResult & { type: "essay" }> = [];
 
+  // Add article results from vector search
   for (const res of vectorResults) {
-    if (!seenIds.has(res.id)) {
-      seenIds.add(res.id);
-      combinedResults.push(res);
+    if (!seenArticleIds.has(res.id)) {
+      seenArticleIds.add(res.id);
+      articleCandidates.push({ ...res, type: "article" });
     }
   }
 
+  // Add essay results from vector search
+  for (const res of essayResults) {
+    if (!seenEssayIds.has(res.id)) {
+      seenEssayIds.add(res.id);
+      essayCandidates.push({ ...res, type: "essay" });
+    }
+  }
+
+  // Add keyword results (only articles have keyword search)
   for (const res of keywordResults) {
-    if (!seenIds.has(res.id)) {
-      seenIds.add(res.id);
-      // Boost similarity for exact keyword matches to ensure they seem relevant
-      // We'll assign a high artificial similarity for keyword matches to ensure they are picked up in context
-      combinedResults.push({
-        ...res,
-        similarity: 0.95,
-      });
+    if (!seenArticleIds.has(res.id)) {
+      seenArticleIds.add(res.id);
+      articleCandidates.push({ ...res, similarity: 0.95, type: "article" });
     }
   }
 
-  // Sort by similarity descending to ensure keyword matches (0.95) rise to the top
-  combinedResults.sort((a, b) => b.similarity - a.similarity);
+  // Fetch content for all candidates
+  const [articleContentMap, essayContentMap] = await Promise.all([
+    fetchArticleContent(articleCandidates.map((a) => a.id)),
+    fetchEssayContent(essayCandidates.map((e) => e.id)),
+  ]);
 
-  // Return a slightly larger set if mixed
-  return combinedResults.slice(0, limit + 2);
+  // Build final results with content snippets (parallel processing)
+  const articleResultsPromises = articleCandidates.map(async (article) => {
+    const content = articleContentMap.get(article.id) ?? null;
+    const snippet = await getContentSnippet(content);
+    return {
+      ...article,
+      contentSnippet: snippet,
+    };
+  });
+
+  const essayResultsPromises = essayCandidates.map(async (essay) => {
+    const content = essayContentMap.get(essay.id) ?? null;
+    const snippet = await getContentSnippet(content);
+    return {
+      ...essay,
+      contentSnippet: snippet,
+    };
+  });
+
+  // Wait for all snippet generation to complete in parallel
+  const [processedArticles, processedEssays] = await Promise.all([Promise.all(articleResultsPromises), Promise.all(essayResultsPromises)]);
+
+  const finalResults: SearchResult[] = [...processedArticles, ...processedEssays];
+
+  // Sort by similarity descending
+  finalResults.sort((a, b) => b.similarity - a.similarity);
+
+  // Return top results
+  return finalResults.slice(0, limit + 2);
 }

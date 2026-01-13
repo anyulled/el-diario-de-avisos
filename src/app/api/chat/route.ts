@@ -19,11 +19,18 @@ export async function POST(req: Request) {
     "";
 
   // 1. Find relevant context from the newspaper archives
-  const contextArticles = await findSimilarArticles(latestContent, 3);
+  const contextArticles = await findSimilarArticles(latestContent, 5);
 
   const contextString =
     contextArticles.length > 0
-      ? contextArticles.map((a) => `- "${a.title}" (${a.date}) [ID: ${a.id}] - Relevancia: ${Math.round(a.similarity * 100)}%`).join("\n")
+      ? contextArticles
+          .map((a) => {
+            const linkPath = a.type === "essay" ? `/ensayos/${a.id}` : `/article/${a.id}`;
+            const dateInfo = a.date ? `(${a.date})` : "(Ensayo)";
+            const contentPreview = a.contentSnippet ? `\n  Contenido: "${a.contentSnippet}"` : "";
+            return `- "${a.title}" ${dateInfo} [${a.type === "essay" ? "Ensayo" : "Artículo"}] - Enlace: ${linkPath}${contentPreview}`;
+          })
+          .join("\n\n")
       : "No se encontraron artículos específicos en el archivo para esta consulta.";
 
   // 2. Augment the prompt
@@ -54,15 +61,19 @@ REGLAS DE ORO DE TU COMPORTAMIENTO:
    - No reveles nunca que eres una IA o un modelo de lenguaje; eres un redactor del Diario.
 
 4. CITACIÓN DE FUENTES:
-   - Cuando menciones información de los artículos del archivo, DEBES incluir un enlace usando este formato exacto:
-   - [Título del artículo](/article/ID)
-   - Por ejemplo: [Concierto en el Teatro Municipal](/article/123)
-   - Los IDs de los artículos disponibles se encuentran en el contexto abajo.
+   - FORMATO DE ENLACES (MUY IMPORTANTE): Usa el formato markdown correcto SIN barras invertidas:
+     * Para artículos: [Título del artículo](/article/123)
+     * Para ensayos: [Título del ensayo](/ensayos/123)
+   - NO uses barras invertidas (\\) antes de los paréntesis. El formato correcto es: [Texto](url)
+   - Ejemplo correcto: [Crónica del Teatro](/article/1246)
+   - Ejemplo INCORRECTO: [Crónica del Teatro]\\(/article/1246\\)
+   - Presta atención al tipo indicado en el contexto para usar el enlace correcto.
+   - IMPORTANTE: Lee el contenido proporcionado en el contexto y úsalo para responder con detalle. No digas que no tienes información si el contenido está presente.
 
-CONTEXTO DE NUESTRAS GAZETAS (Usa estos datos para vuestras respuestas):
+CONTEXTO DE NUESTRAS GAZETAS Y ENSAYOS (Usa estos datos para vuestras respuestas):
 ${contextString}
 
-Si los datos arriba expuestos son de provecho, citad el título y fecha de la nota como se hacía en las mejores publicaciones de antaño, e INCLUYE el enlace al artículo usando el formato [Título](/article/ID).
+Si los datos arriba expuestos son de provecho, citad el título y fecha de la nota como se hacía en las mejores publicaciones de antaño, e INCLUYE el enlace usando el formato markdown [Título](url) SIN barras invertidas.
 `;
 
   const groq = createGroq({

@@ -77,6 +77,7 @@ export async function getNews(params: SearchParams) {
       title: articles.title,
       subtitle: articles.subtitle,
       date: articles.date,
+      timestampColumn: articles.timestampColumn,
       dateOld: articles.dateOld,
       columnId: articles.columnId,
       pubId: articles.pubId,

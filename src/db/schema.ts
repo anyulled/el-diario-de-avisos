@@ -17,6 +17,7 @@ export const articles = pgTable("articulos", {
   title: varchar("arti_titulo", { length: 255 }),
   subtitle: varchar("arti_subtitulo", { length: 255 }),
   date: timestamp("arti_fecha", { mode: "string" }),
+  timestampColumn: timestamp("arti_fecha_timestamp", { mode: "string" }),
   dateOld: varchar("arti_fecha_old", { length: 50 }),
   columnId: integer("col_cod"),
   pubId: integer("pub_cod"),
@@ -209,6 +210,14 @@ export const articleEmbeddings = pgTable("articulos_embeddings", {
   articleId: integer("arti_cod")
     .primaryKey()
     .references(() => articles.id),
+  embedding: vector("embedding", { dimensions: 768 }),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const essayEmbeddings = pgTable("ensayos_embeddings", {
+  essayId: integer("ensayo_cod")
+    .primaryKey()
+    .references(() => essays.id),
   embedding: vector("embedding", { dimensions: 768 }),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

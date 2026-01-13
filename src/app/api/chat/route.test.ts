@@ -24,19 +24,23 @@ describe("Chat API Route", () => {
     const { createGroq } = await import("@ai-sdk/groq");
     const { streamText } = await import("ai");
 
-    // Mock similar articles
+    // Mock similar articles with required 'type' and 'contentSnippet' fields
     vi.mocked(findSimilarArticles).mockResolvedValue([
       {
         id: 1,
         title: "Concierto en el Teatro Municipal",
         date: "1885-03-15",
         similarity: 0.85,
+        type: "article",
+        contentSnippet: "El concierto fue un éxito...",
       },
       {
         id: 2,
         title: "Ópera Italiana en Caracas",
         date: "1886-07-20",
         similarity: 0.78,
+        type: "article",
+        contentSnippet: "La ópera italiana...",
       },
     ]);
 
@@ -69,8 +73,8 @@ describe("Chat API Route", () => {
 
     const response = await POST(mockRequest);
 
-    // Verify vector store was called
-    expect(findSimilarArticles).toHaveBeenCalledWith("¿Qué conciertos hubo en 1885?", 3);
+    // Verify vector store was called with limit 5
+    expect(findSimilarArticles).toHaveBeenCalledWith("¿Qué conciertos hubo en 1885?", 5);
 
     // Verify Groq was initialized
     expect(createGroq).toHaveBeenCalledWith({
@@ -216,13 +220,15 @@ describe("Chat API Route", () => {
     const { createGroq } = await import("@ai-sdk/groq");
     const { streamText } = await import("ai");
 
-    // Mock similar articles with IDs
+    // Mock similar articles with IDs, type, and contentSnippet
     vi.mocked(findSimilarArticles).mockResolvedValue([
       {
         id: 42,
         title: "Gran Concierto de Ópera",
         date: "1887-05-10",
         similarity: 0.92,
+        type: "article",
+        contentSnippet: "El gran concierto de ópera...",
       },
     ]);
 
@@ -255,14 +261,14 @@ describe("Chat API Route", () => {
     expect(streamText).toHaveBeenCalled();
     const callArgs = vi.mocked(streamText).mock.calls[0][0];
 
-    // Verify article ID is included in context
-    expect(callArgs.system).toContain("[ID: 42]");
+    // Verify article link is included in context (current format uses path not [ID: XX])
+    expect(callArgs.system).toContain("/article/42");
     expect(callArgs.system).toContain("Gran Concierto de Ópera");
 
     // Verify linking instructions are present
     expect(callArgs.system).toContain("CITACIÓN DE FUENTES");
-    expect(callArgs.system).toContain("[Título del artículo](/article/ID)");
-    expect(callArgs.system).toContain("INCLUYE el enlace al artículo usando el formato");
+    expect(callArgs.system).toContain("/article/123");
+    expect(callArgs.system).toContain("INCLUYE el enlace");
   });
 
   it("should fall back to message content if parts are missing", async () => {
@@ -298,6 +304,6 @@ describe("Chat API Route", () => {
 
     await POST(mockRequest);
 
-    expect(findSimilarArticles).toHaveBeenCalledWith("Direct content without parts", 3);
+    expect(findSimilarArticles).toHaveBeenCalledWith("Direct content without parts", 5);
   });
 });
