@@ -5,12 +5,13 @@ interface HeroProps {
   backgroundImage?: string;
 }
 
-export function Hero({
-  title = "Noticias Musicales en el Diario de Avisos",
-  subtitle = "Un viaje a través del tiempo, descubriendo las noticias que marcaron la historia musical venezolana.",
-  badge = "Archivo Histórico",
-  backgroundImage = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop",
-}: HeroProps) {
+export function Hero(props: Readonly<HeroProps>) {
+  const {
+    title = "Noticias Musicales en el Diario de Avisos",
+    subtitle = "Un viaje a través del tiempo, descubriendo las noticias que marcaron la historia musical venezolana.",
+    badge = "Archivo Histórico",
+    backgroundImage = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop",
+  } = props;
   return (
     <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-zinc-900">
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-900/50 to-transparent z-10" />
