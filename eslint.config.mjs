@@ -57,11 +57,11 @@ const eslintConfig = [
       ],
 
       // No comments - forces self-documenting code
-      "no-warning-comments": "off",
-      "multiline-comment-style": "off",
-      "capitalized-comments": "off",
+      "no-warning-comments": "error",
+      "multiline-comment-style": "error",
+      "capitalized-comments": "error",
       "no-inline-comments": "error",
-      "spaced-comment": "off",
+      "spaced-comment": "error",
 
       // Basic strictness
       "prefer-const": "error",
@@ -134,18 +134,18 @@ const eslintConfig = [
   {
     files: ["src/__tests__/**/*.ts", "src/__tests__/**/*.tsx", "**/*.test.ts", "**/*.test.tsx"],
     rules: {
-      "@typescript-eslint/consistent-type-assertions": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "custom/no-generic-names": "off",
-      "@eslint-community/eslint-comments/disable-enable-pair": "off",
-      "@next/next/no-img-element": "off",
-      "no-restricted-syntax": "off",
+      "@typescript-eslint/consistent-type-assertions": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/no-empty-function": "error",
+      "custom/no-generic-names": "error",
+      "@eslint-community/eslint-comments/disable-enable-pair": "error",
+      "@next/next/no-img-element": "error",
+      "no-restricted-syntax": "error",
     },
   },
   {

@@ -4,7 +4,7 @@ import { processRtfContent, stripHtml } from "./rtf-content-converter";
 // Mock @iarna/rtf-to-html
 vi.mock("@iarna/rtf-to-html", () => ({
   fromString: (rtf: string, options: unknown, cb: (err: Error | null, html: string) => void) => {
-    const callback = typeof options === "function" ? options : cb;
+    const callback = (typeof options === "function" ? options : cb) as (err: Error | null, html: string) => void;
     if (rtf.includes("ERROR_PLEASE")) {
       callback(new Error("Mock Error"), "");
     } else if (rtf.includes("Hello World")) {

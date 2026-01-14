@@ -5,7 +5,7 @@ import { processRtfContent } from "./rtf-html-converter";
 vi.mock("@iarna/rtf-to-html", () => ({
   fromString: (rtf: string, options: unknown, cb: (err: Error | null, html: string) => void) => {
     // Determine callback if options is omitted (though in our code we pass options)
-    const callback = typeof options === "function" ? options : cb;
+    const callback = (typeof options === "function" ? options : cb) as (err: Error | null, html: string) => void;
     // Return mock HTML with the text content if possible, or just a static string
     if (rtf.includes("ERROR_PLEASE")) {
       callback(new Error("Mock Error"), "");
@@ -47,8 +47,10 @@ describe("processRtfContent", () => {
     // Input with hex char \'e1 (á) which is 225 (> 128)
     const content = "{\\rtf1\\'e1}";
     const result = await processRtfContent(content, 1);
-    // The mock returns the RTF string it received.
-    // We expect it to have 'á' instead of '\'e1'.
+    /*
+     * The mock returns the RTF string it received.
+     * We expect it to have 'á' instead of '\'e1'.
+     */
     expect(result).toContain("á");
     expect(result).not.toContain("\\'e1");
   });

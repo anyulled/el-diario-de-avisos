@@ -6,7 +6,7 @@ import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { and, eq, sql } from "drizzle-orm";
 
-// getYears removed
+// GetYears removed
 
 export async function getNewsTypes() {
   return await db.select().from(publicationColumns);

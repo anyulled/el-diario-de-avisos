@@ -62,16 +62,27 @@ describe("vector-store", () => {
 
       // Re-mock DB specifically for this test to return data
       const { db } = await import("@/db");
-      vi.mocked(db.select).mockReturnValue({
+
+      interface MockQueryBuilder {
+        from: ReturnType<typeof vi.fn>;
+        innerJoin: ReturnType<typeof vi.fn>;
+        where: ReturnType<typeof vi.fn>;
+        orderBy: ReturnType<typeof vi.fn>;
+        limit: ReturnType<typeof vi.fn>;
+      }
+
+      const mockQueryBuilder: MockQueryBuilder = {
         from: vi.fn().mockReturnThis(),
         innerJoin: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValue(mockResults),
-      } as any);
+      };
+
+      vi.mocked(db.select).mockReturnValue(mockQueryBuilder as unknown as ReturnType<typeof db.select>);
 
       // Improved mock implementation for db.select to handle different types of queries
-      vi.mocked(db.select).mockImplementation((selection: any) => {
+      vi.mocked(db.select).mockImplementation(((selection: { content?: unknown } | undefined) => {
         // Safe check for content fetch without JSON.stringify circular Drizzle objects
         const isContentFetch = selection && selection.content !== undefined;
 
@@ -88,8 +99,8 @@ describe("vector-store", () => {
             };
           }),
         };
-        return mockQuery as any;
-      });
+        return mockQuery as unknown as ReturnType<typeof db.select>;
+      }) as unknown as typeof db.select);
 
       const results = await findSimilarArticles("test query", 1);
 

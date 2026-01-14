@@ -4,19 +4,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SearchFilters } from "@/components/search-filters";
 
 const replaceMock = vi.fn();
-let currentSearchParams = new URLSearchParams();
+const searchParamsContainer = {
+  current: new URLSearchParams(),
+};
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: replaceMock,
   }),
-  useSearchParams: () => currentSearchParams,
+  useSearchParams: () => searchParamsContainer.current,
 }));
 
 describe("SearchFilters date range", () => {
   beforeEach(() => {
     replaceMock.mockClear();
-    currentSearchParams = new URLSearchParams();
+    searchParamsContainer.current = new URLSearchParams();
   });
 
   it("uses local date state when sending the range on click", async () => {
@@ -84,7 +86,7 @@ describe("SearchFilters date range", () => {
   });
 
   it("uses the selected type label when present", () => {
-    currentSearchParams = new URLSearchParams("type=1");
+    searchParamsContainer.current = new URLSearchParams("type=1");
 
     render(
       <SearchFilters
@@ -183,15 +185,15 @@ describe("SearchFilters date range", () => {
     const [sortSelect, pageSizeSelect] = screen.getAllByRole("combobox");
 
     fireEvent.change(sortSelect, { target: { value: "date_desc" } });
-    let lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
-    let url = new URL(lastCall, "http://localhost");
+    const lastCallDesc = replaceMock.mock.calls.at(-1)?.[0] as string;
+    const urlDesc = new URL(lastCallDesc, "http://localhost");
 
-    expect(url.searchParams.get("sort")).toBe("date_desc");
+    expect(urlDesc.searchParams.get("sort")).toBe("date_desc");
 
     fireEvent.change(pageSizeSelect, { target: { value: "50" } });
-    lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
-    url = new URL(lastCall, "http://localhost");
-    expect(url.searchParams.get("pageSize")).toBe("50");
+    const lastCallPage = replaceMock.mock.calls.at(-1)?.[0] as string;
+    const urlPage = new URL(lastCallPage, "http://localhost");
+    expect(urlPage.searchParams.get("pageSize")).toBe("50");
 
     const typeToggle = screen.getByRole("button", { name: /Tipo de Noticia/i });
     fireEvent.click(typeToggle);
@@ -201,8 +203,8 @@ describe("SearchFilters date range", () => {
 
     expect(replaceMock).toHaveBeenCalledTimes(3);
 
-    lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
-    url = new URL(lastCall, "http://localhost");
-    expect(url.searchParams.get("type")).toBe("1");
+    const lastCallFinal = replaceMock.mock.calls.at(-1)?.[0] as string;
+    const urlFinal = new URL(lastCallFinal, "http://localhost");
+    expect(urlFinal.searchParams.get("type")).toBe("1");
   });
 });

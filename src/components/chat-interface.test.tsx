@@ -7,7 +7,7 @@ const mockUseChat = vi.fn();
 
 // Mock the useChat hook - factory function must not reference external variables
 vi.mock("@ai-sdk/react", () => ({
-  useChat: () => mockUseChat(),
+  useChat: () => mockUseChat() as unknown,
 }));
 
 // Mock ReactMarkdown
@@ -16,22 +16,24 @@ vi.mock("react-markdown", () => ({
 }));
 
 describe("ChatInterface Session Storage", () => {
-  let mockSetMessages: ReturnType<typeof vi.fn>;
-  let mockSendMessage: ReturnType<typeof vi.fn>;
+  const mocks = {
+    setMessages: vi.fn(),
+    sendMessage: vi.fn(),
+  };
 
   beforeEach(() => {
     // Clear session storage before each test
     sessionStorage.clear();
     vi.clearAllMocks();
 
-    mockSetMessages = vi.fn();
-    mockSendMessage = vi.fn();
+    mocks.setMessages = vi.fn();
+    mocks.sendMessage = vi.fn();
 
     // Reset mock to default state
     mockUseChat.mockReturnValue({
       messages: [],
-      sendMessage: mockSendMessage,
-      setMessages: mockSetMessages,
+      sendMessage: mocks.sendMessage,
+      setMessages: mocks.setMessages,
       status: "idle",
     });
   });
@@ -54,18 +56,20 @@ describe("ChatInterface Session Storage", () => {
 
     render(<ChatInterface />);
 
-    expect(mockSetMessages).toHaveBeenCalledWith(savedMessages);
+    expect(mocks.setMessages).toHaveBeenCalledWith(savedMessages);
   });
 
   it("should handle corrupted session storage data gracefully", () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {
+      // Mocked implementation for test
+    });
 
     sessionStorage.setItem("chat-history", "invalid json{");
 
     render(<ChatInterface />);
 
     expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to parse saved messages:", expect.any(Error));
-    expect(mockSetMessages).not.toHaveBeenCalled();
+    expect(mocks.setMessages).not.toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
   });
@@ -82,8 +86,8 @@ describe("ChatInterface Session Storage", () => {
     // Re-render with messages
     mockUseChat.mockReturnValue({
       messages,
-      sendMessage: mockSendMessage,
-      setMessages: mockSetMessages,
+      sendMessage: mocks.sendMessage,
+      setMessages: mocks.setMessages,
       status: "idle",
     });
 
@@ -99,7 +103,7 @@ describe("ChatInterface Session Storage", () => {
     );
 
     const saved = sessionStorage.getItem("chat-history");
-    expect(JSON.parse(saved!)).toEqual(messages);
+    expect(JSON.parse(saved ?? "null")).toEqual(messages);
   });
 
   it("should not save empty messages array to session storage initially", async () => {
@@ -128,7 +132,7 @@ describe("ChatInterface Session Storage", () => {
     const clearButton = screen.getByTitle("Limpiar conversación");
     fireEvent.click(clearButton);
 
-    expect(mockSetMessages).toHaveBeenCalledWith([]);
+    expect(mocks.setMessages).toHaveBeenCalledWith([]);
     expect(sessionStorage.getItem("chat-history")).toBeNull();
   });
 
@@ -144,8 +148,8 @@ describe("ChatInterface Session Storage", () => {
     // First render with messages
     mockUseChat.mockReturnValue({
       messages,
-      sendMessage: mockSendMessage,
-      setMessages: mockSetMessages,
+      sendMessage: mocks.sendMessage,
+      setMessages: mocks.setMessages,
       status: "idle",
     });
 
@@ -159,19 +163,19 @@ describe("ChatInterface Session Storage", () => {
     unmount();
 
     // Reset mocks
-    mockSetMessages.mockClear();
+    mocks.setMessages.mockClear();
 
     // Second render should load from storage
     mockUseChat.mockReturnValue({
       messages: [],
-      sendMessage: mockSendMessage,
-      setMessages: mockSetMessages,
+      sendMessage: mocks.sendMessage,
+      setMessages: mocks.setMessages,
       status: "idle",
     });
 
     render(<ChatInterface />);
 
-    expect(mockSetMessages).toHaveBeenCalledWith(messages);
+    expect(mocks.setMessages).toHaveBeenCalledWith(messages);
   });
 
   it("should handle navigation and return scenario", async () => {
@@ -196,8 +200,8 @@ describe("ChatInterface Session Storage", () => {
 
     mockUseChat.mockReturnValue({
       messages: conversationMessages,
-      sendMessage: mockSendMessage,
-      setMessages: mockSetMessages,
+      sendMessage: mocks.sendMessage,
+      setMessages: mocks.setMessages,
       status: "idle",
     });
 
@@ -213,18 +217,18 @@ describe("ChatInterface Session Storage", () => {
     unmount();
 
     // User navigates back (new mount)
-    mockSetMessages.mockClear();
+    mocks.setMessages.mockClear();
     mockUseChat.mockReturnValue({
       messages: [],
-      sendMessage: mockSendMessage,
-      setMessages: mockSetMessages,
+      sendMessage: mocks.sendMessage,
+      setMessages: mocks.setMessages,
       status: "idle",
     });
 
     render(<ChatInterface />);
 
     // Messages should be restored
-    expect(mockSetMessages).toHaveBeenCalledWith(conversationMessages);
+    expect(mocks.setMessages).toHaveBeenCalledWith(conversationMessages);
   });
 
   it("should send a message when form is submitted", () => {
@@ -234,9 +238,11 @@ describe("ChatInterface Session Storage", () => {
     const form = input.closest("form");
 
     fireEvent.change(input, { target: { value: "New message" } });
-    fireEvent.submit(form!);
+    if (form) {
+      fireEvent.submit(form);
+    }
 
-    expect(mockSendMessage).toHaveBeenCalledWith({
+    expect(mocks.sendMessage).toHaveBeenCalledWith({
       role: "user",
       parts: [{ type: "text", text: "New message" }],
     });

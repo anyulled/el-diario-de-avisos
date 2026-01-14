@@ -31,12 +31,16 @@ export async function processRtfContent(content: Buffer | string | null, id: num
       return html;
     }
 
-    // Process RTF content
-    // HACK: Manually unescape RTF hex sequences for Latin1 characters (\'xx)
+    /*
+     * Process RTF content
+     * HACK: Manually unescape RTF hex sequences for Latin1 characters (\'xx)
+     */
     const unescapedRtf = contentString.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
       const code = parseInt(hex, 16);
-      // Only decode extended ASCII range (128-255).
-      // Standard ASCII escapes (if any) might be handled slightly differently or not occur as \'xx often.
+      /*
+       * Only decode extended ASCII range (128-255).
+       * Standard ASCII escapes (if any) might be handled slightly differently or not occur as \'xx often.
+       */
       if (code >= 0x80 && code <= 0xff) {
         return String.fromCharCode(code);
       }

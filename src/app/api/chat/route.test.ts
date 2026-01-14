@@ -132,7 +132,7 @@ describe("Chat API Route", () => {
     // Verify system prompt includes fallback message
     expect(streamText).toHaveBeenCalledWith(
       expect.objectContaining({
-        system: expect.stringContaining("No se encontraron artículos específicos"),
+        system: expect.stringContaining("No se encontraron artículos específicos") as unknown as string,
       }),
     );
   });
@@ -173,8 +173,10 @@ describe("Chat API Route", () => {
 
     await POST(mockRequest);
 
-    // The content extraction should handle the parts array
-    // This is a regression test for the UIMessage.parts structure
+    /*
+     * The content extraction should handle the parts array
+     * This is a regression test for the UIMessage.parts structure
+     */
     expect(findSimilarArticles).toHaveBeenCalled();
   });
 
