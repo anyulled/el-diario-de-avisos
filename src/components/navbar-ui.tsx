@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/styles";
-import { BookOpen, Calendar, Info, Menu, MessageSquare, Search, X } from "lucide-react";
+import { BookOpen, Calendar, Info, Menu, MessageSquare, Quote, Search, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -75,6 +75,11 @@ export function NavbarUI({ essays }: NavbarUIProps) {
             <MessageSquare size={16} />
             <span className="text-sm font-medium">Asistente</span>
           </Link>
+
+          <Link href="/como-citar" className="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-full transition-colors backdrop-blur-sm">
+            <Quote size={16} />
+            <span className="text-sm font-medium">Cómo citar</span>
+          </Link>
           <Link href="/about" className="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-full transition-colors backdrop-blur-sm">
             <Info size={16} />
             <span className="text-sm font-medium">Acerca de</span>
@@ -129,6 +134,11 @@ export function NavbarUI({ essays }: NavbarUIProps) {
             <Link href="/chat" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
               <MessageSquare size={24} />
               Asistente
+            </Link>
+
+            <Link href="/como-citar" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
+              <Quote size={24} />
+              Cómo citar
             </Link>
 
             <Link href="/about" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
