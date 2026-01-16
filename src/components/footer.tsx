@@ -45,7 +45,11 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
           <p>© {new Date().getFullYear()} Noticias Musicales en el Diario de Avisos. Todos los derechos reservados.</p>
-          <p>Universidad Central de Venezuela</p>
+          <p>
+            <a href="http://www.ucv.ve/" target="_blank" rel="noopener noreferrer" className="hover:text-amber-600 transition-colors">
+              Universidad Central de Venezuela
+            </a>
+          </p>
         </div>
       </div>
     </footer>
