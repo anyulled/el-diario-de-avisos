@@ -5,14 +5,14 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const TRACKS = [
-  { title: "Track 00", src: "/music/M00.mp3" },
-  { title: "Track 01", src: "/music/M01.mp3" },
-  { title: "Track 02", src: "/music/M02.mp3" },
-  { title: "Track 03", src: "/music/M03.mp3" },
-  { title: "Track 04", src: "/music/M04.mp3" },
-  { title: "Track 05", src: "/music/M05.mp3" },
-  { title: "Track 06", src: "/music/M06.mp3" },
-  { title: "Track 07", src: "/music/M07.MP3" },
+  { title: "El Cáliz de una flor", artist: "Rafael Saumell", src: "/music/M00.mp3" },
+  { title: "Un Bal en Reve", artist: "Teresa Carreño", src: "/music/M01.mp3" },
+  { title: "La Dulzura de tu rostro", artist: "Ramón Delgado Palacios", src: "/music/M02.mp3" },
+  { title: "El Guitarrero", artist: "Carlos Acevedo", src: "/music/M03.mp3" },
+  { title: "Lu (Suite Lu ci la)", artist: "Ramón Delgado Palacios", src: "/music/M04.mp3" },
+  { title: "Ci (Suite Lu ci la)", artist: "Ramón Delgado Palacios", src: "/music/M05.mp3" },
+  { title: "La (Suite Lu ci la)", artist: "Ramón Delgado Palacios", src: "/music/M06.mp3" },
+  { title: "La bartolada", artist: "Anónimo de Pto. Cabello", src: "/music/M07.MP3" },
 ];
 
 export function MusicPlayer() {
@@ -140,7 +140,7 @@ export function MusicPlayer() {
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-sm">{TRACKS[currentTrack].title}</span>
-            <span className="text-xs text-gray-400">Noticias Musicales en el Diario de Avisos</span>
+            <span className="text-xs text-gray-400">{TRACKS[currentTrack].artist}</span>
           </div>
         </div>
 
