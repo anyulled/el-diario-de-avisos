@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 // Import new fonts
-import { Geist, Geist_Mono, Lora, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,11 +15,6 @@ const geistMono = Geist_Mono({
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
-  subsets: ["latin"],
-});
-
-const lora = Lora({
-  variable: "--font-lora",
   subsets: ["latin"],
 });
 
@@ -72,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lora.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}>
         {children}
         <Footer />
         <Analytics />

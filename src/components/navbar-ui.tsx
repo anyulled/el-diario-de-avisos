@@ -2,9 +2,10 @@
 
 import { cn } from "@/lib/styles";
 import { BookOpen, Calendar, Info, Menu, MessageSquare, Quote, Search, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Essay {
   id: number;
@@ -17,11 +18,14 @@ interface NavbarUIProps {
 
 export function NavbarUI({ essays }: NavbarUIProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEnsayosOpen, setIsEnsayosOpen] = useState(false);
   const pathname = usePathname();
+  const ensayosRef = useRef<HTMLDivElement>(null);
 
   // Close menu when route changes
   useEffect(() => {
     setIsOpen(false);
+    setIsEnsayosOpen(false);
   }, [pathname]);
 
   // Prevent scroll when menu is open
@@ -36,21 +40,47 @@ export function NavbarUI({ essays }: NavbarUIProps) {
     };
   }, [isOpen]);
 
+  // Click outside to close Ensayos dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ensayosRef.current && !ensayosRef.current.contains(event.target as Node)) {
+        setIsEnsayosOpen(false);
+      }
+    };
+
+    if (isEnsayosOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEnsayosOpen]);
+
   return (
     <nav className="absolute top-0 left-0 right-0 z-50 py-4 md:py-6 text-white/90">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link href="/" className="font-bold text-xl tracking-tighter hover:text-white transition-colors z-50 relative uppercase">
+        <Link href="/" className="font-bold text-xl tracking-tighter hover:text-white transition-colors z-50 relative uppercase flex items-center gap-3">
+          <Image src="/icon.png" alt="Logo" width={40} height={40} className="rounded" />
           Noticias Musicales
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">
-          <div className="relative group">
-            <button className="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-full transition-colors backdrop-blur-sm cursor-pointer">
+          <div className="relative group" ref={ensayosRef}>
+            <button
+              onClick={() => setIsEnsayosOpen(!isEnsayosOpen)}
+              className="flex items-center gap-2 hover:bg-white/10 px-4 py-2 rounded-full transition-colors backdrop-blur-sm cursor-pointer"
+            >
               <BookOpen size={16} />
               <span className="text-sm font-medium">Ensayos</span>
             </button>
-            <div className="absolute right-0 mt-2 w-64 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right p-2 max-h-96 overflow-y-auto z-50">
+            <div
+              className={cn(
+                "absolute right-0 mt-2 w-64 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-lg shadow-xl transition-all duration-200 transform origin-top-right p-2 max-h-96 overflow-y-auto z-50",
+                isEnsayosOpen ? "opacity-100 visible" : "opacity-0 invisible group-hover:opacity-100 group-hover:visible",
+              )}
+            >
               <div className="flex flex-col gap-1">
                 {essays.map((essay) => (
                   <Link

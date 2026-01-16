@@ -14,13 +14,23 @@ export function Footer() {
 
           <div className="flex items-center gap-8 pl-4 border-l-0 md:border-l border-gray-200 dark:border-zinc-800">
             <div className="flex flex-col items-center gap-2">
-              <div className="relative h-12 w-auto aspect-[1/1] grayscale hover:grayscale-0 transition-all opacity-80 hover:opacity-100">
+              <a
+                href="http://www.ucv.ve/artes"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-12 w-auto aspect-[1/1] grayscale hover:grayscale-0 transition-all opacity-80 hover:opacity-100"
+              >
                 <Image src="/logo.png" alt="Logo Escuela de Artes" height={48} width={48} className="object-contain h-full w-auto" />
-              </div>
+              </a>
             </div>
 
             <div className="flex flex-col items-center gap-2">
-              <div className="relative h-12 w-auto aspect-[1/1] grayscale hover:grayscale-0 transition-all opacity-80 hover:opacity-100">
+              <a
+                href="http://www.ucv.ve/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-12 w-auto aspect-[1/1] grayscale hover:grayscale-0 transition-all opacity-80 hover:opacity-100"
+              >
                 <Image
                   src="/logo_ucv.jpg"
                   alt="Logo Universidad Central de Venezuela"
@@ -28,7 +38,7 @@ export function Footer() {
                   width={48}
                   className="object-contain h-full w-auto mix-blend-multiply dark:mix-blend-normal rounded-full"
                 />
-              </div>
+              </a>
             </div>
           </div>
         </div>

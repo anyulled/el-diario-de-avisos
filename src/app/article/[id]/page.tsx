@@ -48,7 +48,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                   : `Año ${article.publicationYear}`}
               </span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">{article.title || "Sin Título"}</h1>
+            <h1 className="text-3xl md:text-5xl font-bold font-serif text-white tracking-tight leading-tight">{article.title || "Sin Título"}</h1>
           </div>
         </div>
       </div>
