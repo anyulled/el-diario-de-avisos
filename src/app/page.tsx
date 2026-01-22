@@ -33,7 +33,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Resultados de Búsqueda ({total})</h2>
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
         </div>
-        <NewsGrid news={news} />
+        <NewsGrid news={news} searchTerm={params.text || null} />
 
         <Pagination total={total} pageSize={pageSize} currentPage={currentPage} />
       </div>

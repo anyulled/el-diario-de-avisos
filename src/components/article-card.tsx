@@ -1,10 +1,12 @@
 import { articles } from "@/db/schema";
 import Link from "next/link";
 
-export function ArticleCard({ item }: { item: typeof articles.$inferSelect }) {
+export function ArticleCard({ item, searchTerm }: { item: typeof articles.$inferSelect; searchTerm: string | null }) {
+  const href = searchTerm ? `/article/${item.id}?text=${encodeURIComponent(searchTerm)}` : `/article/${item.id}`;
+
   return (
     <Link
-      href={`/article/${item.id}`}
+      href={href}
       className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-zinc-800 flex flex-col h-full group block"
     >
       <div className="p-6 flex-1 flex flex-col">

@@ -1,6 +1,7 @@
 import { getArticleById, getArticleSection } from "@/app/actions";
 import { Navbar } from "@/components/navbar";
 import { processRtfContent } from "@/lib/rtf-html-converter";
+import { highlightText } from "@/lib/search-highlighter";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
@@ -21,8 +22,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ArticlePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ text?: string }> }) {
   const { id } = await params;
+  const { text: searchTerm } = await searchParams;
   const article = await getArticleById(Number(id));
   const section = article.columnId ? await getArticleSection(article.columnId) : null;
 
@@ -30,7 +32,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     notFound();
   }
 
-  const htmlContent = await processRtfContent(article.content as Buffer | string | null, id);
+  const rawHtmlContent = await processRtfContent(article.content as Buffer | string | null, id);
+
+  // Apply highlighting if search term is present
+  const htmlContent = searchTerm ? highlightText(rawHtmlContent, searchTerm) : rawHtmlContent;
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950 pb-20">
