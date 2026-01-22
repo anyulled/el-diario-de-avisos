@@ -22,13 +22,11 @@ export function NavbarUI({ essays }: NavbarUIProps) {
   const pathname = usePathname();
   const ensayosRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when route changes
   useEffect(() => {
     setIsOpen(false);
     setIsEnsayosOpen(false);
   }, [pathname]);
 
-  // Prevent scroll when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -40,7 +38,6 @@ export function NavbarUI({ essays }: NavbarUIProps) {
     };
   }, [isOpen]);
 
-  // Click outside to close Ensayos dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ensayosRef.current && !ensayosRef.current.contains(event.target as Node)) {

@@ -23,7 +23,6 @@ export function MusicPlayer() {
   const [volume, setVolume] = useState(1);
   const [restoredTime, setRestoredTime] = useState<number | null>(null);
 
-  // Load state from session storage on mount
   useEffect(() => {
     const loadSavedState = () => {
       const saved = sessionStorage.getItem("da_music_player");
@@ -51,7 +50,6 @@ export function MusicPlayer() {
     loadSavedState();
   }, []);
 
-  // Save state to session storage periodically
   useEffect(() => {
     if (!hasLoaded) return;
 
@@ -70,7 +68,6 @@ export function MusicPlayer() {
     saveState();
     const interval = setInterval(saveState, 5000);
 
-    // Also save on beforeunload to capture the final state
     const handleBeforeUnload = () => saveState();
     window.addEventListener("beforeunload", handleBeforeUnload);
 
@@ -85,13 +82,11 @@ export function MusicPlayer() {
   };
 
   const nextTrack = () => {
-    // Clear restored time on manual track change
     setRestoredTime(null);
     setCurrentTrack((prev) => (prev + 1) % TRACKS.length);
   };
 
   const prevTrack = () => {
-    // Clear restored time on manual track change
     setRestoredTime(null);
     setCurrentTrack((prev) => (prev - 1 + TRACKS.length) % TRACKS.length);
   };
@@ -104,7 +99,6 @@ export function MusicPlayer() {
     }
   };
 
-  // Effect to handle play/pause and volume synchronization
   useEffect(() => {
     if (!hasLoaded || !audioRef.current) return;
 
@@ -119,14 +113,11 @@ export function MusicPlayer() {
     } else {
       audio.pause();
     }
-    // Trigger when track changes, play state changes or volume changes
   }, [isPlaying, hasLoaded, currentTrack, volume]);
 
-  // Handle Metadata Loaded to restore time
   const handleLoadedMetadata = () => {
     if (audioRef.current && restoredTime !== null) {
       audioRef.current.currentTime = restoredTime;
-      // Reset after applying
       setRestoredTime(null);
     }
   };

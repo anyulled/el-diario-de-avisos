@@ -16,7 +16,6 @@ export default function ChatInterface({ className }: { className?: string }) {
   const isLoading = status === "submitted" || status === "streaming";
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load messages from session storage on mount
   useEffect(() => {
     const savedMessages = sessionStorage.getItem(CHAT_STORAGE_KEY);
     if (savedMessages) {
@@ -30,14 +29,12 @@ export default function ChatInterface({ className }: { className?: string }) {
     setIsHydrated(true);
   }, [setMessages]);
 
-  // Save messages to session storage whenever they change
   useEffect(() => {
     if (isHydrated && messages.length > 0) {
       sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
     }
   }, [messages, isHydrated]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;

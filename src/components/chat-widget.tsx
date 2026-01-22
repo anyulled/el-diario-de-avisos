@@ -9,7 +9,6 @@ export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  // Don't show the widget on the dedicated chat page
   if (pathname === "/chat") return null;
 
   return (
