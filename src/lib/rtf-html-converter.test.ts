@@ -71,4 +71,20 @@ describe("processRtfContent", () => {
     // Should REMAIN \'7f because logic only unescapes 128-255
     expect(result).toContain("\\'7f");
   });
+
+  describe("font style stripping", () => {
+    it("should strip font-size from RTF content", async () => {
+      const content = "{\\rtf1 \\fs16 Small text}";
+      const result = await processRtfContent(content, 1);
+      // The stripFontStyles function should remove any font-size styles
+      expect(result).not.toContain("font-size");
+    });
+
+    it("should strip font-family from RTF content", async () => {
+      const content = "{\\rtf1 \\f0 Arial text}";
+      const result = await processRtfContent(content, 1);
+      // The stripFontStyles function should remove any font-family styles
+      expect(result).not.toContain("font-family");
+    });
+  });
 });

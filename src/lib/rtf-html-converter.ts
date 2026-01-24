@@ -5,6 +5,23 @@ import { promisify } from "util";
 
 const rtfToHtml = promisify(fromString);
 
+/**
+ * Strips inline font-size and font-family styles from HTML to ensure consistent typography
+ * @param html - The HTML string to process
+ * @returns The HTML string with font styles removed
+ */
+function stripFontStyles(html: string): string {
+  return (
+    html
+      .replace(/\s*font-size:\s*[^;]+;?/gi, "")
+      .replace(/\s*font-family:\s*[^;]+;?/gi, "")
+      // Remove empty style attributes
+      .replace(/\s*style=""\s*/gi, "")
+      // Remove style attributes with only whitespace
+      .replace(/\s*style="\s*"\s*/gi, "")
+  );
+}
+
 export async function processRtfContent(content: Buffer | string | null, id: number | string): Promise<string> {
   if (!content) return "Contenido no disponible";
   try {
@@ -52,7 +69,8 @@ export async function processRtfContent(content: Buffer | string | null, id: num
       template: (_doc: unknown, _defaults: unknown, content: string) => content,
     });
 
-    return html;
+    // Strip inline font-size and font-family styles to ensure consistent typography
+    return stripFontStyles(html);
   } catch (e) {
     console.error(`[Content ${id}] Error processing content:`, e);
     const rawContent = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
