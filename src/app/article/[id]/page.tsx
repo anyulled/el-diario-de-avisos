@@ -2,6 +2,7 @@ import { getArticleById, getArticleSection } from "@/app/actions";
 import { Navbar } from "@/components/navbar";
 import { processRtfContent } from "@/lib/rtf-html-converter";
 import { highlightText } from "@/lib/search-highlighter";
+import { formatArticleTitle } from "@/lib/title-formatter";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
@@ -11,10 +12,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!article) return {};
 
   return {
-    title: article.title || "Sin Título",
+    title: formatArticleTitle(article.title),
     description: article.subtitle || `Año ${article.publicationYear}${article.page ? ` - Página ${article.page}` : ""}`,
     openGraph: {
-      title: article.title || "Sin Título",
+      title: formatArticleTitle(article.title),
       description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
       type: "article",
       publishedTime: article.date || undefined,
@@ -53,7 +54,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
                   : `Año ${article.publicationYear}`}
               </span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold font-serif text-white tracking-tight leading-tight">{article.title || "Sin Título"}</h1>
+            <h1 className="text-3xl md:text-5xl font-bold font-serif text-white tracking-tight leading-tight">{formatArticleTitle(article.title)}</h1>
           </div>
         </div>
       </div>

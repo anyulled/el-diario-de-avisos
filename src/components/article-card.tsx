@@ -1,4 +1,5 @@
 import { articles } from "@/db/schema";
+import { formatArticleTitle } from "@/lib/title-formatter";
 import Link from "next/link";
 
 export function ArticleCard({ item, searchTerm }: { item: typeof articles.$inferSelect; searchTerm: string | null }) {
@@ -16,7 +17,7 @@ export function ArticleCard({ item, searchTerm }: { item: typeof articles.$infer
           </span>
         </div>
         <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-gray-100 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight">
-          {item.title || "Sin Título"}
+          {formatArticleTitle(item.title)}
         </h3>
         <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-4 leading-relaxed flex-1">{item.subtitle}</p>
       </div>
