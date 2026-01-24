@@ -6,11 +6,18 @@ vi.mock("@iarna/rtf-to-html", () => ({
   fromString: (rtf: string, options: unknown, cb: (err: Error | null, html: string) => void) => {
     // Determine callback if options is omitted (though in our code we pass options)
     const callback = (typeof options === "function" ? options : cb) as (err: Error | null, html: string) => void;
-    // Return mock HTML with the text content if possible, or just a static string
+
+    // Return realistic HTML with inline styles to properly test stripFontStyles
     if (rtf.includes("ERROR_PLEASE")) {
       callback(new Error("Mock Error"), "");
     } else if (rtf.includes("Hello World")) {
       callback(null, "<div>Hello World</div>");
+    } else if (rtf.includes("\\fs16")) {
+      // Mock RTF with font-size - return HTML with inline font-size style
+      callback(null, '<span style="font-size: 8pt;">Small text</span>');
+    } else if (rtf.includes("\\f0")) {
+      // Mock RTF with font-family - return HTML with inline font-family style
+      callback(null, '<span style="font-family: Arial;">Arial text</span>');
     } else {
       // Return the input as "html" so we can verify if unescape happened
       callback(null, rtf);
