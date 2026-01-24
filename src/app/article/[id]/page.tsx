@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   return {
     title: article.title || "Sin Título",
-    description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
+    description: article.subtitle || `Año ${article.publicationYear}${article.page ? ` - Página ${article.page}` : ""}`,
     openGraph: {
       title: article.title || "Sin Título",
       description: article.subtitle || `Año ${article.publicationYear} - Página ${article.page}`,
@@ -69,7 +69,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
           </div>
 
           <div className="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center text-sm text-gray-500">
-            <span>Página: {article.page}</span>
+            <span>Página: {article.page || "No especificada"}</span>
             <span>Ref: {article.id}</span>
           </div>
         </div>

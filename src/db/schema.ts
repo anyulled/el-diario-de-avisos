@@ -22,7 +22,7 @@ export const articles = pgTable("articulos", {
   columnId: integer("col_cod"),
   pubId: integer("pub_cod"),
   issueId: integer("ejm_cod"),
-  page: integer("arti_pag"),
+  page: varchar("arti_pag", { length: 50 }),
   content: bytea("arti_contenido"),
   cota: varchar("arti_cota", { length: 128 }),
   code2: varchar("arti_cod2", { length: 128 }),

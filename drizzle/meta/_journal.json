@@ -15,6 +15,13 @@
       "when": 1767691091532,
       "tag": "0001_mighty_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769268262283,
+      "tag": "0002_dizzy_lily_hollister",
+      "breakpoints": true
     }
   ]
 }

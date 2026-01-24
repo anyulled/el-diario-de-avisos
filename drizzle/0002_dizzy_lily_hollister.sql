@@ -1,0 +1,12 @@
+CREATE TABLE "ensayos_embeddings" (
+	"ensayo_cod" integer PRIMARY KEY NOT NULL,
+	"embedding" vector(768),
+	"updated_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+ALTER TABLE "articulos" ALTER COLUMN "arti_fecha" SET DATA TYPE timestamp;--> statement-breakpoint
+ALTER TABLE "articulos" ALTER COLUMN "arti_pag" SET DATA TYPE varchar(50);--> statement-breakpoint
+ALTER TABLE "articulos" ADD COLUMN "arti_fecha_timestamp" timestamp;--> statement-breakpoint
+ALTER TABLE "articulos" ADD COLUMN "arti_fecha_old" varchar(50);--> statement-breakpoint
+ALTER TABLE "articulos" ADD COLUMN "search_vector" "tsvector";--> statement-breakpoint
+ALTER TABLE "ensayos_embeddings" ADD CONSTRAINT "ensayos_embeddings_ensayo_cod_ensayos_ensayo_cod_fk" FOREIGN KEY ("ensayo_cod") REFERENCES "public"."ensayos"("ensayo_cod") ON DELETE no action ON UPDATE no action;
