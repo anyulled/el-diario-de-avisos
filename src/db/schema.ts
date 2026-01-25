@@ -75,6 +75,7 @@ export const members = pgTable("integrantes", {
   faculty: varchar("intg_facultad", { length: 255 }),
   department: varchar("intg_departamento", { length: 255 }),
   photo: bytea("intg_foto"),
+  resume: varchar("intg_resumen"),
 });
 
 export const subjects = pgTable("materias", {
@@ -123,6 +124,16 @@ export const tutors = pgTable("tutores", {
   id: serial("tutor_cod").primaryKey().notNull(),
   names: varchar("tutor_nombres", { length: 255 }),
   title: varchar("tutor_titulo", { length: 20 }),
+  photoPath: varchar("tutor_foto_path", { length: 255 }),
+  resume: varchar("tutor_resumen"),
+});
+
+export const developers = pgTable("desarrolladores", {
+  id: serial("dev_cod").primaryKey().notNull(),
+  firstName: varchar("dev_nombres", { length: 255 }),
+  lastName: varchar("dev_apellidos", { length: 255 }),
+  photoPath: varchar("dev_foto", { length: 255 }),
+  resume: varchar("dev_resumen"),
 });
 
 export const articleTopics = pgTable(

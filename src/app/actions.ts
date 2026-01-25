@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { articles, essays, members, publicationColumns, tutors } from "@/db/schema";
+import { articles, developers, essays, members, publicationColumns, tutors } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { and, eq, sql } from "drizzle-orm";
@@ -121,6 +121,10 @@ export async function getIntegrantes() {
 
 export async function getTutores() {
   return await db.select().from(tutors);
+}
+
+export async function getDevelopers() {
+  return await db.select().from(developers);
 }
 
 export async function getArticleById(id: number) {

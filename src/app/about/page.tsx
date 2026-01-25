@@ -1,9 +1,11 @@
 import { Navbar } from "@/components/navbar";
-import { getIntegrantes, getTutores } from "../actions";
+import Image from "next/image";
+import { getDevelopers, getIntegrantes, getTutores } from "../actions";
 
 export default async function AboutPage() {
   const integrantes = await getIntegrantes();
   const tutores = await getTutores();
+  const desarrolladores = await getDevelopers();
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-zinc-950">
@@ -49,6 +51,32 @@ export default async function AboutPage() {
                   <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.names}</span>
                   <span className="text-sm text-amber-600 dark:text-amber-500">{t.title}</span>
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800 text-amber-700 dark:text-amber-500">Desarrolladores</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {desarrolladores.map((dev) => (
+              <div key={dev.id} className="flex flex-col p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+                <div className="flex items-start gap-4 mb-4">
+                  {dev.photoPath ? (
+                    <Image src={dev.photoPath} alt={`${dev.firstName} ${dev.lastName}`} width={64} height={64} className="rounded-full object-cover" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-400">
+                      <span className="text-xl font-serif">D</span>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                      {dev.firstName} {dev.lastName}
+                    </span>
+                    <span className="text-sm text-amber-600 dark:text-amber-500">Desarrollador</span>
+                  </div>
+                </div>
+                {dev.resume && <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{dev.resume}</p>}
               </div>
             ))}
           </div>
