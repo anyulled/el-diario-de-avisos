@@ -77,6 +77,8 @@ export default async function AboutPage() {
                 subtitle={i.faculty}
                 subtitleTone="muted"
                 eyebrow={i.department}
+                linkedinUrl={i.linkedinUrl}
+                twitterUrl={i.twitterUrl}
                 fallbackLetter="I"
               />
             ))}
@@ -87,7 +89,16 @@ export default async function AboutPage() {
           <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800 text-amber-700 dark:text-amber-500">Tutores</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {tutores.map((t) => (
-              <MemberCard key={t.id} fullName={t.names} subtitle={t.title} photoPath={t.photoPath} resume={t.resume} fallbackLetter="T" />
+              <MemberCard
+                key={t.id}
+                fullName={t.names}
+                subtitle={t.title}
+                photoPath={t.photoPath}
+                resume={t.resume}
+                linkedinUrl={t.linkedinUrl}
+                twitterUrl={t.twitterUrl}
+                fallbackLetter="T"
+              />
             ))}
           </div>
         </section>
@@ -103,6 +114,8 @@ export default async function AboutPage() {
                 lastName={dev.lastName}
                 subtitle="Desarrollador"
                 resume={dev.resume}
+                linkedinUrl={dev.linkedinUrl}
+                twitterUrl={dev.twitterUrl}
                 fallbackLetter="D"
               />
             ))}

@@ -75,6 +75,8 @@ export const members = pgTable("integrantes", {
   faculty: varchar("intg_facultad", { length: 255 }),
   department: varchar("intg_departamento", { length: 255 }),
   photo: varchar("intg_foto"),
+  linkedinUrl: varchar("intg_linkedin_url", { length: 255 }),
+  twitterUrl: varchar("intg_twitter_url", { length: 255 }),
   resume: varchar("intg_resumen"),
 });
 
@@ -125,6 +127,8 @@ export const tutors = pgTable("tutores", {
   names: varchar("tutor_nombres", { length: 255 }),
   title: varchar("tutor_titulo", { length: 20 }),
   photoPath: varchar("tutor_foto_path", { length: 255 }),
+  linkedinUrl: varchar("tutor_linkedin_url", { length: 255 }),
+  twitterUrl: varchar("tutor_twitter_url", { length: 255 }),
   resume: varchar("tutor_resumen"),
 });
 
@@ -133,6 +137,8 @@ export const developers = pgTable("desarrolladores", {
   firstName: varchar("dev_nombres", { length: 255 }),
   lastName: varchar("dev_apellidos", { length: 255 }),
   photoPath: varchar("dev_foto", { length: 255 }),
+  linkedinUrl: varchar("dev_linkedin_url", { length: 255 }),
+  twitterUrl: varchar("dev_twitter_url", { length: 255 }),
   resume: varchar("dev_resumen"),
 });
 

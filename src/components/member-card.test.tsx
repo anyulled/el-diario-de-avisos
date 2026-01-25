@@ -8,8 +8,18 @@ vi.mock("next/image", () => ({
 }));
 
 describe("MemberCard", () => {
-  it("renders the full name, photo, and resume", () => {
-    render(<MemberCard fullName="Ana Torres" subtitle="Tutora" photoPath="/images/ana.jpg" resume="Docente universitaria." fallbackLetter="T" />);
+  it("renders the full name, photo, resume, and social links", () => {
+    render(
+      <MemberCard
+        fullName="Ana Torres"
+        subtitle="Tutora"
+        photoPath="/images/ana.jpg"
+        resume="Docente universitaria."
+        linkedinUrl="https://linkedin.com/in/ana"
+        twitterUrl="https://twitter.com/ana"
+        fallbackLetter="T"
+      />,
+    );
 
     expect(screen.getByText("Ana Torres")).toBeTruthy();
     expect(screen.getByText("Tutora")).toBeTruthy();
@@ -17,6 +27,11 @@ describe("MemberCard", () => {
     const image = screen.getByTestId("next-image");
     expect(image.getAttribute("data-alt")).toBe("Ana Torres");
     expect(image.getAttribute("data-src")).toBe("/images/ana.jpg");
+
+    const linkedinLink = screen.getByRole("link", { name: "LinkedIn" });
+    const twitterLink = screen.getByRole("link", { name: "Twitter" });
+    expect(linkedinLink.getAttribute("href")).toBe("https://linkedin.com/in/ana");
+    expect(twitterLink.getAttribute("href")).toBe("https://twitter.com/ana");
   });
 
   it("renders fallback avatar and muted subtitle", () => {
@@ -41,5 +56,7 @@ describe("MemberCard", () => {
 
     const headerRow = container.querySelector(".flex.items-start.gap-4");
     expect(headerRow?.className).not.toContain("mb-4");
+    expect(screen.queryByRole("link", { name: "LinkedIn" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Twitter" })).toBeNull();
   });
 });
