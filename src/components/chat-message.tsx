@@ -51,6 +51,8 @@ function ChatMessage({ message }: { message: UIMessage }) {
   );
 }
 
-// Memoized to prevent re-renders of all messages when the user types in the input
-// or when new messages are added to the list.
+/**
+ * Memoized to prevent re-renders of all messages when the user types in the input
+ * or when new messages are added to the list.
+ */
 export default memo(ChatMessage);
