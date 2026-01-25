@@ -11,7 +11,6 @@ vi.mock('@/db', () => ({
   },
 }));
 
-// Mock schema to avoid actual db dependencies
 vi.mock('@/db/schema', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/db/schema')>();
   return {
@@ -19,7 +18,6 @@ vi.mock('@/db/schema', async (importOriginal) => {
   };
 });
 
-// Mock other dependencies that might be used
 vi.mock('@/lib/date-range', () => ({
   normalizeDateRange: () => ({ start: null, end: null, isValidRange: true }),
 }));
@@ -28,43 +26,62 @@ vi.mock('@/lib/news-order', () => ({
   getNewsOrderBy: () => [],
 }));
 
+type MockResult = Record<string, unknown>[];
+
+interface MockChain {
+  from: () => MockChain;
+  $dynamic: () => MockChain;
+  where: () => MockChain;
+  orderBy: () => MockChain;
+  limit: () => MockChain;
+  offset: () => MockChain;
+  then: (resolve: (val: MockResult) => void, reject: (err: unknown) => void) => Promise<void>;
+}
+
 describe('getNews Performance', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   it('should run queries in parallel', async () => {
-    let activeQueries = 0;
-    let maxConcurrency = 0;
+    const stats = {
+      activeQueries: 0,
+      maxConcurrency: 0,
+    };
 
-    // A helper to simulate query execution delay and tracking
-    const executeQuery = async (result: any) => {
-      activeQueries++;
-      maxConcurrency = Math.max(maxConcurrency, activeQueries);
-      await delay(100); // 100ms delay
-      activeQueries--;
+    /**
+     * A helper to simulate query execution delay and tracking
+     */
+    const executeQuery = async (result: MockResult) => {
+      stats.activeQueries++;
+      stats.maxConcurrency = Math.max(stats.maxConcurrency, stats.activeQueries);
+      // 100ms delay
+      await delay(100);
+      stats.activeQueries--;
       return result;
     };
 
-    // Chainable mock object factory
-    const createMockChain = (result: any) => {
-      const chain: any = {};
+    /**
+     * Chainable mock object factory
+     */
+    const createMockChain = (result: MockResult): MockChain => {
+      const chain: Partial<MockChain> = {};
 
-      const methods = ['from', '$dynamic', 'where', 'orderBy', 'limit', 'offset'];
-      methods.forEach(method => {
-        chain[method] = vi.fn().mockReturnValue(chain);
+      const methods = ['from', '$dynamic', 'where', 'orderBy', 'limit', 'offset'] as const;
+      methods.forEach((method) => {
+        chain[method] = vi.fn().mockReturnValue(chain as MockChain);
       });
 
-      // The 'then' method makes it awaitable
-      chain.then = (resolve: any, reject: any) => {
+      chain.then = (resolve, reject) => {
         return executeQuery(result).then(resolve, reject);
       };
 
-      return chain;
+      return chain as MockChain;
     };
 
-    // Cast db to any to access the mock
-    (db.select as any).mockImplementation((selection: any) => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    mockSelect.mockImplementation((selection: { count?: unknown }) => {
        // If selection has 'count', return count result
        if (selection && selection.count) {
            return createMockChain([{ count: 10 }]);
@@ -75,7 +92,7 @@ describe('getNews Performance', () => {
 
     await getNews({});
 
-    console.log(`Max concurrency: ${maxConcurrency}`);
-    expect(maxConcurrency).toBe(2);
+    console.log(`Max concurrency: ${stats.maxConcurrency}`);
+    expect(stats.maxConcurrency).toBe(2);
   });
 });
