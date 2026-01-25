@@ -34,11 +34,13 @@ describe("Search Functionality", () => {
     // Wait for results
     cy.get('a[href^="/article/"]').should("be.visible");
 
-    // Verify search term is highlighted (has mark tag or highlight class)
-    // Note: Search results on the grid do not currently display highlights in the production code.
-    // We keep the selector check for the article card, but the highlight check might fail if not implemented.
-    // cy.get("mark, .highlight").should("exist");
-    // cy.get("mark, .highlight").should("contain", "José");
+    /*
+     * Verify search term is highlighted (has mark tag or highlight class)
+     * Note: Search results on the grid do not currently display highlights in the production code.
+     * We keep the selector check for the article card, but the highlight check might fail if not implemented.
+     * cy.get("mark, .highlight").should("exist");
+     * cy.get("mark, .highlight").should("contain", "José");
+     */
   });
 
   it("should handle accent-insensitive search", () => {
@@ -74,8 +76,10 @@ describe("Search Functionality", () => {
     // Click on a result
     cy.get('a[href^="/article/"]').first().click();
 
-    // Verify URL contains search query parameter
-    // Production code uses 'text' parameter, not 'q'
+    /*
+     * Verify URL contains search query parameter
+     * Production code uses 'text' parameter, not 'q'
+     */
     cy.url().should("include", "text=");
 
     // Verify search term is highlighted in article content
