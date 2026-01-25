@@ -74,7 +74,7 @@ export const members = pgTable("integrantes", {
   idCard: integer("inrg_cedula"),
   faculty: varchar("intg_facultad", { length: 255 }),
   department: varchar("intg_departamento", { length: 255 }),
-  photo: bytea("intg_foto"),
+  photo: varchar("intg_foto"),
   resume: varchar("intg_resumen"),
 });
 

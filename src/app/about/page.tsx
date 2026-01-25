@@ -28,6 +28,7 @@ export default async function AboutPage() {
               <MemberCard
                 key={i.id}
                 firstName={i.firstName}
+                photoPath={i.photo}
                 lastName={i.lastName}
                 subtitle={i.faculty}
                 subtitleTone="muted"
