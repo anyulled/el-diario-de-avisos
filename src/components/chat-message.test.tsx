@@ -20,7 +20,7 @@ describe("ChatMessage", () => {
 
     expect(screen.getByText("Hello AI")).toBeDefined();
     // User icon container
-    expect(screen.getByText("Hello AI").closest(".flex-row-reverse")).toBeDefined();
+    expect(screen.getByText("Hello AI").closest(".flex-row-reverse")).not.toBeNull();
   });
 
   it("renders assistant message correctly with markdown", () => {
@@ -35,7 +35,7 @@ describe("ChatMessage", () => {
     const content = screen.getByTestId("markdown-content");
     expect(content.textContent).toBe("**Bold** response");
     // Assistant icon container (not reversed)
-    expect(content.closest(".flex-row")).toBeDefined();
+    expect(content.closest(".flex-row")).not.toBeNull();
   });
 
   it("handles empty text parts gracefully", () => {
@@ -45,7 +45,11 @@ describe("ChatMessage", () => {
       parts: [],
     };
 
-    render(<ChatMessage message={message} />);
-    // Should render without crashing, content might be empty
+    const { container } = render(<ChatMessage message={message} />);
+
+    // Check that the component rendered but has empty content
+    const messageBubble = container.querySelector(".max-w-\\[80\\%\\]");
+    expect(messageBubble).not.toBeNull();
+    expect(messageBubble?.textContent).toBe("");
   });
 });
