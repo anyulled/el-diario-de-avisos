@@ -9,9 +9,16 @@ import { unstable_cache } from "next/cache";
 
 // GetYears removed
 
-export async function getNewsTypes() {
-  return await db.select().from(publicationColumns);
-}
+export const getNewsTypes = unstable_cache(
+  async () => {
+    return await db.select().from(publicationColumns);
+  },
+  ["news-types"],
+  {
+    revalidate: 3600,
+    tags: ["news-types"],
+  },
+);
 
 export type SearchParams = {
   year?: number | null;
