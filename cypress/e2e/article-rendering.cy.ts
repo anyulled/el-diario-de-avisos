@@ -11,18 +11,18 @@ describe("Article Rendering", () => {
     cy.get("h1").should("be.visible");
 
     // Verify the article content is visible
-    cy.get("article").should("be.visible");
+    cy.get(".prose").should("be.visible");
 
     // Verify no RTF codes are visible in the content
-    cy.get("article").should("not.contain", "{\\rtf");
-    cy.get("article").should("not.contain", "\\ansi");
-    cy.get("article").should("not.contain", "\\deff0");
-    cy.get("article").should("not.contain", "\\viewkind");
-    cy.get("article").should("not.contain", "\\uc1");
-    cy.get("article").should("not.contain", "\\pard");
+    cy.get(".prose").should("not.contain", "{\\rtf");
+    cy.get(".prose").should("not.contain", "\\ansi");
+    cy.get(".prose").should("not.contain", "\\deff0");
+    cy.get(".prose").should("not.contain", "\\viewkind");
+    cy.get(".prose").should("not.contain", "\\uc1");
+    cy.get(".prose").should("not.contain", "\\pard");
 
     // Verify the content is actually readable (not just raw RTF)
-    cy.get("article").invoke("text").should("have.length.greaterThan", 50);
+    cy.get(".prose").invoke("text").should("have.length.greaterThan", 50);
   });
 
   it("should display formatted article title", () => {
@@ -42,10 +42,10 @@ describe("Article Rendering", () => {
     cy.visit("/article/1");
 
     // Verify metadata is displayed (date, page number, etc.)
-    cy.get("article").should("be.visible");
+    cy.get(".prose").should("be.visible");
 
-    // Check for date display (format: DD/MM/YYYY)
-    cy.contains(/\d{2}\/\d{2}\/\d{4}/).should("be.visible");
+    // Check for date display (format: D de Month de YYYY)
+    cy.contains(/\d{1,2} de [a-z]+ de \d{4}/i).should("be.visible");
   });
 
   it("should handle navigation between articles", () => {
@@ -59,15 +59,15 @@ describe("Article Rendering", () => {
 
     // Verify second article loads
     cy.get("h1").should("be.visible");
-    cy.get("article").should("be.visible");
-    cy.get("article").should("not.contain", "{\\rtf");
+    cy.get(".prose").should("be.visible");
+    cy.get(".prose").should("not.contain", "{\\rtf");
   });
 
   it("should display article content with proper typography", () => {
     cy.visit("/article/1");
 
     // Verify content uses Tailwind prose classes (no inline font styles)
-    cy.get("article").within(() => {
+    cy.get(".prose").within(() => {
       // Check that paragraphs exist
       cy.get("p").should("exist");
 
@@ -81,7 +81,7 @@ describe("Article Rendering", () => {
     cy.visit("/article/1");
 
     // Verify Spanish characters are displayed correctly
-    cy.get("article")
+    cy.get(".prose")
       .invoke("text")
       .should("match", /[áéíóúñÁÉÍÓÚÑ]/);
   });
@@ -93,7 +93,7 @@ describe("Article Rendering", () => {
 
     // Verify content is visible and readable on mobile
     cy.get("h1").should("be.visible");
-    cy.get("article").should("be.visible");
-    cy.get("article").should("not.contain", "{\\rtf");
+    cy.get(".prose").should("be.visible");
+    cy.get(".prose").should("not.contain", "{\\rtf");
   });
 });
