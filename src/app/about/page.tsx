@@ -73,6 +73,7 @@ export default async function AboutPage() {
                 photoPath={i.photo}
                 lastName={i.lastName}
                 subtitle={i.faculty}
+                resume={i.resume}
                 subtitleTone="muted"
                 eyebrow={i.department}
                 linkedinUrl={i.linkedinUrl}

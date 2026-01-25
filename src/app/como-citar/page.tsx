@@ -1,5 +1,25 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cómo citar esta fuente",
+  description: "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+  alternates: {
+    canonical: "/como-citar",
+  },
+  openGraph: {
+    title: "Cómo citar esta fuente",
+    description: "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+    url: "/como-citar",
+    type: "article",
+  },
+  twitter: {
+    card: "summary",
+    title: "Cómo citar esta fuente",
+    description: "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+  },
+};
 
 export default function ComoCitarPage() {
   return (
