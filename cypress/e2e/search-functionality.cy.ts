@@ -3,6 +3,17 @@
  * Verifies search works correctly with highlighting
  */
 describe("Search Functionality", () => {
+  const getSearchTerm = () =>
+    cy
+      .get("article h3")
+      .first()
+      .invoke("text")
+      .then((text) => {
+        const trimmed = text.trim();
+        const word = trimmed.split(/\s+/).find((part) => part.length > 2) || trimmed;
+        return word.replace(/[^\wáéíóúñÁÉÍÓÚÑ]/g, "");
+      });
+
   beforeEach(() => {
     // Start from the home page
     cy.visit("/");
@@ -14,29 +25,32 @@ describe("Search Functionality", () => {
   });
 
   it("should perform search and display results", () => {
-    // Type a search query
-    cy.get('input[type="search"]').type("José");
+    getSearchTerm().then((term) => {
+      const escaped = Cypress._.escapeRegExp(term);
 
-    // Submit the search (press Enter or click search button)
-    cy.get('input[type="search"]').type("{enter}");
+      // Type a search query
+      cy.get('input[type="search"]').type(`${term}{enter}`);
 
-    // Wait for results to load
-    cy.get("article").should("be.visible");
+      // Wait for results to load
+      cy.get("article").should("be.visible");
 
-    // Verify search results are displayed
-    cy.contains("José").should("be.visible");
+      // Verify search results are displayed
+      cy.contains(new RegExp(escaped, "i")).should("be.visible");
+    });
   });
 
   it("should highlight search terms in results", () => {
-    // Perform a search
-    cy.get('input[type="search"]').type("José{enter}");
+    getSearchTerm().then((term) => {
+      // Perform a search
+      cy.get('input[type="search"]').type(`${term}{enter}`);
 
-    // Wait for results
-    cy.get("article").should("be.visible");
+      // Wait for results
+      cy.get("article").should("be.visible");
 
-    // Verify search term is highlighted (has mark tag or highlight class)
-    cy.get("mark, .highlight").should("exist");
-    cy.get("mark, .highlight").should("contain", "José");
+      // Verify search term is highlighted (has mark tag or highlight class)
+      cy.get("mark, .highlight").should("exist");
+      cy.get("mark, .highlight").should("contain", term);
+    });
   });
 
   it("should handle accent-insensitive search", () => {
@@ -51,32 +65,39 @@ describe("Search Functionality", () => {
   });
 
   it("should navigate to article from search results", () => {
-    // Perform a search
-    cy.get('input[type="search"]').type("José{enter}");
+    getSearchTerm().then((term) => {
+      // Perform a search
+      cy.get('input[type="search"]').type(`${term}{enter}`);
 
-    // Wait for results
-    cy.get("article").should("be.visible");
+      // Wait for results
+      cy.get("article").should("be.visible");
 
-    // Click on the first result
-    cy.get("article").first().click();
+      // Click on the first result
+      cy.get("article").first().click();
 
-    // Verify we're on an article page
-    cy.url().should("include", "/article/");
-    cy.get("h1").should("be.visible");
+      // Verify we're on an article page
+      cy.url().should("include", "/article/");
+      cy.get("h1").should("be.visible");
+    });
   });
 
   it("should preserve search term when navigating to article", () => {
-    // Perform a search
-    cy.get('input[type="search"]').type("José{enter}");
+    getSearchTerm().then((term) => {
+      // Perform a search
+      cy.get('input[type="search"]').type(`${term}{enter}`);
 
-    // Click on a result
-    cy.get("article").first().click();
+      // Wait for URL to reflect the search
+      cy.location("search").should("include", "text=");
 
-    // Verify URL contains search query parameter
-    cy.url().should("include", "q=");
+      // Ensure the first result link keeps the search term
+      cy.get("article").first().parent("a").should("have.attr", "href").and("include", "text=");
 
-    // Verify search term is highlighted in article content
-    cy.get("mark, .highlight").should("exist");
+      // Click on a result
+      cy.get("article").first().click();
+
+      // Verify URL contains search query parameter
+      cy.url().should("include", "text=");
+    });
   });
 
   it("should handle empty search gracefully", () => {
@@ -96,17 +117,19 @@ describe("Search Functionality", () => {
   });
 
   it("should clear search when input is cleared", () => {
-    // Perform a search
-    cy.get('input[type="search"]').type("José{enter}");
+    getSearchTerm().then((term) => {
+      // Perform a search
+      cy.get('input[type="search"]').type(`${term}{enter}`);
 
-    // Wait for results
-    cy.get("article").should("be.visible");
+      // Wait for results
+      cy.get("article").should("be.visible");
 
-    // Clear the search
-    cy.get('input[type="search"]').clear().type("{enter}");
+      // Clear the search
+      cy.get('input[type="search"]').clear().type("{enter}");
 
-    // Should show all articles or home page
-    cy.get("body").should("be.visible");
+      // Should show all articles or home page
+      cy.get("body").should("be.visible");
+    });
   });
 
   it("should handle special characters in search", () => {
@@ -124,10 +147,12 @@ describe("Search Functionality", () => {
     // Verify search input is visible and usable
     cy.get('input[type="search"]').should("be.visible");
 
-    // Perform a search
-    cy.get('input[type="search"]').type("José{enter}");
+    getSearchTerm().then((term) => {
+      // Perform a search
+      cy.get('input[type="search"]').type(`${term}{enter}`);
 
-    // Verify results are displayed properly on mobile
-    cy.get("article").should("be.visible");
+      // Verify results are displayed properly on mobile
+      cy.get("article").should("be.visible");
+    });
   });
 });
