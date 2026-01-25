@@ -54,6 +54,9 @@
     "typescript": "^5",
     "vitest": "^4.0.16"
   },
+  "overrides": {
+    "esbuild": "0.27.2"
+  },
   "lint-staged": {
     "!(cypress)/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix",
