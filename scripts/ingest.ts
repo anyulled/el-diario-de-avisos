@@ -1,4 +1,6 @@
 import "dotenv/config";
+import { fileURLToPath } from "url";
+import { resolve } from "path";
 import { eq, isNull, sql } from "drizzle-orm";
 import { db } from "../src/db";
 import { articleEmbeddings, articles, essayEmbeddings, essays } from "../src/db/schema";
@@ -21,7 +23,7 @@ interface IngestConfig {
 /**
  * Generic ingestion function that handles both articles and essays
  */
-async function ingestEntities(config: IngestConfig) {
+export async function ingestEntities(config: IngestConfig) {
   console.log(`🚀 Starting ${config.entityName} Ingestion...`);
 
   // Count total entities without embeddings
@@ -88,17 +90,19 @@ async function ingestEntities(config: IngestConfig) {
     console.log("💾 Saving embeddings to database...");
 
     // Save embeddings to database
-    for (const [i, entity] of validData.entries()) {
+    if (validData.length > 0) {
+      const values = validData.map((entity, i) => ({
+        [config.embeddingIdColumn.name]: entity.id,
+        embedding: allEmbeddings[i],
+      }));
+
       await db
         .insert(config.embeddingTable)
-        .values({
-          [config.embeddingIdColumn.name]: entity.id,
-          embedding: allEmbeddings[i],
-        })
+        .values(values)
         .onConflictDoUpdate({
           target: config.embeddingIdColumn,
           set: {
-            embedding: allEmbeddings[i],
+            embedding: sql`excluded.embedding`,
             updatedAt: sql`now()`,
           },
         });
@@ -122,7 +126,7 @@ async function ingestEntities(config: IngestConfig) {
 /**
  * Ingest articles using the generic function
  */
-async function ingestArticles() {
+export async function ingestArticles() {
   await ingestEntities({
     entityName: "Articles",
     entityTable: articles,
@@ -137,7 +141,7 @@ async function ingestArticles() {
 /**
  * Ingest essays using the generic function
  */
-async function ingestEssays() {
+export async function ingestEssays() {
   await ingestEntities({
     entityName: "Essays",
     entityTable: essays,
@@ -152,13 +156,29 @@ async function ingestEssays() {
 /**
  * Main ingestion function that processes both articles and essays
  */
-async function ingest() {
+export async function ingest() {
   await ingestArticles();
   console.log("--------------------------------");
   await ingestEssays();
 }
 
 // Run if called directly
-ingest()
-  .catch(console.error)
-  .finally(() => process.exit());
+const isMainModule = () => {
+  // Check if running in a CommonJS environment
+  if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) {
+    return true;
+  }
+  // Check if running in an ESM environment
+  if (import.meta.url) {
+    const scriptPath = fileURLToPath(import.meta.url);
+    // Normalize paths for comparison
+    return process.argv[1] === scriptPath || resolve(process.argv[1]) === scriptPath;
+  }
+  return false;
+};
+
+if (isMainModule()) {
+  ingest()
+    .catch(console.error)
+    .finally(() => process.exit());
+}
