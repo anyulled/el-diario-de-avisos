@@ -55,6 +55,15 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
 
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
       - name: Verify SonarQube Configuration
         shell: bash
         run: |
@@ -78,3 +87,21 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Smoke test - Article rendering
+        run: |
+          npm run start &
+          SERVER_PID=$!
+          sleep 10
+          curl http://localhost:3000/article/1 > article.html
+          if grep -q "{\\\\rtf" article.html; then
+            echo "ERROR: Raw RTF code detected in article page"
+            cat article.html
+            kill $SERVER_PID
+            exit 1
+          fi
+          echo "✓ Article rendering smoke test passed"
+          kill $SERVER_PID
