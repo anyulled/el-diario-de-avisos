@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
     "ingest": "npx tsx scripts/ingest.ts",
     "transform-dates": "npx tsx scripts/transform-dates.ts",
     "transform-dates:dry-run": "npx tsx scripts/transform-dates.ts --dry-run",
@@ -79,6 +80,7 @@
   "lint-staged": {
     "!(cypress)/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix",
+      "vitest related --run --passWithNoTests",
       "prettier --write"
     ],
     "*.{json,css,md}": [
