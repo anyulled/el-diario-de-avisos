@@ -65,9 +65,9 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
             {article.subtitle}
           </h2>
 
-          <div className="prose prose-lg dark:prose-invert max-w-none font-serif">
+          <article className="prose prose-lg dark:prose-invert max-w-none font-serif">
             <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-          </div>
+          </article>
 
           <div className="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-800 flex justify-between items-center text-sm text-gray-500">
             <span>Página: {article.page || "No especificada"}</span>

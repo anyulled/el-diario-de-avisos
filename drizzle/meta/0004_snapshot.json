@@ -51,12 +51,8 @@
           "name": "articulos_embeddings_arti_cod_articulos_arti_cod_fk",
           "tableFrom": "articulos_embeddings",
           "tableTo": "articulos",
-          "columnsFrom": [
-            "arti_cod"
-          ],
-          "columnsTo": [
-            "arti_cod"
-          ],
+          "columnsFrom": ["arti_cod"],
+          "columnsTo": ["arti_cod"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -107,10 +103,7 @@
       "compositePrimaryKeys": {
         "articulos_imagenes_pkey": {
           "name": "articulos_imagenes_pkey",
-          "columns": [
-            "arti_cod",
-            "img_cod"
-          ]
+          "columns": ["arti_cod", "img_cod"]
         }
       },
       "uniqueConstraints": {},
@@ -146,10 +139,7 @@
       "compositePrimaryKeys": {
         "articulos_topicos_pkey": {
           "name": "articulos_topicos_pkey",
-          "columns": [
-            "mat_cod",
-            "arti_cod"
-          ]
+          "columns": ["mat_cod", "arti_cod"]
         }
       },
       "uniqueConstraints": {},
@@ -465,10 +455,7 @@
       "compositePrimaryKeys": {
         "ensayos_articulos_pkey": {
           "name": "ensayos_articulos_pkey",
-          "columns": [
-            "ensayo_cod",
-            "articulo_cod"
-          ]
+          "columns": ["ensayo_cod", "articulo_cod"]
         }
       },
       "uniqueConstraints": {},
@@ -506,12 +493,8 @@
           "name": "ensayos_embeddings_ensayo_cod_ensayos_ensayo_cod_fk",
           "tableFrom": "ensayos_embeddings",
           "tableTo": "ensayos",
-          "columnsFrom": [
-            "ensayo_cod"
-          ],
-          "columnsTo": [
-            "ensayo_cod"
-          ],
+          "columnsFrom": ["ensayo_cod"],
+          "columnsTo": ["ensayo_cod"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -562,10 +545,7 @@
       "compositePrimaryKeys": {
         "ensayos_imagenes_pkey": {
           "name": "ensayos_imagenes_pkey",
-          "columns": [
-            "ensayo_cod",
-            "img_cod"
-          ]
+          "columns": ["ensayo_cod", "img_cod"]
         }
       },
       "uniqueConstraints": {},
@@ -698,10 +678,7 @@
       "compositePrimaryKeys": {
         "palabras_clave_indice_pkey": {
           "name": "palabras_clave_indice_pkey",
-          "columns": [
-            "pc_cod",
-            "arti_cod"
-          ]
+          "columns": ["pc_cod", "arti_cod"]
         }
       },
       "uniqueConstraints": {},

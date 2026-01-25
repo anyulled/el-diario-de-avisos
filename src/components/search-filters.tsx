@@ -225,7 +225,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <div className="relative flex-1">
           <input
-            type="text"
+            type="search"
             placeholder="Buscar por palabra clave o texto..."
             className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all dark:text-white"
             value={searchTerm}
