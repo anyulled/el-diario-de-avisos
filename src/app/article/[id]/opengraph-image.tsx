@@ -14,7 +14,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const article = await getArticleById(Number(id));
 
   const bgPath = path.join(process.cwd(), "public/og-background.png");
-  const bgData = fs.readFileSync(bgPath);
+  const bgData = await fs.promises.readFile(bgPath);
   const bgBase64 = `data:image/png;base64,${bgData.toString("base64")}`;
 
   if (!article) {
