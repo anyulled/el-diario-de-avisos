@@ -12,7 +12,7 @@ export const contentType = "image/png";
 
 export default async function Image() {
   const bgPath = path.join(process.cwd(), "public/og-background.png");
-  const bgData = fs.readFileSync(bgPath);
+  const bgData = await fs.promises.readFile(bgPath);
   const bgBase64 = `data:image/png;base64,${bgData.toString("base64")}`;
 
   return new ImageResponse(
