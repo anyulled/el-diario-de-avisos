@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/anyulled/el-diario-de-avisos/actions/workflows/ci.yml/badge.svg)](https://github.com/anyulled/el-diario-de-avisos/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=anyulled_el-diario-de-avisos&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=anyulled_el-diario-de-avisos)
+[![codecov](https://codecov.io/gh/anyulled/el-diario-de-avisos/branch/main/graph/badge.svg)](https://codecov.io/gh/anyulled/el-diario-de-avisos)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/anyulled/el-diario-de-avisos)
 
 ## 📂 Project Structure
