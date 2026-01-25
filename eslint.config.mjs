@@ -149,6 +149,29 @@ const eslintConfig = [
     },
   },
   {
+    // Cypress test files configuration
+    files: ["cypress/**/*.cy.ts", "cypress/**/*.cy.tsx"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        cy: "readonly",
+        Cypress: "readonly",
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        before: "readonly",
+        after: "readonly",
+        context: "readonly",
+      },
+    },
+    rules: {
+      "no-undef": "off",
+    },
+  },
+  {
     // Special config for JS rules files to avoids parser.project errors
     files: [".eslint-rules/*.js", "*.config.mjs", "*.config.ts"],
     languageOptions: {
