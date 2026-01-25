@@ -150,7 +150,7 @@ const eslintConfig = [
   },
   {
     // Cypress test files configuration
-    files: ["cypress/**/*.cy.ts", "cypress/**/*.cy.tsx"],
+    files: ["cypress/**/*.cy.ts", "cypress/**/*.cy.tsx", "cypress/support/**/*.ts"],
     languageOptions: {
       globals: {
         ...globals.browser,
