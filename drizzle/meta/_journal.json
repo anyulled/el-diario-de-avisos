@@ -22,6 +22,20 @@
       "when": 1769268262283,
       "tag": "0002_dizzy_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769360784034,
+      "tag": "0003_sync_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769360802565,
+      "tag": "0004_add_vector_index",
+      "breakpoints": true
     }
   ]
 }
