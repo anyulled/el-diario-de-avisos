@@ -1,6 +1,50 @@
 import { MemberCard } from "@/components/member-card";
 import { Navbar } from "@/components/navbar";
+import type { Metadata } from "next";
 import { getDevelopers, getIntegrantes, getTutores } from "../actions";
+
+const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);
+
+  const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean);
+  const tutorNames = tutores.map((t) => t.names).filter(Boolean);
+  const developerNames = desarrolladores.map((d) => `${d.firstName} ${d.lastName}`.trim()).filter(Boolean);
+  const people = [...integranteNames, ...tutorNames, ...developerNames];
+  const peopleSummary = people.length ? ` Participan: ${people.slice(0, 8).join(", ")}${people.length > 8 ? ", y más." : "."}` : "";
+
+  const title = "Acerca del Proyecto";
+  const description = `Conoce el equipo y el trabajo detrás del Archivo de Noticias Musicales de El Diario de Avisos.${peopleSummary}`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: "/about",
+    },
+    openGraph: {
+      title,
+      description,
+      url: "/about",
+      type: "website",
+      images: [
+        {
+          url: aboutHeroImage,
+          width: 2071,
+          height: 1381,
+          alt: "Acerca del Proyecto - Diario de Avisos",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [aboutHeroImage],
+    },
+  };
+}
 
 export default async function AboutPage() {
   const integrantes = await getIntegrantes();
