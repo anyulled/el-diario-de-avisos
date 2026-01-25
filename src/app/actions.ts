@@ -67,9 +67,6 @@ export async function getNews(params: SearchParams) {
 
   const countWithConditions = conditions.length > 0 ? countQuery.where(and(...conditions)) : countQuery;
 
-  const [totalResult] = await countWithConditions;
-  const total = Number(totalResult?.count || 0);
-
   // Build query with conditional fields and ordering
   const query = db
     .select({
@@ -104,10 +101,15 @@ export async function getNews(params: SearchParams) {
 
   const orderBy = getNewsOrderBy(sort, text);
 
-  const data = await queryWithConditions
-    .orderBy(...orderBy)
-    .limit(pageSize)
-    .offset((page - 1) * pageSize);
+  const [countResult, data] = await Promise.all([
+    countWithConditions,
+    queryWithConditions
+      .orderBy(...orderBy)
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
+  ]);
+
+  const total = Number(countResult[0]?.count || 0);
 
   return {
     data,
