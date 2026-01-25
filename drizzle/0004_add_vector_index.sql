@@ -1,0 +1,1 @@
+CREATE INDEX "embeddingIndex" ON "articulos_embeddings" USING hnsw ("embedding" vector_cosine_ops);

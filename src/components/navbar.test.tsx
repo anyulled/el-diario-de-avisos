@@ -9,14 +9,14 @@ vi.mock('@/app/actions', () => ({
 
 // Mock next/cache with a simple in-memory cache implementation
 vi.mock('next/cache', () => {
-  const cache = new Map();
+  const cache = new Map<string, unknown>();
   return {
-    unstable_cache: (fn: () => Promise<any>, keyParts: string[]) => {
+    unstable_cache: <T,>(fn: () => Promise<T>, keyParts: string[]) => {
       // Return a wrapped function that caches the result
-      return async () => {
+      return async (): Promise<T> => {
         const key = keyParts.join('-');
         if (cache.has(key)) {
-          return cache.get(key);
+          return cache.get(key) as T;
         }
         const result = await fn();
         cache.set(key, result);
@@ -29,9 +29,11 @@ vi.mock('next/cache', () => {
 describe('Navbar Performance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // specific cache clearing is not possible with this mock structure,
-    // but since we only have one test or can rely on fresh module per file (sometimes),
-    // we'll rely on the logic that it SHOULD cache.
+    /**
+     * Specific cache clearing is not possible with this mock structure,
+     * but since we only have one test or can rely on fresh module per file (sometimes),
+     * we'll rely on the logic that it SHOULD cache.
+     */
   });
 
   it('calls getEssays only once due to caching', async () => {

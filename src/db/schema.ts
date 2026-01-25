@@ -222,13 +222,17 @@ export const essayImages = pgTable(
   ],
 );
 
-export const articleEmbeddings = pgTable("articulos_embeddings", {
-  articleId: integer("arti_cod")
-    .primaryKey()
-    .references(() => articles.id),
-  embedding: vector("embedding", { dimensions: 768 }),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const articleEmbeddings = pgTable(
+  "articulos_embeddings",
+  {
+    articleId: integer("arti_cod")
+      .primaryKey()
+      .references(() => articles.id),
+    embedding: vector("embedding", { dimensions: 768 }),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [index("embeddingIndex").using("hnsw", table.embedding.op("vector_cosine_ops"))],
+);
 
 export const essayEmbeddings = pgTable("ensayos_embeddings", {
   essayId: integer("ensayo_cod")
