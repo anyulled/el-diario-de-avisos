@@ -47,9 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const integrantes = await getIntegrantes();
-  const tutores = await getTutores();
-  const desarrolladores = await getDevelopers();
+  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-zinc-950">
