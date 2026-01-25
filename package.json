@@ -1,27 +1,4 @@
 {
-  "name": "web",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "type-check": "tsc --noEmit",
-    "ingest": "npx tsx scripts/ingest.ts",
-    "transform-dates": "npx tsx scripts/transform-dates.ts",
-    "transform-dates:dry-run": "npx tsx scripts/transform-dates.ts --dry-run",
-    "transform-dates:rename": "npx tsx scripts/transform-dates.ts --rename",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "test:integration": "vitest run **/*.integration.test.ts",
-    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
-    "test:e2e": "start-server-and-test dev http://localhost:3000 cypress:run",
-    "prepare": "husky"
-  },
   "dependencies": {
     "@ai-sdk/google": "^3.0.10",
     "@ai-sdk/groq": "^3.0.11",
@@ -86,5 +63,28 @@
     "*.{json,css,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "name": "web",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "dev": "next dev",
+    "ingest": "npx tsx scripts/ingest.ts",
+    "lint": "eslint",
+    "prepare": "husky",
+    "start": "next start",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "start-server-and-test dev http://localhost:3000 cypress:run",
+    "test:integration": "vitest run src/**/*.integration.test.ts",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
+    "transform-dates": "npx tsx scripts/transform-dates.ts",
+    "transform-dates:dry-run": "npx tsx scripts/transform-dates.ts --dry-run",
+    "transform-dates:rename": "npx tsx scripts/transform-dates.ts --rename",
+    "type-check": "tsc --noEmit"
+  },
+  "version": "0.1.0"
 }
