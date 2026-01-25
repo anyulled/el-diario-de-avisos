@@ -1,8 +1,12 @@
 
 type NewsType = { id: number; name: string };
 
+/**
+ * Simulates a database call with latency.
+ */
 async function simulateDbCall(): Promise<NewsType[]> {
-  await new Promise((resolve) => setTimeout(resolve, 50)); // 50ms latency
+  // 50ms latency
+  await new Promise((resolve) => setTimeout(resolve, 50));
   return [{ id: 1, name: "Type A" }, { id: 2, name: "Type B" }];
 }
 
@@ -10,11 +14,11 @@ async function getNewsTypesUncached() {
   return await simulateDbCall();
 }
 
-let cachedTypes: NewsType[] | null = null;
+const cachedTypesContainer: { data: NewsType[] | null } = { data: null };
 async function getNewsTypesCached() {
-  if (cachedTypes) return cachedTypes;
-  cachedTypes = await simulateDbCall();
-  return cachedTypes;
+  if (cachedTypesContainer.data) return cachedTypesContainer.data;
+  cachedTypesContainer.data = await simulateDbCall();
+  return cachedTypesContainer.data;
 }
 
 async function benchmark() {
@@ -23,9 +27,18 @@ async function benchmark() {
 
   // Uncached
   const startUncached = performance.now();
-  for (let i = 0; i < iterations; i++) {
-    await getNewsTypesUncached();
-  }
+
+  /**
+   * Helper to run promises sequentially without mutable loop variables.
+   */
+  const runSequentially = async (fn: () => Promise<unknown>, times: number) => {
+    if (times <= 0) return;
+    await fn();
+    await runSequentially(fn, times - 1);
+  };
+
+  await runSequentially(getNewsTypesUncached, iterations);
+
   const endUncached = performance.now();
   const totalUncached = endUncached - startUncached;
   console.log(`Uncached: ${iterations} iterations took ${totalUncached.toFixed(2)}ms`);
@@ -33,9 +46,7 @@ async function benchmark() {
 
   // Cached
   const startCached = performance.now();
-  for (let i = 0; i < iterations; i++) {
-    await getNewsTypesCached();
-  }
+  await runSequentially(getNewsTypesCached, iterations);
   const endCached = performance.now();
   const totalCached = endCached - startCached;
   console.log(`Cached: ${iterations} iterations took ${totalCached.toFixed(2)}ms`);
