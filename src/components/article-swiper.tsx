@@ -9,6 +9,7 @@ import "swiper/css/pagination";
 import { Autoplay, Navigation, Pagination, Parallax } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
+import { formatArticleTitle } from "@/lib/title-formatter";
 import { useState } from "react";
 import { type Swiper as SwiperType } from "swiper";
 
@@ -70,7 +71,7 @@ export function ArticleSwiper({
                   </span>
                   <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight drop-shadow-lg">
                     <Link href={`/article/${item.id}`} className="hover:text-amber-300 transition-colors">
-                      {item.title || "Sin Título"}
+                      {formatArticleTitle(item.title) || "Sin Título"}
                     </Link>
                   </h3>
                   {item.subtitle && <h4 className="text-xl text-zinc-300 font-light mb-6">{item.subtitle}</h4>}
