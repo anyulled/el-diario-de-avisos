@@ -34,7 +34,11 @@ export const articles = pgTable("articulos", {
   series: integer("arti_serie"),
   microfilm: varchar("arti_microfilm", { length: 20 }),
   searchVector: tsvector("search_vector"),
-});
+}, (table) => [
+  index("articles_search_vector_idx").using("gin", table.searchVector),
+  index("articles_publication_year_idx").on(table.publicationYear),
+  index("articles_column_id_idx").on(table.columnId),
+]);
 
 export const authors = pgTable("autores", {
   id: serial("autor_cod").primaryKey().notNull(),
