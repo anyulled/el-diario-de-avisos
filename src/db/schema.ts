@@ -86,6 +86,7 @@ export const members = pgTable("integrantes", {
   linkedinUrl: varchar("intg_linkedin_url", { length: 255 }),
   twitterUrl: varchar("intg_twitter_url", { length: 255 }),
   resume: varchar("intg_resumen"),
+  cvUrl: varchar("cv_url", { length: 255 }),
 });
 
 export const subjects = pgTable("materias", {
@@ -138,6 +139,7 @@ export const tutors = pgTable("tutores", {
   linkedinUrl: varchar("tutor_linkedin_url", { length: 255 }),
   twitterUrl: varchar("tutor_twitter_url", { length: 255 }),
   resume: varchar("tutor_resumen"),
+  cvUrl: varchar("cv_url", { length: 255 }),
 });
 
 export const developers = pgTable("desarrolladores", {
@@ -148,6 +150,7 @@ export const developers = pgTable("desarrolladores", {
   linkedinUrl: varchar("dev_linkedin_url", { length: 255 }),
   twitterUrl: varchar("dev_twitter_url", { length: 255 }),
   resume: varchar("dev_resumen"),
+  cvUrl: varchar("cv_url", { length: 255 }),
 });
 
 export const articleTopics = pgTable(

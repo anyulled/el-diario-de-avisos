@@ -1,5 +1,5 @@
 {
-  "id": "c72768b6-4999-48c1-a08c-c59b3a19246b",
+  "id": "d0663358-b07c-46b4-a94a-2f606d2324a1",
   "prevId": "b41ef20f-0c35-46a1-be91-cae21021248e",
   "version": "7",
   "dialect": "postgresql",
@@ -400,6 +400,12 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -775,6 +781,12 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1007,6 +1019,12 @@
         "tutor_resumen": {
           "name": "tutor_resumen",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         }

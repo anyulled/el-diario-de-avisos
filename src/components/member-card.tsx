@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Linkedin, Twitter } from "lucide-react";
+import { FileText, Linkedin, Twitter } from "lucide-react";
 
 type MemberCardProps = {
   photoPath?: string | null;
@@ -11,6 +11,7 @@ type MemberCardProps = {
   eyebrow?: string | null;
   resume?: string | null;
   linkedinUrl?: string | null;
+  cvUrl?: string | null;
   twitterUrl?: string | null;
   fallbackLetter?: string;
 };
@@ -23,15 +24,27 @@ const getHeaderClassName = (hasMeta: boolean) => `flex items-start gap-4${hasMet
 type SocialLinksProps = {
   linkedinUrl?: string | null;
   twitterUrl?: string | null;
+  cvUrl?: string | null;
 };
 
-const SocialLinks = ({ linkedinUrl, twitterUrl }: SocialLinksProps) => {
-  if (!linkedinUrl && !twitterUrl) {
+const SocialLinks = ({ linkedinUrl, twitterUrl, cvUrl }: SocialLinksProps) => {
+  if (!linkedinUrl && !twitterUrl && !cvUrl) {
     return null;
   }
 
   return (
     <div className="mt-3 flex items-center gap-3">
+      {cvUrl && (
+        <a
+          href={cvUrl}
+          aria-label="Curriculum Vitae"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:border-amber-500 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400"
+        >
+          <FileText className="h-4 w-4" />
+        </a>
+      )}
       {linkedinUrl && (
         <a
           href={linkedinUrl}
@@ -96,10 +109,11 @@ export function MemberCard({
   resume,
   linkedinUrl,
   twitterUrl,
+  cvUrl,
   fallbackLetter = "M",
 }: MemberCardProps) {
   const displayName = fullName || [firstName, lastName].filter(Boolean).join(" ");
-  const hasSocialLinks = Boolean(linkedinUrl || twitterUrl);
+  const hasSocialLinks = Boolean(linkedinUrl || twitterUrl || cvUrl);
   const hasMeta = Boolean(eyebrow || resume || hasSocialLinks);
   const headerClassName = getHeaderClassName(hasMeta);
   const subtitleClassName = getSubtitleClassName(subtitleTone);
@@ -116,7 +130,7 @@ export function MemberCard({
       />
       {eyebrow && <span className="text-xs text-amber-600 dark:text-amber-500 uppercase tracking-wide">{eyebrow}</span>}
       {resume && <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{resume}</p>}
-      <SocialLinks linkedinUrl={linkedinUrl} twitterUrl={twitterUrl} />
+      <SocialLinks linkedinUrl={linkedinUrl} twitterUrl={twitterUrl} cvUrl={cvUrl} />
     </article>
   );
 }

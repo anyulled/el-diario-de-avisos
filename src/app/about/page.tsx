@@ -78,6 +78,7 @@ export default async function AboutPage() {
                 eyebrow={i.department}
                 linkedinUrl={i.linkedinUrl}
                 twitterUrl={i.twitterUrl}
+                cvUrl={i.cvUrl}
                 fallbackLetter="I"
               />
             ))}
@@ -96,6 +97,7 @@ export default async function AboutPage() {
                 resume={t.resume}
                 linkedinUrl={t.linkedinUrl}
                 twitterUrl={t.twitterUrl}
+                cvUrl={t.cvUrl}
                 fallbackLetter="T"
               />
             ))}
@@ -115,6 +117,7 @@ export default async function AboutPage() {
                 resume={dev.resume}
                 linkedinUrl={dev.linkedinUrl}
                 twitterUrl={dev.twitterUrl}
+                cvUrl={dev.cvUrl}
                 fallbackLetter="D"
               />
             ))}
