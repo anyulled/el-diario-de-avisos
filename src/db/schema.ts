@@ -245,10 +245,14 @@ export const articleEmbeddings = pgTable(
   (table) => [index("embeddingIndex").using("hnsw", table.embedding.op("vector_cosine_ops"))],
 );
 
-export const essayEmbeddings = pgTable("ensayos_embeddings", {
-  essayId: integer("ensayo_cod")
-    .primaryKey()
-    .references(() => essays.id),
-  embedding: vector("embedding", { dimensions: 768 }),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const essayEmbeddings = pgTable(
+  "ensayos_embeddings",
+  {
+    essayId: integer("ensayo_cod")
+      .primaryKey()
+      .references(() => essays.id),
+    embedding: vector("embedding", { dimensions: 768 }),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [index("essayEmbeddingIndex").using("hnsw", table.embedding.op("vector_cosine_ops"))],
+);
