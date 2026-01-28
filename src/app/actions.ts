@@ -50,11 +50,12 @@ function getNewsConditions(
   }
   const { start, end, isValidRange } = normalizeDateRange({ start: dateFrom, end: dateTo });
   if (isValidRange) {
+    // Optimization: Use direct comparison instead of DATE() function to allow index usage (Sargable query)
     if (start) {
-      conditions.push(sql`DATE(${articles.date}) >= ${start}`);
+      conditions.push(sql`${articles.date} >= ${start}::date`);
     }
     if (end) {
-      conditions.push(sql`DATE(${articles.date}) <= ${end}`);
+      conditions.push(sql`${articles.date} < ${end}::date + interval '1 day'`);
     }
   }
   return conditions;

@@ -41,6 +41,7 @@ export const articles = pgTable(
     index("articles_search_vector_idx").using("gin", table.searchVector),
     index("articles_publication_year_idx").on(table.publicationYear),
     index("articles_column_id_idx").on(table.columnId),
+    index("articles_date_idx").on(table.date),
   ],
 );
 
