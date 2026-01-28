@@ -55,7 +55,7 @@ function getNewsConditions(
       conditions.push(sql`${articles.date} >= ${start}::date`);
     }
     if (end) {
-      conditions.push(sql`${articles.date} < ${end}::date + 1`);
+      conditions.push(sql`${articles.date} < ${end}::date + interval '1 day'`);
     }
   }
   return conditions;
