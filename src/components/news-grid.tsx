@@ -1,7 +1,13 @@
 import { articles } from "@/db/schema";
 import { ArticleCard } from "./article-card";
 
-export function NewsGrid({ news, searchTerm }: { news: (typeof articles.$inferSelect)[]; searchTerm: string | null }) {
+export function NewsGrid({
+  news,
+  searchTerm,
+}: {
+  news: Omit<typeof articles.$inferSelect, "content" | "searchVector">[];
+  searchTerm: string | null;
+}) {
   if (news.length === 0) {
     return <div className="text-center py-20 text-gray-500 italic">No se encontraron resultados para su búsqueda.</div>;
   }
