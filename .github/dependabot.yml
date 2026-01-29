@@ -7,6 +7,39 @@ updates:
     open-pull-requests-limit: 10
     assignees:
       - "anyulled"
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "eslint-plugin-vitest"
+      ai-sdk:
+        patterns:
+          - "ai"
+          - "@ai-sdk/*"
+      testing-library:
+        patterns:
+          - "@testing-library/*"
+      eslint-typescript:
+        patterns:
+          - "eslint*"
+          - "@eslint-community/*"
+          - "@typescript-eslint/*"
+          - "typescript"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+      drizzle:
+        patterns:
+          - "drizzle-orm"
+          - "drizzle-kit"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
