@@ -14,7 +14,7 @@
     "drizzle-orm": "^0.45.1",
     "groq-sdk": "^0.37.0",
     "iconv-lite": "^0.7.2",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "luxon": "^3.7.2",
     "next": "16.1.5",
     "pg": "^8.16.3",
