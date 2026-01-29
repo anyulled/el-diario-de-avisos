@@ -111,7 +111,7 @@ export function MemberCard({
   twitterUrl,
   cvUrl,
   fallbackLetter = "M",
-}: MemberCardProps) {
+}: Readonly<MemberCardProps>) {
   const displayName = fullName || [firstName, lastName].filter(Boolean).join(" ");
   const hasSocialLinks = Boolean(linkedinUrl || twitterUrl || cvUrl);
   const hasMeta = Boolean(eyebrow || resume || hasSocialLinks);
