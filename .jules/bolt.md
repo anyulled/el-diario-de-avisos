@@ -5,3 +5,7 @@
 ## 2026-01-27 - Missing Vector Index
 **Learning:** Found that `essayEmbeddings` table was missing the HNSW index that `articleEmbeddings` had. This caused O(N) performance for essay vector searches.
 **Action:** Always check all embedding tables for proper HNSW indexing when using pgvector.
+
+## 2026-01-28 - Over-fetching Large Columns
+**Learning:** `getNews` and `getArticlesOnThisDay` were fetching `content` (bytea) and `searchVector` (tsvector) for list views, causing unnecessary DB IO and large network payloads. Next.js serializes all Server Action return values to the client.
+**Action:** Explicitly exclude large columns (`content`, `searchVector`) from Drizzle queries or return objects when they are not needed for the UI.

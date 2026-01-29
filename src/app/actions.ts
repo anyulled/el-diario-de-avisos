@@ -88,7 +88,6 @@ export async function getNews(params: SearchParams) {
       pubId: articles.pubId,
       issueId: articles.issueId,
       page: articles.page,
-      content: articles.content,
       cota: articles.cota,
       code2: articles.code2,
       authorId: articles.authorId,
@@ -99,7 +98,6 @@ export async function getNews(params: SearchParams) {
       issueNumber: articles.issueNumber,
       series: articles.series,
       microfilm: articles.microfilm,
-      searchVector: articles.searchVector,
       // Add relevance ranking when searching
       ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text}))` } : {}),
     })
@@ -170,10 +168,13 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         .limit(10);
 
       return await Promise.all(
-        news.map(async (item) => ({
-          ...item,
-          extract: await processRtfContent(item.content as Buffer | null, { maxLength: 500 }),
-        })),
+        news.map(async (item) => {
+          const { content, ...rest } = item;
+          return {
+            ...rest,
+            extract: await processRtfContent(content as Buffer | null, { maxLength: 500 }),
+          };
+        }),
       );
     },
     [`articles-on-this-day-${month}-${day}`],

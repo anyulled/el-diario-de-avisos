@@ -3,7 +3,13 @@ import { highlightText } from "@/lib/search-highlighter";
 import { formatArticleTitle } from "@/lib/title-formatter";
 import Link from "next/link";
 
-export function ArticleCard({ item, searchTerm }: { item: typeof articles.$inferSelect; searchTerm: string | null }) {
+export function ArticleCard({
+  item,
+  searchTerm,
+}: {
+  item: Omit<typeof articles.$inferSelect, "content" | "searchVector">;
+  searchTerm: string | null;
+}) {
   const href = searchTerm ? `/article/${item.id}?text=${encodeURIComponent(searchTerm)}` : `/article/${item.id}`;
   const title = formatArticleTitle(item.title);
   const subtitle = item.subtitle || "";
