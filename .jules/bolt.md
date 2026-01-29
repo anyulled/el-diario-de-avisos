@@ -9,3 +9,7 @@
 ## 2026-01-28 - Over-fetching Large Columns
 **Learning:** `getNews` and `getArticlesOnThisDay` were fetching `content` (bytea) and `searchVector` (tsvector) for list views, causing unnecessary DB IO and large network payloads. Next.js serializes all Server Action return values to the client.
 **Action:** Explicitly exclude large columns (`content`, `searchVector`) from Drizzle queries or return objects when they are not needed for the UI.
+
+## 2026-01-29 - CI Build Requirements
+**Learning:** Cypress GitHub Action running `npm start` (Next.js production server) failed because the workflow lacked a build step. Also, Next.js `npm run build` often requires environment variables (e.g., `DATABASE_URL`) for static page generation, even if not fully running the app.
+**Action:** Ensure CI workflows running `npm start` include a `build` step and provide necessary environment variables (secrets) to the build process.
