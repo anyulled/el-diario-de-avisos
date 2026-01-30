@@ -136,12 +136,11 @@ export async function getDevelopers() {
   return await db.select().from(developers);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const { searchVector, ...articleColumns } = getTableColumns(articles);
-
 const getCachedArticle = unstable_cache(
   async (id: number) => {
-    const result = await db.select(articleColumns).from(articles).where(eq(articles.id, id)).limit(1);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { searchVector, ...rest } = getTableColumns(articles);
+    const result = await db.select(rest).from(articles).where(eq(articles.id, id)).limit(1);
     return result[0];
   },
   ["article-by-id"],
