@@ -86,7 +86,9 @@ describe("Article Rendering", () => {
     // Verify Spanish characters are displayed correctly
     cy.get("article")
       .invoke("text")
-      .should("match", /[áéíóúñÁÉÍÓÚÑ]/);
+      .then((text) => {
+        expect(text).to.match(/[áéíóúñÁÉÍÓÚÑ]/);
+      });
   });
 
   it("should be responsive on mobile devices", () => {
