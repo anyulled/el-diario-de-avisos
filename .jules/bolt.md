@@ -9,3 +9,7 @@
 ## 2026-01-28 - Over-fetching Large Columns
 **Learning:** `getNews` and `getArticlesOnThisDay` were fetching `content` (bytea) and `searchVector` (tsvector) for list views, causing unnecessary DB IO and large network payloads. Next.js serializes all Server Action return values to the client.
 **Action:** Explicitly exclude large columns (`content`, `searchVector`) from Drizzle queries or return objects when they are not needed for the UI.
+
+## 2026-01-29 - Single Article Optimization
+**Learning:** Individual article lookups (`getArticleById`) were uncached and fetched the heavy `searchVector` column.
+**Action:** Wrap single-item lookups in `unstable_cache` and use `getTableColumns` to exclude large, unused columns like `searchVector` to reduce payload size.
