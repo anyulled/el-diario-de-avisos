@@ -77,7 +77,7 @@ describe("Search Functionality", () => {
 
       // Verify we're on an article page
       cy.url().should("include", "/article/");
-      cy.get("h1").should("be.visible");
+      cy.get("h2").should("be.visible");
     });
   });
 
