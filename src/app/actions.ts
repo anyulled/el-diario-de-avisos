@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { articles, developers, essays, members, publicationColumns, tutors } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, getTableColumns } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 // GetYears removed
@@ -136,9 +136,19 @@ export async function getDevelopers() {
   return await db.select().from(developers);
 }
 
+const getCachedArticle = unstable_cache(
+  async (id: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { searchVector, ...rest } = getTableColumns(articles);
+    const result = await db.select(rest).from(articles).where(eq(articles.id, id)).limit(1);
+    return result[0];
+  },
+  ["article-by-id"],
+  { tags: ["articles"], revalidate: 3600 },
+);
+
 export async function getArticleById(id: number) {
-  const result = await db.select().from(articles).where(eq(articles.id, id)).limit(1);
-  return result[0];
+  return await getCachedArticle(id);
 }
 
 export async function getEssays() {
