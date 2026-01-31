@@ -187,8 +187,10 @@ import { processRtfContent } from "@/lib/rtf-content-converter";
 export async function getArticlesOnThisDay(day: number, month: number) {
   return await unstable_cache(
     async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { searchVector, ...columns } = getTableColumns(articles);
       const news = await db
-        .select()
+        .select(columns)
         .from(articles)
         .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`)
         .orderBy(sql`RANDOM()`)

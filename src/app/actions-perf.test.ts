@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getArticleById } from './actions';
+import { getArticleById, getArticlesOnThisDay } from './actions';
 import { db } from '@/db';
 
 // Mock setup
@@ -17,10 +17,15 @@ vi.mock('next/cache', () => ({
   },
 }));
 
+vi.mock('@/lib/rtf-content-converter', () => ({
+  processRtfContent: vi.fn().mockResolvedValue('extract'),
+}));
+
 interface MockChain {
   from: ReturnType<typeof vi.fn>;
   where: ReturnType<typeof vi.fn>;
   limit: ReturnType<typeof vi.fn>;
+  orderBy: ReturnType<typeof vi.fn>;
   then: (resolve: (value: unknown) => void) => Promise<void>;
   catch: ReturnType<typeof vi.fn>;
   finally: ReturnType<typeof vi.fn>;
@@ -30,7 +35,7 @@ interface MockChain {
 // Mock chain
 const createMockChain = (): MockChain => {
   const chain: Partial<MockChain> = {};
-  const methods = ['from', 'where', 'limit', 'catch', 'finally'];
+  const methods = ['from', 'where', 'limit', 'orderBy', 'catch', 'finally'];
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });
@@ -38,7 +43,7 @@ const createMockChain = (): MockChain => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   chain.then = (resolve: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    resolve([{ id: 1, title: 'Test Article' }]);
+    resolve([{ id: 1, title: 'Test Article', content: Buffer.from('content') }]);
     return Promise.resolve();
   };
   return chain as MockChain;
@@ -63,18 +68,26 @@ describe('getArticleById Performance', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const callArgs = mockSelect.mock.calls[0][0];
 
-    // This expectation should FAIL before optimization
     expect(callArgs).toBeDefined();
+    expect(callArgs).not.toHaveProperty('searchVector');
+  });
+});
 
-    /**
-     * Once defined, check that searchVector is NOT in the selected columns
-     * We can't easily check for the property key 'searchVector' because
-     * Drizzle column objects are complex.
-     * But if we pass a plain object to select, keys might be preserved?
-     * Drizzle uses the column object itself as the key/value usually.
-     * If we use getTableColumns(articles), we pass an object { colName: ColumnObj, ... }
-     */
-    // Let's assume callArgs is an object.
+describe('getArticlesOnThisDay Performance', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should exclude searchVector from the query', async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain());
+
+    await getArticlesOnThisDay(1, 1);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const callArgs = mockSelect.mock.calls[0][0];
+
+    expect(callArgs).toBeDefined();
     expect(callArgs).not.toHaveProperty('searchVector');
   });
 });

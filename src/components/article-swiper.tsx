@@ -17,7 +17,7 @@ export function ArticleSwiper({
   articles: news,
   backgroundImage = "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2068&auto=format&fit=crop",
 }: {
-  articles: (Omit<typeof articles.$inferSelect, "content"> & { extract: string })[];
+  articles: (Omit<typeof articles.$inferSelect, "content" | "searchVector"> & { extract: string })[];
   backgroundImage?: string;
 }) {
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
