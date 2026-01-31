@@ -54,16 +54,15 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
                   : `Año ${article.publicationYear}`}
               </span>
             </div>
-            {/* <h1 className="text-3xl md:text-5xl font-bold font-serif text-white tracking-tight leading-tight">{formatArticleTitle(article.title)}</h1>*/}
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 max-w-3xl -mt-10 relative z-30">
         <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl p-8 md:p-12 border border-gray-100 dark:border-zinc-800">
-          <h2 className="text-xl md:text-2xl font-serif italic text-gray-600 dark:text-gray-300 mb-8 leading-relaxed border-b border-gray-200 dark:border-zinc-800 pb-8">
+          <h1 className="text-xl md:text-2xl font-serif text-gray-600 dark:text-gray-300 mb-8 leading-relaxed border-b border-gray-200 dark:border-zinc-800 pb-8">
             {formatArticleTitle(article.title)}
-          </h2>
+          </h1>
 
           <article className="prose prose-lg dark:prose-invert max-w-none font-serif">
             <div dangerouslySetInnerHTML={{ __html: htmlContent }} />

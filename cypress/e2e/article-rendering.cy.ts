@@ -4,11 +4,11 @@
  */
 describe("Article Rendering", () => {
   it("should display article content without RTF codes", () => {
-    // Visit an article page
+    // Visit article 1: ESCLAVOS PROFUGOS
     cy.visit("/article/1");
 
-    // Wait for the page to load
-    cy.get("h2").should("be.visible");
+    // Wait for the page to load and verify h1 title
+    cy.get("h1").should("be.visible").and("contain", "ESCLAVOS PROFUGOS");
 
     // Verify the article content is visible
     cy.get("article").should("be.visible");
@@ -21,20 +21,24 @@ describe("Article Rendering", () => {
     cy.get("article").should("not.contain", "\\uc1");
     cy.get("article").should("not.contain", "\\pard");
 
-    // Verify the content is actually readable (not just raw RTF)
-    cy.get("article").invoke("text").should("have.length.greaterThan", 10);
+    // Verify specific content from the article is present
+    cy.get("article").should("contain", "José de los Reyes");
+    cy.get("article").should("contain", "color negro");
+    cy.get("article").should("contain", "cantador de fandangos");
   });
 
-  it("should display formatted article title", () => {
+  it("should display formatted article title in h1 tag", () => {
     cy.visit("/article/1");
 
-    // Verify title is present and cleaned when needed
-    cy.get("h2").should("be.visible");
-    cy.get("h2")
+    // Verify h1 title is present with exact content
+    cy.get("h1").should("be.visible");
+    cy.get("h1")
       .invoke("text")
       .then((text) => {
         const trimmed = text.trim();
-        expect(trimmed).to.not.equal("");
+        // Verify it's the correct title
+        expect(trimmed).to.equal("ESCLAVOS PROFUGOS");
+        // Ensure it doesn't contain fallback patterns
         expect(trimmed).to.not.match(/\(Sin Título\).*Articulo #/i);
       });
   });
@@ -45,23 +49,27 @@ describe("Article Rendering", () => {
     // Verify metadata is displayed (date, page number, etc.)
     cy.get("article").should("be.visible");
 
-    // Check for metadata labels
+    // Check for specific metadata
     cy.contains(/Página:/).should("be.visible");
+    // Article 1 is on page 4
+    cy.contains("Página: 4").should("be.visible");
     cy.contains(/Ref:/).should("be.visible");
-    cy.contains(/\d{4}/).should("be.visible");
+    cy.contains("Ref: 1").should("be.visible");
+    // Verify year 1837 is displayed
+    cy.contains("1837").should("be.visible");
   });
 
   it("should handle navigation between articles", () => {
     cy.visit("/article/1");
 
     // Verify first article loads
-    cy.get("h2").should("be.visible");
+    cy.get("h1").should("be.visible");
 
     // Navigate to another article
     cy.visit("/article/2");
 
     // Verify second article loads
-    cy.get("h2").should("be.visible");
+    cy.get("h1").should("be.visible");
     cy.get("article").should("be.visible");
     cy.get("article").should("not.contain", "{\\rtf");
   });
@@ -93,30 +101,42 @@ describe("Article Rendering", () => {
     cy.visit("/article/1");
 
     // Verify content is visible and readable on mobile
-    cy.get("h2").should("be.visible");
+    cy.get("h1").should("be.visible");
     cy.get("article").should("be.visible");
     cy.get("article").should("not.contain", "{\\rtf");
   });
 
-  it("should not display '[object Object]' in article content", () => {
+  it("should display actual article content without errors", () => {
     cy.visit("/article/1");
 
-    // Explicit check for the bug
+    // Verify h1 contains the correct title
+    cy.get("h1").should("contain", "ESCLAVOS PROFUGOS");
+
+    // Explicit check for common rendering bugs
     cy.get("article").should("not.contain", "[object Object]");
     cy.get("article").should("not.contain", "[object HTMLDivElement]");
 
-    // Verify actual content is present (article 1 is "ESCLAVOS PROFUGOS")
+    // Verify actual content is present with specific phrases from article 1
     cy.get("article")
       .invoke("text")
       .then((text) => {
         const trimmed = text.trim();
         expect(trimmed).to.not.equal("");
-        expect(trimmed.length).to.be.greaterThan(50);
+        expect(trimmed.length).to.be.greaterThan(100);
+
         // Ensure it's not just error messages or placeholders
         expect(trimmed).to.not.contain("Contenido no disponible");
         expect(trimmed).to.not.contain("Error:");
-        // Verify actual article content is present (from article 1: "ESCLAVOS PROFUGOS")
+
+        // Verify specific content from article 1: "ESCLAVOS PROFUGOS"
         expect(trimmed).to.contain("José de los Reyes");
+        expect(trimmed).to.contain("color negro");
+        expect(trimmed).to.contain("estatura regular");
+        expect(trimmed).to.contain("cantador de fandangos");
+        expect(trimmed).to.contain("sabe tocar guitarra");
+
+        // Verify the date is present
+        expect(trimmed).to.contain("Sábado 2 de diciembre de 1837");
       });
   });
 });
