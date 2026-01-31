@@ -17,3 +17,11 @@
 ## 2026-02-05 - Article List Optimization
 **Learning:** Found that `getArticlesOnThisDay` was fetching the large `searchVector` column even though it wasn't used, and passing it to the client (serialized by Next.js).
 **Action:** Use `getTableColumns` with destructuring to explicitly exclude `searchVector` from Drizzle queries when it's not needed, reducing payload size.
+
+## 2026-02-05 - TypeScript Mismatch on Optimization
+**Learning:** When excluding columns from a Drizzle query using  and destructuring, TypeScript types derived from  in consuming components must be updated to explicitly  the excluded columns, otherwise  or  will fail with type mismatches.
+**Action:** Whenever changing the shape of data returned by a server action, immediately grep for usages of that action and update the Prop types of any components receiving that data.
+
+## 2026-02-05 - TypeScript Mismatch on Optimization
+**Learning:** When excluding columns from a Drizzle query using `getTableColumns` and destructuring, TypeScript types derived from `$inferSelect` in consuming components must be updated to explicitly `Omit` the excluded columns, otherwise `tsc` or `next build` will fail with type mismatches.
+**Action:** Whenever changing the shape of data returned by a server action, immediately grep for usages of that action and update the Prop types of any components receiving that data.
