@@ -13,3 +13,7 @@
 ## 2026-01-29 - Single Article Optimization
 **Learning:** Individual article lookups (`getArticleById`) were uncached and fetched the heavy `searchVector` column.
 **Action:** Wrap single-item lookups in `unstable_cache` and use `getTableColumns` to exclude large, unused columns like `searchVector` to reduce payload size.
+
+## 2026-02-05 - Article List Optimization
+**Learning:** Found that `getArticlesOnThisDay` was fetching the large `searchVector` column even though it wasn't used, and passing it to the client (serialized by Next.js).
+**Action:** Use `getTableColumns` with destructuring to explicitly exclude `searchVector` from Drizzle queries when it's not needed, reducing payload size.
