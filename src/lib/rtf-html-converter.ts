@@ -24,6 +24,13 @@ function stripFontStyles(html: string): string {
 
 export async function processRtfContent(content: Buffer | string | null, id: number | string): Promise<string> {
   if (!content) return "Contenido no disponible";
+
+  // Defensive check: ensure content is not an object
+  if (typeof content === "object" && !Buffer.isBuffer(content)) {
+    console.error(`[Content ${id}] Received object instead of Buffer/string:`, content);
+    return "Error: contenido no válido";
+  }
+
   try {
     // Using iconv-lite to decode as Windows-1252 first to ensure 8-bit bytes are mapped to correct chars
     const contentString = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);

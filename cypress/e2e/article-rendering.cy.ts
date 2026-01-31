@@ -97,4 +97,26 @@ describe("Article Rendering", () => {
     cy.get("article").should("be.visible");
     cy.get("article").should("not.contain", "{\\rtf");
   });
+
+  it("should not display '[object Object]' in article content", () => {
+    cy.visit("/article/1");
+
+    // Explicit check for the bug
+    cy.get("article").should("not.contain", "[object Object]");
+    cy.get("article").should("not.contain", "[object HTMLDivElement]");
+
+    // Verify actual content is present (article 1 is "ESCLAVOS PROFUGOS")
+    cy.get("article")
+      .invoke("text")
+      .then((text) => {
+        const trimmed = text.trim();
+        expect(trimmed).to.not.equal("");
+        expect(trimmed.length).to.be.greaterThan(50);
+        // Ensure it's not just error messages or placeholders
+        expect(trimmed).to.not.contain("Contenido no disponible");
+        expect(trimmed).to.not.contain("Error:");
+        // Verify actual article content is present (from article 1: "ESCLAVOS PROFUGOS")
+        expect(trimmed).to.contain("José de los Reyes");
+      });
+  });
 });

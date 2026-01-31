@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { articles, developers, essays, members, publicationColumns, tutors } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
-import { and, eq, sql, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 // GetYears removed
@@ -148,7 +148,24 @@ const getCachedArticle = unstable_cache(
 );
 
 export async function getArticleById(id: number) {
-  return await getCachedArticle(id);
+  const article = await getCachedArticle(id);
+  if (!article) return article;
+
+  /**
+   * Handle Buffer deserialization from cache
+   * Unstable_cache serializes Buffers to {type: 'Buffer', data: [...]} format
+   */
+  if (article.content && typeof article.content === "object" && !Buffer.isBuffer(article.content)) {
+    const obj = article.content as { type: string; data: number[] };
+    if (obj.type === "Buffer" && Array.isArray(obj.data)) {
+      return {
+        ...article,
+        content: Buffer.from(obj.data),
+      };
+    }
+  }
+
+  return article;
 }
 
 export async function getEssays() {
