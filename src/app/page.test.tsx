@@ -45,9 +45,11 @@ describe('Home Page Performance', () => {
 
     console.log(`Duration: ${duration}ms`);
 
-    // Expectation: Parallel execution should be close to 100ms.
-    // Sequential execution (current) should be close to 200ms.
-    // We set the threshold to 150ms to strictly require parallelism.
+    /**
+     * Expectation: Parallel execution should be close to 100ms.
+     * Sequential execution (current) should be close to 200ms.
+     * We set the threshold to 150ms to strictly require parallelism.
+     */
     expect(duration).toBeLessThan(150);
   });
 });
