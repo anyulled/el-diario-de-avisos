@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, customType, index, integer, pgTable, primaryKey, serial, timestamp, varchar, vector } from "drizzle-orm/pg-core";
+import { boolean, customType, index, integer, pgTable, primaryKey, serial, text, timestamp, varchar, vector } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Buffer }>({
   dataType() {
@@ -60,6 +60,7 @@ export const articles = pgTable(
     series: integer("arti_serie"),
     microfilm: varchar("arti_microfilm", { length: 20 }),
     searchVector: tsvector("search_vector"),
+    plainText: text("arti_texto_plano"),
   },
   (table) => [
     index("articles_search_vector_idx").using("gin", table.searchVector),
