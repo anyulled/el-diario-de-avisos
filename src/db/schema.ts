@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { boolean, customType, index, integer, pgTable, primaryKey, serial, timestamp, varchar, vector } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Buffer }>({
@@ -65,6 +66,11 @@ export const articles = pgTable(
     index("articles_publication_year_idx").on(table.publicationYear),
     index("articles_column_id_idx").on(table.columnId),
     index("articles_date_idx").on(table.date),
+    /**
+     * Functional index to optimize 'On this day' queries which filter by month and day,
+     * ignoring the year. This prevents full table scans when using EXTRACT().
+     */
+    index("articles_date_month_day_idx").on(sql`EXTRACT(MONTH FROM ${table.date})`, sql`EXTRACT(DAY FROM ${table.date})`),
   ],
 );
 
