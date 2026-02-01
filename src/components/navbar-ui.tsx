@@ -178,7 +178,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
       </nav>
 
       {/* Mobile Navigation Overlay */}
-      <div className={cn("fixed inset-0 w-screen h-screen bg-black z-999 md:hidden flex flex-col pt-24 px-6 overflow-y-auto", isOpen ? "block" : "hidden")}>
+<div className={cn("fixed inset-0 w-screen h-screen bg-black z-999 md:hidden flex flex-col pt-24 px-6 overflow-y-auto transition-opacity duration-300 ease-in-out", isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none")}>
         {/* Defined navLinks array to reuse across desktop and mobile menus */}
         <div className="flex flex-col gap-6">
           <Link href="/" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
