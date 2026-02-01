@@ -60,4 +60,7 @@ async function main() {
   console.log("Backfill complete.");
 }
 
-main().catch(console.error).finally(() => process.exit());
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
