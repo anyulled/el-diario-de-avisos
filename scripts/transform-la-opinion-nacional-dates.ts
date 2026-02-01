@@ -63,7 +63,9 @@ async function main() {
 
       console.log("\nSample Extraction:");
       previewRes.rows.forEach((row) => {
-        console.log(`ID ${row.id}: ${row.extracted_date ? row.extracted_date.toISOString().split("T")[0] : "NULL"} | "${row.preview.replace(/\n/g, " ")}..."`);
+        const dateStr = row.extracted_date ? new Date(row.extracted_date).toISOString().split("T")[0] : "NULL";
+        const previewStr = row.preview ? row.preview.replace(/\n/g, " ") : "NULL";
+        console.log(`ID ${row.id}: ${dateStr} | "${previewStr}..."`);
       });
     } else {
       console.log("🚀 Applying extraction...");

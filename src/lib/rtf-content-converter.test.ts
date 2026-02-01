@@ -58,7 +58,7 @@ describe("rtf-content-converter", () => {
       expect(result).toContain("ERROR_PLEASE");
     });
 
-    it("should correcty decode UTF-8 content", async () => {
+    it("should correctly decode UTF-8 content", async () => {
       // UTF-8 representation of 'ñ' is 0xC3 0xB1
       const content = Buffer.from([0xc3, 0xb1]);
       const result = await processRtfContent(content);

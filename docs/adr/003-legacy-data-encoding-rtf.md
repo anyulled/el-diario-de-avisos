@@ -40,7 +40,7 @@ For the web UI and Vector Ingestion:
   - **Searchability**: The index is clean, enabling effective full-text search.
 - **Cons**:
   - **Complexity**: Regex parsing of RTF is fragile and computationally expensive compared to storing plain text.
-  - **Maintainability**: The custom PL/pgSQL function needed updates to handle edge cases (like split hex codes in [ADR-001](adr/001-hybrid-search-and-unaccent.md)).
+  - **Maintainability**: The custom PL/pgSQL function needed updates to handle edge cases (like split hex codes in [ADR-001](001-hybrid-search-and-unaccent.md)).
 
 ## Status
 

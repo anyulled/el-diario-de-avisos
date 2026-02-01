@@ -31,7 +31,7 @@ We implemented a **Retrieval-Augmented Generation (RAG)** pipeline using **pgvec
 - **Flow**:
   1. User query is embedded using the same model.
   2. System retrieves top k similar articles.
-  3. (Updated in [ADR-001](adr/001-hybrid-search-and-unaccent.md)) System matches keywords via Hybrid Search.
+  3. (Updated in [ADR-001](001-hybrid-search-and-unaccent.md)) System matches keywords via Hybrid Search.
   4. Retrieved context is injected into the System Prompt.
   5. Llama 3 (via Groq) generates the response using the provided context.
 
