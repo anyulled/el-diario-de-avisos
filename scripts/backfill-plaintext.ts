@@ -23,6 +23,7 @@ async function main() {
   }
 
   const BATCH_SIZE = 50;
+  // eslint-disable-next-line no-restricted-syntax
   let processed = 0;
 
   while (true) {

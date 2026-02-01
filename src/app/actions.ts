@@ -199,12 +199,10 @@ export async function getArticlesOnThisDay(day: number, month: number) {
       return await Promise.all(
         news.map(async (item) => {
           const { content, plainText, ...rest } = item;
-          let extract = "";
-          if (plainText !== null && plainText !== undefined) {
-            extract = plainText.slice(0, 500);
-          } else {
-            extract = await processRtfContent(content as Buffer | null, { maxLength: 500 });
-          }
+          const extract =
+            plainText !== null && plainText !== undefined
+              ? plainText.slice(0, 500)
+              : await processRtfContent(content as Buffer | null, { maxLength: 500 });
           return {
             ...rest,
             extract,

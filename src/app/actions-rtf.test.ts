@@ -11,8 +11,7 @@ vi.mock('@/db', () => ({
 }));
 
 vi.mock('next/cache', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <T>(fn: T) => fn,
 }));
 
 vi.mock('@/lib/rtf-content-converter', () => ({
@@ -34,8 +33,7 @@ const createMockChain = (returnData: any[]): MockChain => {
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  chain.then = (resolve: any) => {
+  chain.then = (resolve: (value: unknown) => void) => {
     resolve(returnData);
     return Promise.resolve();
   };
