@@ -141,15 +141,31 @@ const getCachedArticle = unstable_cache(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchVector, ...rest } = getTableColumns(articles);
     const result = await db.select(rest).from(articles).where(eq(articles.id, id)).limit(1);
-    return result[0];
+    const article = result[0];
+
+    if (article?.content && Buffer.isBuffer(article.content)) {
+      return {
+        ...article,
+        content: article.content.toString("base64") as unknown as Buffer,
+      };
+    }
+
+    return article;
   },
-  ["article-by-id"],
+  ["article-by-id-v2"],
   { tags: ["articles"], revalidate: 3600 },
 );
 
 export async function getArticleById(id: number) {
   const article = await getCachedArticle(id);
   if (!article) return article;
+
+  if (typeof article.content === "string") {
+    return {
+      ...article,
+      content: Buffer.from(article.content, "base64"),
+    };
+  }
 
   /**
    * Handle Buffer deserialization from cache
