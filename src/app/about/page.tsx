@@ -50,21 +50,26 @@ export default async function AboutPage() {
   const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-      <div className="relative h-[40vh] w-full bg-zinc-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent z-10" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center brightness-50" />
+    <main className="min-h-screen bg-white dark:bg-zinc-950 pb-20">
+      <div className="relative h-[50vh] w-full bg-zinc-900 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/40 to-transparent z-10" />
+        <div className="absolute inset-0 bg-linear-to-r from-amber-900/20 to-blue-900/20 z-10" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center brightness-50 bg-fixed" />
         <Navbar />
-        <div className="relative z-20 container mx-auto h-full flex items-center justify-center pt-20">
-          <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight">Acerca del Proyecto</h1>
+        <div className="relative z-20 container mx-auto h-full flex flex-col items-center justify-center pt-24 text-center px-4">
+          <div className="mb-4 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full backdrop-blur-md animate-in fade-in duration-700">
+            <span className="text-amber-200 text-xs font-bold tracking-[0.2em] uppercase">Nuestro Equipo</span>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tight animate-slide-up [animation-delay:200ms]">Acerca del Proyecto</h1>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 max-w-4xl space-y-16">
-        <section>
-          <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800 text-amber-700 dark:text-amber-500">
-            Integrantes del Equipo
-          </h2>
+      <div className="container mx-auto px-4 py-20 max-w-5xl space-y-24">
+        <section className="animate-slide-up [animation-delay:400ms] opacity-0 [animation-fill-mode:forwards]">
+          <div className="flex items-center gap-4 mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading whitespace-nowrap">Integrantes del Equipo</h2>
+            <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {integrantes.map((i) => (
               <MemberCard
@@ -85,8 +90,11 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <section>
-          <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800 text-amber-700 dark:text-amber-500">Tutores</h2>
+        <section className="animate-slide-up [animation-delay:600ms] opacity-0 [animation-fill-mode:forwards]">
+          <div className="flex items-center gap-4 mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading whitespace-nowrap">Tutores</h2>
+            <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {tutores.map((t) => (
               <MemberCard
@@ -104,8 +112,11 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <section>
-          <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800 text-amber-700 dark:text-amber-500">Desarrolladores</h2>
+        <section className="animate-slide-up [animation-delay:800ms] opacity-0 [animation-fill-mode:forwards]">
+          <div className="flex items-center gap-4 mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading whitespace-nowrap">Desarrolladores</h2>
+            <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {desarrolladores.map((dev) => (
               <MemberCard

@@ -17,7 +17,7 @@ type MemberCardProps = {
 };
 
 const getSubtitleClassName = (subtitleTone: MemberCardProps["subtitleTone"]) =>
-  subtitleTone === "muted" ? "text-sm text-gray-500 dark:text-gray-400 mt-1" : "text-sm text-amber-600 dark:text-amber-500 mt-1";
+  subtitleTone === "muted" ? "text-sm text-gray-500 dark:text-gray-400 mt-1" : "text-sm font-semibold text-amber-600 dark:text-amber-500 mt-1";
 
 const getHeaderClassName = (hasMeta: boolean) => `flex items-start gap-4${hasMeta ? " mb-4" : ""}`;
 
@@ -33,14 +33,14 @@ const SocialLinks = ({ linkedinUrl, twitterUrl, cvUrl }: SocialLinksProps) => {
   }
 
   return (
-    <div className="mt-3 flex items-center gap-3">
+    <div className="mt-4 flex items-center gap-3">
       {cvUrl && (
         <a
           href={cvUrl}
           aria-label="Curriculum Vitae"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:border-amber-500 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400 dark:hover:bg-amber-500/20 active:scale-95"
         >
           <FileText className="h-4 w-4" />
         </a>
@@ -51,7 +51,7 @@ const SocialLinks = ({ linkedinUrl, twitterUrl, cvUrl }: SocialLinksProps) => {
           aria-label="LinkedIn"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:border-amber-500 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400 dark:hover:bg-amber-500/20 active:scale-95"
         >
           <Linkedin className="h-4 w-4" />
         </a>
@@ -62,7 +62,7 @@ const SocialLinks = ({ linkedinUrl, twitterUrl, cvUrl }: SocialLinksProps) => {
           aria-label="Twitter"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:border-amber-500 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-amber-500 hover:bg-amber-500/10 hover:text-amber-600 dark:border-zinc-800 dark:text-gray-400 dark:hover:bg-amber-500/20 active:scale-95"
         >
           <Twitter className="h-4 w-4" />
         </a>
@@ -84,15 +84,15 @@ const MemberHeader = ({ className, photoPath, displayName, subtitle, subtitleCla
   <div className={className}>
     <aside className="shrink-0">
       {photoPath ? (
-        <Image src={photoPath} alt={displayName || ""} width={64} height={64} className="rounded-full object-cover" />
+        <Image src={photoPath} alt={displayName || ""} width={80} height={80} className="rounded-2xl object-cover shadow-md" />
       ) : (
-        <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-400">
-          <span className="text-xl font-serif">{fallbackLetter}</span>
+        <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-400 border border-gray-200 dark:border-zinc-700">
+          <span className="text-2xl font-serif">{fallbackLetter}</span>
         </div>
       )}
     </aside>
-    <header className="flex flex-col">
-      {displayName && <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{displayName}</span>}
+    <header className="flex flex-col justify-center">
+      {displayName && <span className="text-xl font-bold text-gray-900 dark:text-gray-100 font-heading tracking-tight">{displayName}</span>}
       {subtitle && <span className={subtitleClassName}>{subtitle}</span>}
     </header>
   </div>
@@ -119,7 +119,7 @@ export function MemberCard({
   const subtitleClassName = getSubtitleClassName(subtitleTone);
 
   return (
-    <article className="flex flex-col p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+    <article className="flex flex-col p-8 glass premium-shadow rounded-3xl border border-gray-100 dark:border-zinc-800/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
       <MemberHeader
         className={headerClassName}
         photoPath={photoPath}
@@ -128,8 +128,8 @@ export function MemberCard({
         subtitleClassName={subtitleClassName}
         fallbackLetter={fallbackLetter}
       />
-      {eyebrow && <span className="text-xs text-amber-600 dark:text-amber-500 uppercase tracking-wide">{eyebrow}</span>}
-      {resume && <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{resume}</p>}
+      {eyebrow && <span className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-[0.2em] mb-3">{eyebrow}</span>}
+      {resume && <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-normal">{resume}</p>}
       <SocialLinks linkedinUrl={linkedinUrl} twitterUrl={twitterUrl} cvUrl={cvUrl} />
     </article>
   );

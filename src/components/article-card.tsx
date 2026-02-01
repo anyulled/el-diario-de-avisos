@@ -3,13 +3,7 @@ import { highlightText } from "@/lib/search-highlighter";
 import { formatArticleTitle } from "@/lib/title-formatter";
 import Link from "next/link";
 
-export function ArticleCard({
-  item,
-  searchTerm,
-}: {
-  item: Omit<typeof articles.$inferSelect, "content" | "searchVector">;
-  searchTerm: string | null;
-}) {
+export function ArticleCard({ item, searchTerm }: { item: Omit<typeof articles.$inferSelect, "content" | "searchVector">; searchTerm: string | null }) {
   const href = searchTerm ? `/article/${item.id}?text=${encodeURIComponent(searchTerm)}` : `/article/${item.id}`;
   const title = formatArticleTitle(item.title);
   const subtitle = item.subtitle || "";
@@ -17,16 +11,16 @@ export function ArticleCard({
   const highlightedSubtitle = searchTerm ? highlightText(subtitle, searchTerm) : subtitle;
 
   return (
-    <Link href={href} className="block">
-      <article className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-zinc-800 flex flex-col h-full group">
+    <Link href={href} className="block group">
+      <article className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-zinc-800 flex flex-col h-full active:scale-[0.98]">
         <div className="p-6 flex-1 flex flex-col">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-xs font-mono text-amber-700 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded border border-amber-100 dark:border-amber-900/50">
+            <span className="text-[10px] font-bold tracking-widest text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-100 dark:border-amber-900/50 uppercase transition-all group-hover:bg-amber-100 dark:group-hover:bg-amber-900/60">
               {item.date ? new Date(item.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" }) : item.publicationYear}
             </span>
           </div>
           <h3
-            className="text-xl font-bold mb-3 text-gray-900 dark:text-gray-100 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight"
+            className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 group-hover:text-amber-700 dark:group-hover:text-amber-500 transition-colors line-clamp-2 leading-tight font-heading"
             dangerouslySetInnerHTML={{ __html: highlightedTitle }}
           />
           <p

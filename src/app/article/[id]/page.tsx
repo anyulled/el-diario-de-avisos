@@ -40,15 +40,18 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950 pb-20">
-      <div className="relative h-[40vh] w-full bg-zinc-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent z-10" />
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center brightness-50" />
+      <div className="relative h-[45vh] w-full bg-zinc-900 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/40 to-transparent z-10" />
+        <div className="absolute inset-0 bg-linear-to-r from-amber-900/20 to-blue-900/20 z-10" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center brightness-50 bg-fixed" />
         <Navbar />
-        <div className="relative z-20 container mx-auto h-full flex items-end pb-12 px-4">
-          <div className="max-w-4xl">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="bg-amber-600/90 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">{section?.name || "Noticia"}</span>
-              <span className="text-white/80 font-mono text-sm">
+        <div className="relative z-20 container mx-auto h-full flex items-end justify-center pb-12 px-4">
+          <div className="max-w-4xl animate-slide-up text-center">
+            <div className="flex items-center justify-center gap-4">
+              <span className="bg-amber-600 inline-flex items-center justify-center text-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm leading-none">
+                {section?.name || "Noticia"}
+              </span>
+              <span className="text-white/80 font-mono text-xs uppercase tracking-[0.2em] flex items-center">
                 {article.date
                   ? new Date(article.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" })
                   : `Año ${article.publicationYear}`}

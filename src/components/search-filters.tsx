@@ -63,37 +63,41 @@ function DateRangeRow({ dateFrom, dateTo, onDateFromChange, onDateToChange, onBl
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <div className="relative">
-          <label className="text-xs font-semibold text-gray-500 mb-1 block pl-1">Desde</label>
+        <div className="relative group">
+          <label className="text-[10px] font-bold text-gray-500/80 mb-1.5 block pl-4 uppercase tracking-[0.15em]">Desde</label>
           <div className="relative">
             <input
               type="date"
               aria-label="Fecha desde"
-              className={`w-full h-11 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border focus:ring-2 transition-all text-gray-700 dark:text-gray-300 ${
-                error ? "border-red-500 focus:ring-red-500" : "border-transparent focus:ring-amber-600"
+              className={`w-full h-12 pl-12 pr-4 rounded-2xl bg-black/5 dark:bg-white/5 border-2 transition-all text-gray-700 dark:text-gray-300 font-medium outline-hidden ${
+                error
+                  ? "border-red-500 focus:bg-white dark:focus:bg-zinc-900"
+                  : "border-transparent focus:border-amber-500/50 focus:bg-white dark:focus:bg-zinc-900"
               }`}
               onChange={(e) => onDateFromChange(e.target.value)}
               onBlur={onBlur}
               value={dateFrom}
             />
-            <Calendar className="absolute left-3 top-3 text-gray-400 pointer-events-none" size={16} />
+            <Calendar className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-amber-500 transition-colors" size={18} />
           </div>
         </div>
 
-        <div className="relative">
-          <label className="text-xs font-semibold text-gray-500 mb-1 block pl-1">Hasta</label>
+        <div className="relative group">
+          <label className="text-[10px] font-bold text-gray-500/80 mb-1.5 block pl-4 uppercase tracking-[0.15em]">Hasta</label>
           <div className="relative">
             <input
               type="date"
               aria-label="Fecha hasta"
-              className={`w-full h-11 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border focus:ring-2 transition-all text-gray-700 dark:text-gray-300 ${
-                error ? "border-red-500 focus:ring-red-500" : "border-transparent focus:ring-amber-600"
+              className={`w-full h-12 pl-12 pr-4 rounded-2xl bg-black/5 dark:bg-white/5 border-2 transition-all text-gray-700 dark:text-gray-300 font-medium outline-hidden ${
+                error
+                  ? "border-red-500 focus:bg-white dark:focus:bg-zinc-900"
+                  : "border-transparent focus:border-amber-500/50 focus:bg-white dark:focus:bg-zinc-900"
               }`}
               onChange={(e) => onDateToChange(e.target.value)}
               onBlur={onBlur}
               value={dateTo}
             />
-            <Calendar className="absolute left-3 top-3 text-gray-400 pointer-events-none" size={16} />
+            <Calendar className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-amber-500 transition-colors" size={18} />
           </div>
         </div>
       </div>
@@ -111,25 +115,37 @@ interface TypeFilterPanelProps {
 
 function TypeFilterPanel({ types, selectedType, onSelect, onClear }: TypeFilterPanelProps) {
   return (
-    <div className="mt-4 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg animate-in fade-in slide-in-from-top-2 border border-gray-100 dark:border-zinc-700 relative z-40">
-      <h3 className="text-xs font-bold mb-3 text-gray-500 uppercase tracking-widest">Filtrar por Tipo</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+    <div className="mt-6 p-6 glass rounded-2xl animate-in slide-up border border-gray-100 dark:border-zinc-800/50 relative z-40 bg-white/50 dark:bg-zinc-900/50 shadow-2xl">
+      <h3 className="text-[10px] font-bold mb-4 text-gray-500 uppercase tracking-widest">Filtrar por Tipo</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {types.map((type) => (
-          <label key={type.id} className="flex items-center gap-2 cursor-pointer hover:bg-amber-50 dark:hover:bg-zinc-700 p-2 rounded transition-colors">
+          <label
+            key={type.id}
+            className="flex items-center gap-3 cursor-pointer hover:bg-amber-500/10 p-2.5 rounded-xl transition-all border border-transparent hover:border-amber-500/20 group"
+          >
             <input
               type="radio"
               name="type"
               value={type.id}
               checked={selectedType === String(type.id)}
               onChange={(e) => onSelect(e.target.value)}
-              className="text-amber-600 focus:ring-amber-500 border-gray-300"
+              className="w-4 h-4 text-amber-600 focus:ring-amber-500 border-gray-300 dark:bg-zinc-800 transition-all checked:scale-110"
             />
-            <span className="text-sm truncate">{type.name}</span>
+            <span className="text-sm truncate font-medium text-gray-700 dark:text-gray-300 group-hover:text-amber-700 dark:group-hover:text-amber-500">
+              {type.name}
+            </span>
           </label>
         ))}
-        <label className="flex items-center gap-2 cursor-pointer hover:bg-amber-50 dark:hover:bg-zinc-700 p-2 rounded transition-colors text-amber-600">
-          <input type="radio" name="type" value="" checked={!selectedType} onChange={onClear} className="text-amber-600 focus:ring-amber-500" />
-          <span className="text-sm font-semibold">Ver Todos</span>
+        <label className="flex items-center gap-3 cursor-pointer hover:bg-amber-500/10 p-2.5 rounded-xl transition-all border border-transparent hover:border-amber-500/20 group text-amber-600">
+          <input
+            type="radio"
+            name="type"
+            value=""
+            checked={!selectedType}
+            onChange={onClear}
+            className="w-4 h-4 text-amber-600 focus:ring-amber-500 transition-all checked:scale-110"
+          />
+          <span className="text-sm font-bold uppercase tracking-wide">Mostar Todos</span>
         </label>
       </div>
     </div>
@@ -220,27 +236,31 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto -mt-10 relative z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-6">
+    <div className="w-full max-w-7xl mx-auto -mt-12 relative z-30 glass premium-shadow rounded-3xl p-6 md:p-8 animate-slide-up [animation-delay:600ms] opacity-0 [animation-fill-mode:forwards]">
       {/* Row 1: Search Input & Button */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-4">
-        <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1 group">
           <input
             type="search"
             placeholder="Buscar por palabra clave o texto..."
-            className="w-full h-12 pl-10 pr-4 rounded-lg bg-gray-100 dark:bg-zinc-800 border-none focus:ring-2 focus:ring-amber-600 transition-all dark:text-white"
+            className="w-full h-14 pl-12 pr-4 rounded-2xl bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-amber-500/50 focus:bg-white dark:focus:bg-zinc-900 transition-all dark:text-white outline-hidden text-lg placeholder:text-gray-400 font-medium"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleManualSearch()}
           />
-          <Search className="absolute left-3 top-3.5 text-gray-400" size={18} />
+          <Search className="absolute left-4 top-4.5 text-gray-400 group-focus-within:text-amber-500 transition-colors" size={20} />
         </div>
         <button
           type="button"
           aria-label="Buscar"
           onClick={handleManualSearch}
-          className="h-12 px-6 rounded-lg bg-amber-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-amber-700 transition-colors shadow-sm"
+          className="h-14 px-8 rounded-2xl bg-amber-600 text-white font-bold flex items-center justify-center gap-3 hover:bg-amber-700 transition-all shadow-lg hover:shadow-amber-500/20 active:scale-95 group"
         >
-          {isPending ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> : <Search size={18} />}
+          {isPending ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+          ) : (
+            <Search className="group-hover:scale-110 transition-transform" size={20} />
+          )}
           <span>Buscar</span>
         </button>
       </div>
@@ -250,15 +270,15 @@ export function SearchFilters({ types }: SearchFiltersProps) {
       {/* Row 3: Type & Other Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Type Dropdown / Toggle */}
-        <div className="relative">
+        <div className="relative group">
           <button
             onClick={() => setIsTypeExpanded(!isTypeExpanded)}
-            className="w-full h-11 pl-10 pr-4 rounded-lg bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 flex items-center justify-between text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors text-sm"
+            className="w-full h-12 pl-12 pr-4 rounded-2xl bg-black/5 dark:bg-white/5 border-2 border-transparent hover:border-amber-500/30 flex items-center justify-between text-gray-700 dark:text-gray-300 transition-all text-sm font-semibold cursor-pointer group-focus-within:border-amber-500/50"
           >
             <span className="truncate">{getTypeLabel(types, selectedType)}</span>
-            {isTypeExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {isTypeExpanded ? <ChevronUp size={18} className="text-amber-600" /> : <ChevronDown size={18} className="text-gray-400" />}
           </button>
-          <Type className="absolute left-3 top-3 text-gray-400" size={16} />
+          <Type className="absolute left-4 top-3.5 text-gray-400 group-hover:text-amber-500 transition-colors" size={18} />
         </div>
 
         {/* Sort */}
