@@ -7,9 +7,9 @@ import { SearchFilters } from "@/components/search-filters";
 import { getNews, getNewsTypes, SearchParams } from "./actions";
 
 export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const typesPromise = getNewsTypes();
   const params = await searchParams;
-  const types = await getNewsTypes();
-  const { data: news, total } = await getNews(params);
+  const [types, { data: news, total }] = await Promise.all([typesPromise, getNews(params)]);
 
   const currentPage = Number(params.page || 1);
   const pageSize = Number(params.pageSize || 20);
