@@ -107,7 +107,7 @@ The original regex `.*?(\\d{4})` was too lenient, allowing the pattern to skip o
 
 ### Migration
 
-Applied via [fix_edition_number_dates.sql](file:///Users/anyulled/Downloads/El%20Diario%20de%20Avisos/web/drizzle/migrations/fix_edition_number_dates.sql):
+Applied via [fix_edition_number_dates.sql](/drizzle/migrations/fix_edition_number_dates.sql):
 
 - Fixed 44 affected articles
 - Updated `extract_article_date` function

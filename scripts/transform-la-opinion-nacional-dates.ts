@@ -67,15 +67,26 @@ async function main() {
       });
     } else {
       console.log("🚀 Applying extraction...");
-      const updateRes = await pool.query(
-        `
-        UPDATE articulos 
-        SET arti_fecha = extract_article_date(arti_contenido)
-        WHERE pub_cod = $1
-      `,
-        [pubId],
-      );
-      console.log(`✓ Updated ${updateRes.rowCount} articles.`);
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const updateRes = await client.query(
+          `
+          UPDATE articulos 
+          SET arti_fecha = extract_article_date(arti_contenido)
+          WHERE pub_cod = $1
+        `,
+          [pubId],
+        );
+        await client.query("COMMIT");
+        console.log(`✓ Updated ${updateRes.rowCount} articles.`);
+      } catch (e) {
+        await client.query("ROLLBACK");
+        console.error("❌ Transaction failed, rolling back.");
+        throw e;
+      } finally {
+        client.release();
+      }
     }
 
     // 3. Verification Stats
@@ -103,4 +114,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

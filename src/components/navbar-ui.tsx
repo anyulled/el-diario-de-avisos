@@ -77,9 +77,16 @@ export function NavbarUI({ essays }: NavbarUIProps) {
     {} as Record<string, Essay[]>,
   );
 
+  const navLinks = [
+    { href: "/tal-dia-como-hoy", icon: Calendar, label: "Tal día como hoy" },
+    { href: "/chat", icon: MessageSquare, label: "Asistente" },
+    { href: "/como-citar", icon: Quote, label: "Cómo citar" },
+    { href: "/about", icon: Info, label: "Acerca de" },
+  ];
+
   return (
     <>
-      <nav className={cn("fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 pt-4", isScrolled ? "translate-y-0" : "translate-y-0")}>
+      <nav className={cn("fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 pt-4 translate-y-0")}>
         <div
           className={cn(
             "container mx-auto px-4 py-3 flex justify-between items-center transition-all duration-300 rounded-full",
@@ -141,12 +148,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
               </div>
             </div>
 
-            {[
-              { href: "/tal-dia-como-hoy", icon: Calendar, label: "Tal día como hoy" },
-              { href: "/chat", icon: MessageSquare, label: "Asistente" },
-              { href: "/como-citar", icon: Quote, label: "Cómo citar" },
-              { href: "/about", icon: Info, label: "Acerca de" },
-            ].map((item) => (
+            {navLinks.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -177,6 +179,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
 
       {/* Mobile Navigation Overlay */}
       <div className={cn("fixed inset-0 w-screen h-screen bg-black z-999 md:hidden flex flex-col pt-24 px-6 overflow-y-auto", isOpen ? "block" : "hidden")}>
+        {/* Defined navLinks array to reuse across desktop and mobile menus */}
         <div className="flex flex-col gap-6">
           <Link href="/" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
             <Search size={24} />
@@ -203,28 +206,16 @@ export function NavbarUI({ essays }: NavbarUIProps) {
             </div>
           </div>
 
-          <Link
-            href="/tal-dia-como-hoy"
-            className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10"
-          >
-            <Calendar size={24} />
-            Tal día como hoy
-          </Link>
-
-          <Link href="/chat" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
-            <MessageSquare size={24} />
-            Asistente
-          </Link>
-
-          <Link href="/como-citar" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
-            <Quote size={24} />
-            Cómo citar
-          </Link>
-
-          <Link href="/about" className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10">
-            <Info size={24} />
-            Acerca de
-          </Link>
+          {navLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-2xl font-light hover:text-white transition-colors flex items-center gap-3 py-2 border-b border-white/10"
+            >
+              <item.icon size={24} />
+              {item.label}
+            </Link>
+          ))}
         </div>
       </div>
     </>

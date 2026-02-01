@@ -221,4 +221,63 @@ describe("SearchFilters date range", () => {
     const urlFinal = new URL(lastCallFinal, "http://localhost");
     expect(urlFinal.searchParams.get("type")).toBe("1");
   });
+
+  describe("PublicationFilter", () => {
+    const mockPubs = [
+      { id: 1, name: "Diario de Avisos", foundedDate: null, closedDate: null },
+      { id: 2, name: "La Opinión Nacional", foundedDate: null, closedDate: null },
+    ];
+
+    it("updates functionality when a publication is selected", () => {
+      render(<SearchFilters types={[]} publications={mockPubs} />);
+
+      /**
+       * 1. Select a publication (e.g., Diario de Avisos)
+       * Since it's a radio group inside a Field component, we look for the radio item.
+       * Based on the implementation, the radio buttons have ids like `pub-{id}`.
+       * However, typical testing library usage is finding by label or role.
+       * The implementation uses FieldTitle as label.
+       */
+      const diarioRadio = screen.getByRole("radio", { name: /Diario de Avisos/i });
+      fireEvent.click(diarioRadio);
+
+      expect(replaceMock).toHaveBeenCalled();
+      const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+      const url = new URL(lastCall, "http://localhost");
+      expect(url.searchParams.get("pubId")).toBe("1");
+    });
+
+    it("removes pubId when 'Todas' is selected", () => {
+      // Initialize with a publication selected (pubId=1)
+      searchParamsContainer.current = new URLSearchParams("pubId=1");
+
+      render(<SearchFilters types={[]} publications={mockPubs} />);
+
+      // Verify initial state reflects the URL
+      const diarioRadio = screen.getByRole("radio", { name: /Diario de Avisos/i }) as HTMLInputElement;
+      expect(diarioRadio.checked).toBe(true);
+
+      // Select "Todas"
+      const todasRadio = screen.getByRole("radio", { name: /Todas/i });
+      fireEvent.click(todasRadio);
+
+      expect(replaceMock).toHaveBeenCalled();
+      const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
+      const url = new URL(lastCall, "http://localhost");
+
+      // PubId should be absent or empty
+      expect(url.searchParams.has("pubId")).toBe(false);
+    });
+
+    it("initializes validation correctly from URL params", () => {
+      searchParamsContainer.current = new URLSearchParams("pubId=2");
+      render(<SearchFilters types={[]} publications={mockPubs} />);
+
+      const laOpinionRadio = screen.getByRole("radio", { name: /La Opinión Nacional/i }) as HTMLInputElement;
+      expect(laOpinionRadio.checked).toBe(true);
+
+      const diarioRadio = screen.getByRole("radio", { name: /Diario de Avisos/i }) as HTMLInputElement;
+      expect(diarioRadio.checked).toBe(false);
+    });
+  });
 });

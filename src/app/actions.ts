@@ -9,9 +9,16 @@ import { unstable_cache } from "next/cache";
 
 // GetYears removed
 
-export const getNewsTypes = unstable_cache(async () => {
-  return await db.select().from(publicationColumns);
-}, ["news-types"]);
+export const getNewsTypes = unstable_cache(
+  async () => {
+    return await db.select().from(publicationColumns);
+  },
+  ["news-types"],
+  {
+    revalidate: 3600,
+    tags: ["news-types"],
+  },
+);
 
 export const getPublications = unstable_cache(
   async () => {
@@ -74,9 +81,17 @@ export async function getNews(params: SearchParams) {
   const { year: rawYear, text, type: rawType, pubId: rawPubId, dateFrom, dateTo, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
   const page = Number(rawPage);
   const pageSize = Number(rawPageSize);
-  const year = rawYear ? Number(rawYear) : null;
-  const type = rawType ? Number(rawType) : null;
-  const pubId = rawPubId ? Number(rawPubId) : null;
+
+  const safelyParseInt = (curr: string | number | null | undefined): number | null => {
+    if (curr === null || curr === undefined) return null;
+    const parsed = Number(curr);
+    if (Number.isNaN(parsed)) return null;
+    return parsed;
+  };
+
+  const year = safelyParseInt(rawYear);
+  const type = safelyParseInt(rawType);
+  const pubId = safelyParseInt(rawPubId);
 
   const conditions = getNewsConditions(year, type, text, dateFrom, dateTo, pubId);
 
@@ -210,7 +225,7 @@ export async function getEssays() {
   return essaysList.map((essay) => ({
     id: essay.id,
     title: essay.title,
-    groupName: essay.groupName!,
+    groupName: essay.groupName ?? "Publicación Desconocida",
   }));
 }
 

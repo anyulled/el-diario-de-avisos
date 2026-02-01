@@ -50,8 +50,6 @@ describe("Home Page Performance", () => {
     const end = performance.now();
     const duration = end - start;
 
-    console.log(`Duration: ${duration}ms`);
-
     /**
      * Expectation: Parallel execution should be close to 100ms.
      * Sequential execution (current) should be close to 200ms.
