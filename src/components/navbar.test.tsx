@@ -1,20 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Navbar } from './navbar';
-import * as actions from '@/app/actions';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Navbar } from "./navbar";
+import * as actions from "@/app/actions";
 
 // Mock the actions
-vi.mock('@/app/actions', () => ({
+vi.mock("@/app/actions", () => ({
   getEssays: vi.fn(),
 }));
 
 // Mock next/cache with a simple in-memory cache implementation
-vi.mock('next/cache', () => {
+vi.mock("next/cache", () => {
   const cache = new Map<string, unknown>();
   return {
     unstable_cache: <T,>(fn: () => Promise<T>, keyParts: string[]) => {
       // Return a wrapped function that caches the result
       return async (): Promise<T> => {
-        const key = keyParts.join('-');
+        const key = keyParts.join("-");
         if (cache.has(key)) {
           return cache.get(key) as T;
         }
@@ -26,7 +26,7 @@ vi.mock('next/cache', () => {
   };
 });
 
-describe('Navbar Performance', () => {
+describe("Navbar Performance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     /**
@@ -36,9 +36,9 @@ describe('Navbar Performance', () => {
      */
   });
 
-  it('calls getEssays only once due to caching', async () => {
+  it("calls getEssays only once due to caching", async () => {
     const getEssaysMock = vi.mocked(actions.getEssays);
-    getEssaysMock.mockResolvedValue([{ id: 1, title: 'Test Essay' }]);
+    getEssaysMock.mockResolvedValue([{ id: 1, title: "Test Essay", groupName: "Test Group" }]);
 
     // First Call
     await Navbar();

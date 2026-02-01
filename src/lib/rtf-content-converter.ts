@@ -1,9 +1,4 @@
-import iconv from "iconv-lite";
-// @ts-expect-error - rtf-to-html type definitions are missing
-import { fromString } from "@iarna/rtf-to-html";
-import { promisify } from "util";
-
-const rtfToHtml = promisify(fromString);
+import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-encoding-handler";
 
 /**
  * Strips HTML tags from a string and returns plain text
@@ -13,16 +8,6 @@ export function stripHtml(html: string): string {
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-/**
- * Unescapes RTF hex sequences (e.g., \\'e1 -> á)
- */
-function unescapeRtfHex(rtfContent: string): string {
-  return rtfContent.replace(/\\'([0-9a-fA-F]{2})/g, (match, hex) => {
-    const code = parseInt(hex, 16);
-    return code >= 0x80 && code <= 0xff ? String.fromCharCode(code) : match;
-  });
 }
 
 /**
@@ -50,7 +35,10 @@ export async function processRtfContent(content: Buffer | string | null, options
   if (!content) return "";
 
   try {
-    const contentString = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
+    const rawString = Buffer.isBuffer(content) ? decodeBuffer(content) : String(content);
+
+    // Apply Mojibake repair
+    const contentString = repairMojibake(rawString);
 
     // Detect if content is RTF format (starts with {\rtf) or plain text
     const isRtf = contentString.trim().startsWith("{\\rtf");
@@ -73,7 +61,7 @@ export async function processRtfContent(content: Buffer | string | null, options
   } catch (error) {
     // Fallback: return raw content if available
     console.debug("RTF content processing failed, using fallback:", error);
-    const fallback = Buffer.isBuffer(content) ? iconv.decode(content, "win1252") : String(content);
+    const fallback = Buffer.isBuffer(content) ? decodeBuffer(content) : String(content);
     const result = fallback || "";
     return maxLength ? result.slice(0, maxLength) : result;
   }

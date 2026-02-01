@@ -7,7 +7,7 @@ interface HeroProps {
 
 export function Hero(props: Readonly<HeroProps>) {
   const {
-    title = "Noticias Musicales en el Diario de Avisos",
+    title = "Noticias Musicales en la prensa caraqueña del siglo XIX",
     subtitle = "Un viaje a través del tiempo, descubriendo las noticias que marcaron la historia musical venezolana.",
     badge = "Archivo Histórico",
     backgroundImage = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop",

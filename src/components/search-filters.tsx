@@ -4,11 +4,13 @@ import { Calendar, ChevronDown, ChevronUp, Search, Type } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-import { publicationColumns } from "@/db/schema";
+import { publicationColumns, publications } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
+import { cn } from "@/lib/styles";
 
 interface SearchFiltersProps {
   types: (typeof publicationColumns.$inferSelect)[];
+  publications: (typeof publications.$inferSelect)[];
 }
 
 function getTypeLabel(types: SearchFiltersProps["types"], selectedType: string | null) {
@@ -116,7 +118,7 @@ interface TypeFilterPanelProps {
 function TypeFilterPanel({ types, selectedType, onSelect, onClear }: TypeFilterPanelProps) {
   return (
     <div className="mt-6 p-6 glass rounded-2xl animate-in slide-up border border-gray-100 dark:border-zinc-800/50 relative z-40 bg-white/50 dark:bg-zinc-900/50 shadow-2xl">
-      <h3 className="text-[10px] font-bold mb-4 text-gray-500 uppercase tracking-widest">Filtrar por Tipo</h3>
+      <h3 className="text-[10px] font-bold mb-4 text-gray-500 uppercase tracking-widest text-center">Filtrar por Tipo</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {types.map((type) => (
           <label
@@ -152,7 +154,109 @@ function TypeFilterPanel({ types, selectedType, onSelect, onClear }: TypeFilterP
   );
 }
 
-export function SearchFilters({ types }: SearchFiltersProps) {
+// Choice Card UI Components (Shadcn-like pattern)
+const Field = ({
+  children,
+  orientation = "vertical",
+  className,
+}: {
+  children: React.ReactNode;
+  orientation?: "vertical" | "horizontal";
+  className?: string;
+}) => (
+  <div
+    className={cn("flex gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer", orientation === "horizontal" ? "items-center" : "flex-col", className)}
+  >
+    {children}
+  </div>
+);
+
+const FieldContent = ({ children }: { children: React.ReactNode }) => <div className="flex-1 min-w-0">{children}</div>;
+const FieldTitle = ({ children }: { children: React.ReactNode }) => <h4 className="font-bold text-sm text-gray-900 dark:text-white mb-0.5">{children}</h4>;
+const FieldDescription = ({ children }: { children: React.ReactNode }) => <p className="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2">{children}</p>;
+const FieldLabel = ({ children, htmlFor }: { children: React.ReactNode; htmlFor: string }) => (
+  <label htmlFor={htmlFor} className="block cursor-pointer">
+    {children}
+  </label>
+);
+
+const RadioGroup = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <div className={cn("grid gap-4", className)}>{children}</div>
+);
+
+const RadioGroupItem = ({ value, id, checked, onChange }: { value: string; id: string; checked: boolean; onChange: (val: string) => void }) => (
+  <input
+    type="radio"
+    id={id}
+    name="publication"
+    value={value}
+    checked={checked}
+    onChange={(e) => onChange(e.target.value)}
+    className="w-4 h-4 text-amber-600 focus:ring-amber-600 border-gray-300 transition-all cursor-pointer"
+  />
+);
+
+function PublicationFilter({
+  publications: pubs,
+  selectedPub,
+  onSelect,
+}: {
+  publications: SearchFiltersProps["publications"];
+  selectedPub: string;
+  onSelect: (id: string) => void;
+}) {
+  const getPubDescription = (name: string | null) => {
+    if (!name) return "";
+    if (name.includes("Diario de Avisos")) return "Fundado en 1837, un Semanario de las Provincias de Venezuela.";
+    if (name.includes("La Opinión Nacional")) return "Un referente histórico del periodismo venezolano.";
+    return "Todas las publicaciones disponibles.";
+  };
+
+  return (
+    <div className="mb-8">
+      <h3 className="text-[10px] font-bold mb-4 text-gray-500 uppercase tracking-[0.2em] pl-4">Filtrar por Publicación</h3>
+      <RadioGroup className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Option: Todas */}
+        <FieldLabel htmlFor="pub-all">
+          <Field
+            orientation="horizontal"
+            className={cn(
+              "hover:border-amber-500/30",
+              !selectedPub ? "border-amber-500 bg-amber-500/5" : "border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50",
+            )}
+          >
+            <FieldContent>
+              <FieldTitle>Todas</FieldTitle>
+              <FieldDescription>Mostrar artículos de todas las publicaciones.</FieldDescription>
+            </FieldContent>
+            <RadioGroupItem value="" id="pub-all" checked={!selectedPub} onChange={onSelect} />
+          </Field>
+        </FieldLabel>
+
+        {/* Dynamic Publications */}
+        {pubs.map((pub) => (
+          <FieldLabel key={pub.id} htmlFor={`pub-${pub.id}`}>
+            <Field
+              orientation="horizontal"
+              className={cn(
+                "hover:border-amber-500/30",
+                selectedPub === String(pub.id) ? "border-amber-500 bg-amber-500/5" : "border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50",
+              )}
+            >
+              <FieldContent>
+                <FieldTitle>{pub.name}</FieldTitle>
+                <FieldDescription>{getPubDescription(pub.name)}</FieldDescription>
+              </FieldContent>
+              <RadioGroupItem value={String(pub.id)} id={`pub-${pub.id}`} checked={selectedPub === String(pub.id)} onChange={onSelect} />
+            </Field>
+          </FieldLabel>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
+
+export function SearchFilters({ types, publications: pubs }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -163,6 +267,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   const [dateTo, setDateTo] = useState(searchParams.get("dateTo") || "");
   const [selectedType, setSelectedType] = useState(searchParams.get("type") || "");
   const [isTypeExpanded, setIsTypeExpanded] = useState(false);
+  const [selectedPublication, setSelectedPublication] = useState(searchParams.get("pubId") || "");
   const [dateError, setDateError] = useState<string | null>(null);
 
   // Sync from URL to local state on navigation
@@ -170,14 +275,16 @@ export function SearchFilters({ types }: SearchFiltersProps) {
   const dateFromParam = searchParams.get("dateFrom");
   const dateToParam = searchParams.get("dateTo");
   const typeParam = searchParams.get("type");
+  const pubParam = searchParams.get("pubId");
 
   useEffect(() => {
     setSearchTerm(textParam || "");
     setDateFrom(dateFromParam || "");
     setDateTo(dateToParam || "");
     setSelectedType(typeParam || "");
+    setSelectedPublication(pubParam || "");
     setDateError(null);
-  }, [textParam, dateFromParam, dateToParam, typeParam]);
+  }, [textParam, dateFromParam, dateToParam, typeParam, pubParam]);
 
   const handleValidation = () => {
     const { isValidRange } = normalizeDateRange({ start: dateFrom, end: dateTo });
@@ -201,6 +308,7 @@ export function SearchFilters({ types }: SearchFiltersProps) {
       dateFrom,
       dateTo,
       type: selectedType,
+      pubId: selectedPublication,
       ...updates,
     };
 
@@ -266,6 +374,15 @@ export function SearchFilters({ types }: SearchFiltersProps) {
       </div>
 
       <DateRangeRow dateFrom={dateFrom} dateTo={dateTo} onDateFromChange={setDateFrom} onDateToChange={setDateTo} onBlur={handleDateBlur} error={dateError} />
+
+      <PublicationFilter
+        publications={pubs}
+        selectedPub={selectedPublication}
+        onSelect={(id) => {
+          setSelectedPublication(id);
+          executeSearch({ pubId: id });
+        }}
+      />
 
       {/* Row 3: Type & Other Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

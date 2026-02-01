@@ -4,12 +4,13 @@ import { NewsGrid } from "@/components/news-grid";
 import { Pagination } from "@/components/pagination";
 import { ScrollToResults } from "@/components/scroll-to-results";
 import { SearchFilters } from "@/components/search-filters";
-import { getNews, getNewsTypes, SearchParams } from "./actions";
+import { getNews, getNewsTypes, getPublications, SearchParams } from "./actions";
 
 export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const typesPromise = getNewsTypes();
+  const pubsPromise = getPublications();
   const params = await searchParams;
-  const [types, { data: news, total }] = await Promise.all([typesPromise, getNews(params)]);
+  const [types, publications, { data: news, total }] = await Promise.all([typesPromise, pubsPromise, getNews(params)]);
 
   const currentPage = Number(params.page || 1);
   const pageSize = Number(params.pageSize || 20);
@@ -25,7 +26,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-20 relative">
       <Navbar />
       <Hero />
-      <SearchFilters types={types} />
+      <SearchFilters types={types} publications={publications} />
       <ScrollToResults shouldScroll={total > 0} scrollKey={scrollKey} />
       <div id="search-results" className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">

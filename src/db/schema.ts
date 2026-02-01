@@ -98,6 +98,7 @@ export const essays = pgTable("ensayos", {
   content: bytea("ensayo_contenido"),
   observations: varchar("ensayo_observaciones", { length: 255 }),
   memberId: integer("intg_cod"),
+  pubId: integer("pub_cod").references(() => publications.id),
 });
 
 export const images = pgTable("imagenes", {
