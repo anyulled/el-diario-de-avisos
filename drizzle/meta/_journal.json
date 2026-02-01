@@ -36,6 +36,13 @@
       "when": 1769360802565,
       "tag": "0004_add_vector_index",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1769935886884,
+      "tag": "0005_grey_corsair",
+      "breakpoints": true
     }
   ]
 }
