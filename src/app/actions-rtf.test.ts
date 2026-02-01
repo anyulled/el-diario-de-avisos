@@ -29,7 +29,7 @@ interface MockChain {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockChain = (returnData: any[]): MockChain => {
   const chain: Partial<MockChain> = {};
-  const methods = ['from', 'where', 'limit', 'orderBy'];
+  const methods = ['from', 'where', 'limit', 'orderBy'] as const;
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });

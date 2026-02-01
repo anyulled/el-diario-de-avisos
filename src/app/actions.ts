@@ -98,6 +98,7 @@ export async function getNews(params: SearchParams) {
       issueNumber: articles.issueNumber,
       series: articles.series,
       microfilm: articles.microfilm,
+      plainText: articles.plainText,
       // Add relevance ranking when searching
       ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text}))` } : {}),
     })
@@ -205,6 +206,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
               : await processRtfContent(content as Buffer | null, { maxLength: 500 });
           return {
             ...rest,
+            plainText,
             extract,
           };
         }),
