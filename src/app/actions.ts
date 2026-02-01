@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { articles, developers, essays, members, publicationColumns, tutors } from "@/db/schema";
+import { articles, developers, essays, members, publicationColumns, publications, tutors } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
@@ -9,21 +9,26 @@ import { unstable_cache } from "next/cache";
 
 // GetYears removed
 
-export const getNewsTypes = unstable_cache(
+export const getNewsTypes = unstable_cache(async () => {
+  return await db.select().from(publicationColumns);
+}, ["news-types"]);
+
+export const getPublications = unstable_cache(
   async () => {
-    return await db.select().from(publicationColumns);
+    return await db.select().from(publications);
   },
-  ["news-types"],
+  ["publications"],
   {
     revalidate: 3600,
-    tags: ["news-types"],
+    tags: ["publications"],
   },
 );
 
 export type SearchParams = {
-  year?: number | null;
+  year?: number | string | null;
   text?: string | null;
-  type?: number | null;
+  type?: number | string | null;
+  pubId?: number | string | null;
   dateFrom?: string | null;
   dateTo?: string | null;
   page?: number | string;
@@ -37,6 +42,7 @@ function getNewsConditions(
   text: string | null | undefined,
   dateFrom: string | null | undefined,
   dateTo: string | null | undefined,
+  pubId: number | null | undefined,
 ) {
   const conditions = [];
   if (year) {
@@ -44,6 +50,9 @@ function getNewsConditions(
   }
   if (type) {
     conditions.push(eq(articles.columnId, type));
+  }
+  if (pubId) {
+    conditions.push(eq(articles.pubId, pubId));
   }
   if (text) {
     conditions.push(sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${text})`);
@@ -62,11 +71,14 @@ function getNewsConditions(
 }
 
 export async function getNews(params: SearchParams) {
-  const { year, text, type, dateFrom, dateTo, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
+  const { year: rawYear, text, type: rawType, pubId: rawPubId, dateFrom, dateTo, page: rawPage = 1, pageSize: rawPageSize = 20, sort } = params;
   const page = Number(rawPage);
   const pageSize = Number(rawPageSize);
+  const year = rawYear ? Number(rawYear) : null;
+  const type = rawType ? Number(rawType) : null;
+  const pubId = rawPubId ? Number(rawPubId) : null;
 
-  const conditions = getNewsConditions(year, type, text, dateFrom, dateTo);
+  const conditions = getNewsConditions(year, type, text, dateFrom, dateTo, pubId);
 
   // Count total results
   const countQuery = db
@@ -186,7 +198,20 @@ export async function getArticleById(id: number) {
 }
 
 export async function getEssays() {
-  return await db.select({ id: essays.id, title: essays.title }).from(essays);
+  const essaysList = await db
+    .select({
+      id: essays.id,
+      title: essays.title,
+      groupName: publications.name,
+    })
+    .from(essays)
+    .leftJoin(publications, eq(essays.pubId, publications.id));
+
+  return essaysList.map((essay) => ({
+    id: essay.id,
+    title: essay.title,
+    groupName: essay.groupName!,
+  }));
 }
 
 export async function getEssayById(id: number) {
@@ -217,9 +242,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         news.map(async (item) => {
           const { content, plainText, ...rest } = item;
           const extract =
-            plainText !== null && plainText !== undefined
-              ? plainText.slice(0, 500)
-              : await processRtfContent(content as Buffer | null, { maxLength: 500 });
+            plainText !== null && plainText !== undefined ? plainText.slice(0, 500) : await processRtfContent(content as Buffer | null, { maxLength: 500 });
           return {
             ...rest,
             plainText,

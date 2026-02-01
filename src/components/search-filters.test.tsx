@@ -31,6 +31,14 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[
+          {
+            id: 1,
+            name: "Diario de Avisos",
+            foundedDate: "1872-01-01",
+            closedDate: null,
+          },
+        ]}
       />,
     );
 
@@ -68,6 +76,7 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[]}
       />,
     );
 
@@ -97,6 +106,7 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[]}
       />,
     );
 
@@ -113,6 +123,7 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[]}
       />,
     );
 
@@ -131,6 +142,7 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[]}
       />,
     );
 
@@ -156,6 +168,7 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[]}
       />,
     );
 
@@ -179,6 +192,7 @@ describe("SearchFilters date range", () => {
             pubId: 1,
           },
         ]}
+        publications={[]}
       />,
     );
 
