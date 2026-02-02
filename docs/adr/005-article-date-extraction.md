@@ -33,7 +33,7 @@ Instead of destructive migration:
 
 1. **Added new column**: `arti_fecha_timestamp` (nullable `TIMESTAMP WITHOUT TIME ZONE`).
 2. **Populated via extraction**: Used the extraction function to populate dates from article content.
-3. **Verified success rate**: Achieved 91.48% success (9,067 of 9,911 articles).
+3. **Verified success rate**: Achieved 99.51% success (21,747 of 21,853 articles).
 4. **Renamed columns**:
    - `arti_fecha` → `arti_fecha_old` (preserves original invalid data)
    - `arti_fecha_timestamp` → `arti_fecha` (new valid dates)
@@ -49,14 +49,14 @@ Updated the Drizzle ORM schema to:
 
 ### Pros
 
-- **Data integrity restored**: 91.48% of articles now have valid, queryable timestamps.
+- **Data integrity restored**: 99.51% of articles now have valid, queryable timestamps.
 - **Date-based queries enabled**: Applications can now perform date range filtering, sorting, and aggregation.
 - **Data preservation**: Original (invalid) dates preserved in `arti_fecha_old` for auditing.
 - **Reproducible process**: Script can be re-run if source data changes.
 
 ### Cons
 
-- **~8.5% null dates**: 844 articles have no extractable date (content may not contain date information or uses non-standard format).
+- **~0.49% null dates**: 106 articles have no extractable date (content may not contain date information or uses non-standard format).
 - **Maintenance burden**: Date extraction function relies on Spanish language patterns.
 - **Index overhead**: Additional index on date column consumes storage.
 
@@ -67,7 +67,7 @@ The transformation was verified by:
 1. Confirming mdb-tools exports invalid dates (tested with `mdb-export` command).
 2. Running dry-run transformation to validate extraction logic.
 3. Sampling extracted dates against article content.
-4. Comparing success rate (91.48%).
+4. Comparing success rate (99.51%).
 
 Sample extractions:
 
@@ -77,7 +77,7 @@ Sample extractions:
 
 ## Status
 
-Accepted. Implemented on 2026-01-07.
+Accepted. Implemented on 2026-01-07. See the [detailed walkthrough](./005-walkthrough-date-extraction.md) for implementation steps.
 
 ---
 
