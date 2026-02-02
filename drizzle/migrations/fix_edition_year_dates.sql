@@ -11,39 +11,27 @@
 -- Stage 2-3: Create improved extraction function for remaining articles
 CREATE OR REPLACE FUNCTION extract_valid_year(content bytea) RETURNS integer AS $$
 DECLARE
-  decoded_text text;
-  safe_content bytea;
+  cleaned_text text;
   year_match text[];
 BEGIN
-  IF content IS NULL THEN RETURN NULL; END IF;
-  
-  safe_content := decode(replace(encode(content, 'hex'), '00', ''), 'hex');
-  
-  BEGIN
-    decoded_text := convert_from(safe_content, 'WIN1252');
-  EXCEPTION WHEN OTHERS THEN
-    BEGIN
-      decoded_text := convert_from(safe_content, 'LATIN1');
-    EXCEPTION WHEN OTHERS THEN
-      RETURN NULL;
-    END;
-  END;
+  cleaned_text := strip_rtf_content(content);
+  IF cleaned_text = '' THEN RETURN NULL; END IF;
   
   -- Look for month + year pattern
-  year_match := regexp_match(decoded_text, '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|setiembre|septiembre|octubre|noviembre|diciembre)\s+(\d{4})', 'i');
+  year_match := regexp_match(cleaned_text, '(enero|febrero|marzo|abril|mayo|junio|julio|agosto|setiembre|septiembre|octubre|noviembre|diciembre)\s+(\d{4})', 'i');
   
   IF year_match IS NOT NULL AND year_match[2]::integer BETWEEN 1800 AND 1899 THEN
     RETURN year_match[2]::integer;
   END IF;
   
   -- Look for "de YYYY" with 18xx
-  year_match := regexp_match(decoded_text, '\bde?\s+(18\d{2})\b', 'i');
+  year_match := regexp_match(cleaned_text, '\bde?\s+(18\d{2})\b', 'i');
   IF year_match IS NOT NULL THEN
     RETURN year_match[1]::integer;
   END IF;
   
   -- Fallback: Find first 18xx year
-  year_match := regexp_match(decoded_text, '\b(18\d{2})\b');
+  year_match := regexp_match(cleaned_text, '\b(18\d{2})\b');
   IF year_match IS NOT NULL THEN
     RETURN year_match[1]::integer;
   END IF;
