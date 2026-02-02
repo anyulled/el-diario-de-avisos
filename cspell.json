@@ -1,0 +1,35 @@
+{
+  "version": "0.2",
+  "language": "en,es",
+  "dictionaries": ["en_US", "es-es", "fonts", "html", "node", "typescript", "misc", "softwareTerms", "project-words"],
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./.cspell/project-words.txt",
+      "addWords": true
+    }
+  ],
+  "ignorePaths": ["node_modules", "dist", ".next", "coverage", "*.json", "*.yml", "package-lock.json"],
+  "words": [
+    "antigravity",
+    "anyulled",
+    "pgvector",
+    "Drizzle",
+    "Vitest",
+    "Vercel",
+    "Zustand",
+    "RTF",
+    "bytea",
+    "WIN1252",
+    "arti",
+    "fecha",
+    "Articulos",
+    "contenido",
+    "titulo",
+    "pag",
+    "cod",
+    "setiembre",
+    "abirl",
+    "cotubre"
+  ]
+}

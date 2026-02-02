@@ -89,7 +89,7 @@ Accepted. Implemented on 2026-01-07. See the [detailed walkthrough](./005-walkth
 
 **Example:**
 
-```
+```text
 Content: "Sábado 15 de noviembre de 1879. ( Año VII, Mes 7, Número 1897)"
 Extracted: 1897-11-15 ❌ (edition number)
 Correct:   1879-11-15 ✓

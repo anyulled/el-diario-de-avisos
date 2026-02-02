@@ -312,6 +312,11 @@ This is normal - all articles are already indexed.
 
 **API errors:**
 
+```bash
+# Add to .env.local
+GEMINI_KEY=your_key_here
+```
+
 - Check `GEMINI_KEY` is set correctly in `.env`
 - Verify API quota hasn't been exceeded
 - Ensure network connectivity

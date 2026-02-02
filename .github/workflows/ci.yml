@@ -3,14 +3,8 @@ name: CI
 on:
   push:
     branches: [main, master]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   pull_request:
     branches: [main, master]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   workflow_dispatch:
 
 concurrency:
@@ -18,8 +12,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - '!(docs/**|**.md)'
+            docs:
+              - 'docs/**'
+              - '**.md'
+
+  docs-lint:
+    name: Documentation Quality
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Markdown Lint
+        run: npm run lint:docs
+      - name: Spell Check
+        run: npm run spell-check
+
   checks:
     name: Lint & Type Check
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +66,8 @@ jobs:
 
   vitest:
     name: Unit & Integration Tests
+    needs: [changes, checks]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -73,6 +106,8 @@ jobs:
 
   build:
     name: Build & Smoke Test
+    needs: [changes, checks]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
