@@ -25,3 +25,7 @@
 ## 2026-02-05 - TypeScript Mismatch on Optimization
 **Learning:** When excluding columns from a Drizzle query using `getTableColumns` and destructuring, TypeScript types derived from `$inferSelect` in consuming components must be updated to explicitly `Omit` the excluded columns, otherwise `tsc` or `next build` will fail with type mismatches.
 **Action:** Whenever changing the shape of data returned by a server action, immediately grep for usages of that action and update the Prop types of any components receiving that data.
+
+## 2026-02-05 - PlainText Over-fetching
+**Learning:** `getNews` was selecting `plainText` (large text field) by default, and `getArticlesOnThisDay` was returning it to the client, even though it wasn't used in list views. This increased payload size significantly.
+**Action:** Explicitly exclude `plainText` from Drizzle queries and Server Action return values when not needed. Update component props types to `Omit` it.
