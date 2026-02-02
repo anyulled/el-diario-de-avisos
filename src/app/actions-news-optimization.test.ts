@@ -46,9 +46,9 @@ const createMockChain = (): MockChain => {
   // Mocking then to resolve
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   chain.then = (resolve: any) => {
-    // Return empty array for query results
+    // Return empty array for query results (count or data)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    resolve([{ count: 10 }]); // For count query, or data query.
+    resolve([{ count: 10 }]);
     return Promise.resolve();
   };
   return chain as MockChain;
