@@ -11,7 +11,7 @@ describe("Search Functionality", () => {
       .invoke("text")
       .then((text) => {
         const trimmed = text.trim();
-        const word = trimmed.split(/\s+/).find((part) => part.length > 2) || trimmed;
+        const word = trimmed.split(/\s+/).find((part) => part.length > 3) || trimmed;
         return word.replace(/[^\wáéíóúñÁÉÍÓÚÑ]/g, "");
       });
 
