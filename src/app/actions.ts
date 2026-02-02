@@ -125,7 +125,7 @@ export async function getNews(params: SearchParams) {
       issueNumber: articles.issueNumber,
       series: articles.series,
       microfilm: articles.microfilm,
-      plainText: articles.plainText,
+      // plainText: articles.plainText, // Optimized: removed to reduce payload size
       // Add relevance ranking when searching
       ...(text ? { rank: sql<number>`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${text}))` } : {}),
     })
@@ -268,7 +268,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
             plainText !== null && plainText !== undefined ? plainText.slice(0, 500) : await processRtfContent(content as Buffer | null, { maxLength: 500 });
           return {
             ...rest,
-            plainText,
+            // plainText, // Optimized: removed to reduce payload size
             extract,
           };
         }),
