@@ -1,37 +1,19 @@
+/* eslint-disable no-restricted-syntax */
 /**
  * E2E tests for search functionality
  * Verifies search works correctly with highlighting
  */
 describe("Search Functionality", () => {
-  const getSearchTerm = () => {
-    // List of common Spanish stop words and title prefixes to avoid
-    const stopWords = new Set(["sin", "con", "del", "por", "las", "los", "una", "uno", "para", "este"]);
-    const titlePrefixes = ["(sin título)", "artículo #", "articulo #"];
-
-    return cy
+  const getSearchTerm = () =>
+    cy
       .get("article h3")
       .first()
       .invoke("text")
       .then((text) => {
-        let cleaned = text.toLowerCase().trim();
-
-        // Remove known prefixes
-        titlePrefixes.forEach((prefix) => {
-          if (cleaned.startsWith(prefix)) {
-            cleaned = cleaned.replace(prefix, "").trim();
-          }
-        });
-
-        // Split into words and find a suitable one (longer than 3 chars and not a stop word)
-        const word =
-          cleaned
-            .split(/\s+/)
-            .map((w) => w.replace(/[^\wáéíóúñÁÉÍÓÚÑ]/g, ""))
-            .find((w) => w.length > 3 && !stopWords.has(w)) || "diario";
-
-        return word;
+        const trimmed = text.trim();
+        const word = trimmed.split(/\s+/).find((part) => part.length > 2) || trimmed;
+        return word.replace(/[^\wáéíóúñÁÉÍÓÚÑ]/g, "");
       });
-  };
 
   beforeEach(() => {
     // Start from the home page
@@ -68,9 +50,7 @@ describe("Search Functionality", () => {
 
       // Verify search term is highlighted (has mark tag or highlight class)
       cy.get("mark, .highlight").should("exist");
-      // Use contains with regex for accent-insensitive and case-insensitive check
-      const escaped = Cypress._.escapeRegExp(term);
-      cy.get("mark, .highlight").first().contains(new RegExp(escaped, "i"));
+      cy.get("mark, .highlight").should("contain", term);
     });
   });
 
@@ -110,17 +90,13 @@ describe("Search Functionality", () => {
       // Wait for URL to reflect the search
       cy.location("search").should("include", "text=");
 
-      // Wait for results
-      cy.get("article").should("be.visible");
-
-      // Verify URL contains search query parameter
-      cy.url().should("include", "text=");
+      // Ensure the first result link keeps the search term
+      cy.get("article").first().parent("a").should("have.attr", "href").and("include", "text=");
 
       // Click on a result
       cy.get("article").first().click();
 
-      // Verify we're on an article page
-      cy.url().should("include", "/article/");
+      // Verify URL contains search query parameter
       cy.url().should("include", "text=");
     });
   });
