@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getArticleById, getArticlesOnThisDay } from './actions';
-import { db } from '@/db';
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { getArticleById, getArticlesOnThisDay } from "./actions";
+import { db } from "@/db";
 
 // Mock setup
-vi.mock('@/db', () => ({
+vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
   },
 }));
 
-vi.mock('next/cache', () => ({
+vi.mock("next/cache", () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   unstable_cache: (fn: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -17,8 +17,8 @@ vi.mock('next/cache', () => ({
   },
 }));
 
-vi.mock('@/lib/rtf-content-converter', () => ({
-  processRtfContent: vi.fn().mockResolvedValue('extract'),
+vi.mock("@/lib/rtf-content-converter", () => ({
+  processRtfContent: vi.fn().mockResolvedValue("extract"),
 }));
 
 interface MockChain {
@@ -35,7 +35,7 @@ interface MockChain {
 // Mock chain
 const createMockChain = (): MockChain => {
   const chain: Partial<MockChain> = {};
-  const methods = ['from', 'where', 'limit', 'orderBy', 'catch', 'finally'];
+  const methods = ["from", "leftJoin", "where", "limit", "orderBy", "catch", "finally"];
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });
@@ -43,18 +43,18 @@ const createMockChain = (): MockChain => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   chain.then = (resolve: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    resolve([{ id: 1, title: 'Test Article', content: Buffer.from('content') }]);
+    resolve([{ id: 1, title: "Test Article", content: Buffer.from("content") }]);
     return Promise.resolve();
   };
   return chain as MockChain;
 };
 
-describe('getArticleById Performance', () => {
+describe("getArticleById Performance", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('should exclude searchVector from the query', async () => {
+  it("should exclude searchVector from the query", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
     mockSelect.mockReturnValue(createMockChain());
 
@@ -69,16 +69,16 @@ describe('getArticleById Performance', () => {
     const callArgs = mockSelect.mock.calls[0][0];
 
     expect(callArgs).toBeDefined();
-    expect(callArgs).not.toHaveProperty('searchVector');
+    expect(callArgs).not.toHaveProperty("searchVector");
   });
 });
 
-describe('getArticlesOnThisDay Performance', () => {
+describe("getArticlesOnThisDay Performance", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('should exclude searchVector from the query', async () => {
+  it("should exclude searchVector from the query", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
     mockSelect.mockReturnValue(createMockChain());
 
@@ -88,6 +88,6 @@ describe('getArticlesOnThisDay Performance', () => {
     const callArgs = mockSelect.mock.calls[0][0];
 
     expect(callArgs).toBeDefined();
-    expect(callArgs).not.toHaveProperty('searchVector');
+    expect(callArgs).not.toHaveProperty("searchVector");
   });
 });

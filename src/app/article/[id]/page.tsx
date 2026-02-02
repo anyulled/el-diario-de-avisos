@@ -47,7 +47,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
         <Navbar />
         <div className="relative z-20 container mx-auto h-full flex items-end justify-center pb-12 px-4">
           <div className="max-w-4xl animate-slide-up text-center">
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
               <span className="bg-amber-600 inline-flex items-center justify-center text-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm leading-none">
                 {section?.name || "Noticia"}
               </span>
@@ -56,6 +56,12 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
                   ? new Date(article.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" })
                   : `Año ${article.publicationYear}`}
               </span>
+              {article.publicationName && (
+                <>
+                  <span className="text-white/40 font-mono text-xs">•</span>
+                  <span className="text-white/80 font-mono text-xs uppercase tracking-[0.2em]">{article.publicationName}</span>
+                </>
+              )}
             </div>
           </div>
         </div>

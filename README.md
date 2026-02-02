@@ -304,7 +304,7 @@ Vector embeddings enable searches like:
 
 **No articles processed:**
 
-```
+```text
 ✅ All articles already have embeddings.
 ```
 

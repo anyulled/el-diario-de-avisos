@@ -168,7 +168,15 @@ const getCachedArticle = unstable_cache(
   async (id: number) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchVector, ...rest } = getTableColumns(articles);
-    const result = await db.select(rest).from(articles).where(eq(articles.id, id)).limit(1);
+    const result = await db
+      .select({
+        ...rest,
+        publicationName: publications.name,
+      })
+      .from(articles)
+      .leftJoin(publications, eq(articles.pubId, publications.id))
+      .where(eq(articles.id, id))
+      .limit(1);
     const article = result[0];
 
     if (article?.content && Buffer.isBuffer(article.content)) {
@@ -180,7 +188,7 @@ const getCachedArticle = unstable_cache(
 
     return article;
   },
-  ["article-by-id-v2"],
+  ["article-by-id-v3"],
   { tags: ["articles"], revalidate: 3600 },
 );
 
