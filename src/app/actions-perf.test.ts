@@ -71,6 +71,19 @@ describe("getArticleById Performance", () => {
     expect(callArgs).toBeDefined();
     expect(callArgs).not.toHaveProperty("searchVector");
   });
+
+  it("should exclude plainText from the query", async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain());
+
+    await getArticleById(1);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const callArgs = mockSelect.mock.calls[0][0];
+
+    expect(callArgs).toBeDefined();
+    expect(callArgs).not.toHaveProperty("plainText");
+  });
 });
 
 describe("getArticlesOnThisDay Performance", () => {
