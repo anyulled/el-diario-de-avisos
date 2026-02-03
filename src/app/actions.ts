@@ -166,7 +166,7 @@ export async function getDevelopers() {
 const getCachedArticle = unstable_cache(
   async (id: number) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { searchVector, ...rest } = getTableColumns(articles);
+    const { searchVector, plainText, ...rest } = getTableColumns(articles);
     const result = await db
       .select({
         ...rest,

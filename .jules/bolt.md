@@ -29,3 +29,7 @@
 ## 2026-02-05 - PlainText Over-fetching
 **Learning:** `getNews` was selecting `plainText` (large text field) by default, and `getArticlesOnThisDay` was returning it to the client, even though it wasn't used in list views. This increased payload size significantly.
 **Action:** Explicitly exclude `plainText` from Drizzle queries and Server Action return values when not needed. Update component props types to `Omit` it.
+
+## 2026-02-03 - Single Article PlainText Over-fetching
+**Learning:** `getArticleById` was fetching `plainText` (large text field) via `getCachedArticle`. This column is not used in the article detail page (which parses `content` RTF) or metadata generation.
+**Action:** Explicitly exclude `plainText` from `getTableColumns` destructuring in `getCachedArticle` to optimize data transfer for single article lookups.
