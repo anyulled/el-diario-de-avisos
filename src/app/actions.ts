@@ -252,9 +252,13 @@ export async function getArticlesOnThisDay(day: number, month: number) {
   return await unstable_cache(
     async () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { searchVector, ...columns } = getTableColumns(articles);
+      const { searchVector, plainText, ...columns } = getTableColumns(articles);
       const news = await db
-        .select(columns)
+        .select({
+          ...columns,
+          // Optimization: Only fetch the first 500 characters of plainText to avoid fetching large text fields
+          plainText: sql<string>`substring(${articles.plainText} from 1 for 500)`,
+        })
         .from(articles)
         .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`)
         .orderBy(sql`RANDOM()`)

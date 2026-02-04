@@ -33,3 +33,7 @@
 ## 2026-02-03 - Single Article PlainText Over-fetching
 **Learning:** `getArticleById` was fetching `plainText` (large text field) via `getCachedArticle`. This column is not used in the article detail page (which parses `content` RTF) or metadata generation.
 **Action:** Explicitly exclude `plainText` from `getTableColumns` destructuring in `getCachedArticle` to optimize data transfer for single article lookups.
+
+## 2026-02-05 - Optimized Text Substring Fetch
+**Learning:** `getArticlesOnThisDay` was fetching the full `plainText` column (potentially large) only to slice 500 characters in Node.js.
+**Action:** Use `sql<string>\`substring(${table.column} from 1 for 500)\`` in Drizzle queries to fetch only the needed text snippet directly from the database, reducing network transfer and memory usage.
