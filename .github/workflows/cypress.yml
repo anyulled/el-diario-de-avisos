@@ -28,7 +28,7 @@ jobs:
                 containers: [1, 2]
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Cypress run
               uses: cypress-io/github-action@v6
               with:
