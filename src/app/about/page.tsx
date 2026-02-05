@@ -1,12 +1,12 @@
 import { MemberCard } from "@/components/member-card";
 import { Navbar } from "@/components/navbar";
 import type { Metadata } from "next";
-import { getDevelopers, getIntegrantes, getTutores } from "../actions";
+import { getDevelopers, getDevelopersNames, getIntegrantes, getIntegrantesNames, getTutores, getTutoresNames } from "../actions";
 
 const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);
+  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
 
   const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean);
   const tutorNames = tutores.map((t) => t.names).filter(Boolean);
