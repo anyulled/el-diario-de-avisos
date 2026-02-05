@@ -163,6 +163,44 @@ export async function getDevelopers() {
   return await db.select().from(developers);
 }
 
+export const getIntegrantesNames = unstable_cache(
+  async () => {
+    return await db
+      .select({
+        firstName: members.firstName,
+        lastName: members.lastName,
+      })
+      .from(members);
+  },
+  ["integrantes-names"],
+  { revalidate: 3600, tags: ["integrantes"] },
+);
+
+export const getTutoresNames = unstable_cache(
+  async () => {
+    return await db
+      .select({
+        names: tutors.names,
+      })
+      .from(tutors);
+  },
+  ["tutores-names"],
+  { revalidate: 3600, tags: ["tutores"] },
+);
+
+export const getDevelopersNames = unstable_cache(
+  async () => {
+    return await db
+      .select({
+        firstName: developers.firstName,
+        lastName: developers.lastName,
+      })
+      .from(developers);
+  },
+  ["developers-names"],
+  { revalidate: 3600, tags: ["developers"] },
+);
+
 const getCachedArticle = unstable_cache(
   async (id: number) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
