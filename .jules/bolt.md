@@ -37,3 +37,7 @@
 ## 2026-02-05 - Optimized Text Substring Fetch
 **Learning:** `getArticlesOnThisDay` was fetching the full `plainText` column (potentially large) only to slice 500 characters in Node.js.
 **Action:** Use `sql<string>\`substring(${table.column} from 1 for 500)\`` in Drizzle queries to fetch only the needed text snippet directly from the database, reducing network transfer and memory usage.
+
+## 2026-02-05 - Essay Caching
+**Learning:** Cached `getEssayById` using `unstable_cache`. Since `essay.content` is a `Buffer` (bytea), it must be manually converted to Base64 before caching and back to Buffer after retrieval, as `unstable_cache` serializes to JSON inefficiently for Buffers.
+**Action:** Always handle Buffer serialization manually when using `unstable_cache` with Drizzle `bytea` columns.

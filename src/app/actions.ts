@@ -274,9 +274,49 @@ export async function getEssays() {
   }));
 }
 
+const getCachedEssay = unstable_cache(
+  async (id: number) => {
+    const result = await db.select().from(essays).where(eq(essays.id, id)).limit(1);
+    const essay = result[0];
+
+    if (essay?.content && Buffer.isBuffer(essay.content)) {
+      return {
+        ...essay,
+        content: essay.content.toString("base64") as unknown as Buffer,
+      };
+    }
+    return essay;
+  },
+  ["essay-by-id"],
+  { tags: ["essays"], revalidate: 3600 },
+);
+
 export async function getEssayById(id: number) {
-  const result = await db.select().from(essays).where(eq(essays.id, id)).limit(1);
-  return result[0];
+  const essay = await getCachedEssay(id);
+  if (!essay) return essay;
+
+  if (typeof essay.content === "string") {
+    return {
+      ...essay,
+      content: Buffer.from(essay.content, "base64"),
+    };
+  }
+
+  /**
+   * Handle Buffer deserialization from cache
+   * Unstable_cache serializes Buffers to {type: 'Buffer', data: [...]} format
+   */
+  if (essay.content && typeof essay.content === "object" && !Buffer.isBuffer(essay.content)) {
+    const obj = essay.content as { type: string; data: number[] };
+    if (obj.type === "Buffer" && Array.isArray(obj.data)) {
+      return {
+        ...essay,
+        content: Buffer.from(obj.data),
+      };
+    }
+  }
+
+  return essay;
 }
 
 export async function getArticleSection(columnId: number) {
