@@ -319,6 +319,44 @@ export async function getEssayById(id: number) {
   return essay;
 }
 
+export const getArticleMetadata = unstable_cache(
+  async (id: number) => {
+    const result = await db
+      .select({
+        id: articles.id,
+        title: articles.title,
+        subtitle: articles.subtitle,
+        date: articles.date,
+        publicationYear: articles.publicationYear,
+        page: articles.page,
+      })
+      .from(articles)
+      .where(eq(articles.id, id))
+      .limit(1);
+    return result[0];
+  },
+  ["article-metadata-by-id"],
+  { tags: ["articles"], revalidate: 3600 },
+);
+
+export const getEssayMetadata = unstable_cache(
+  async (id: number) => {
+    const result = await db
+      .select({
+        id: essays.id,
+        title: essays.title,
+        subtitle: essays.subtitle,
+        observations: essays.observations,
+      })
+      .from(essays)
+      .where(eq(essays.id, id))
+      .limit(1);
+    return result[0];
+  },
+  ["essay-metadata-by-id"],
+  { tags: ["essays"], revalidate: 3600 },
+);
+
 export async function getArticleSection(columnId: number) {
   const result = await db.select().from(publicationColumns).where(eq(publicationColumns.id, columnId)).limit(1);
   return result[0];

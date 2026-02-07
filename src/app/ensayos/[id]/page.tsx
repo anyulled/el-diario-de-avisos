@@ -1,11 +1,11 @@
-import { getEssayById } from "@/app/actions";
+import { getEssayById, getEssayMetadata } from "@/app/actions";
 import { Navbar } from "@/components/navbar";
 import { processRtfContent } from "@/lib/rtf-html-converter";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
   const { id } = await params;
-  const essay = await getEssayById(Number(id));
+  const essay = await getEssayMetadata(Number(id));
 
   if (!essay) return {};
 

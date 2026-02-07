@@ -1,4 +1,4 @@
-import { getArticleById } from "@/app/actions";
+import { getArticleMetadata } from "@/app/actions";
 import fs from "fs";
 import { ImageResponse } from "next/og";
 import path from "path";
@@ -11,7 +11,7 @@ export const size = {
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const article = await getArticleById(Number(id));
+  const article = await getArticleMetadata(Number(id));
 
   const bgPath = path.join(process.cwd(), "public/og-background.png");
   const bgData = await fs.promises.readFile(bgPath);
