@@ -178,7 +178,41 @@ const isMainModule = () => {
 };
 
 if (isMainModule()) {
-  ingest()
+  const args = process.argv.slice(2);
+  const runAll = args.includes("--all");
+
+  const run = async () => {
+    if (runAll) {
+      console.log("🔄 Running in continuous mode (--all)...");
+      while (true) {
+        // We need to re-check counts inside the loop
+        await ingest();
+
+        // Helper function to check pending count:
+        const pendingArticles = await db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(articles)
+          .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
+          .where(isNull(articleEmbeddings.articleId));
+
+        const pendingEssays = await db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(essays)
+          .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
+          .where(isNull(essayEmbeddings.essayId));
+
+        if ((pendingArticles[0]?.count ?? 0) === 0 && (pendingEssays[0]?.count ?? 0) === 0) {
+          console.log("✨ All ingestion complete!");
+          break;
+        }
+        console.log("⏳ Continuing to next batch...");
+      }
+    } else {
+      await ingest();
+    }
+  };
+
+  run()
     .catch(console.error)
     .finally(() => process.exit());
 }

@@ -43,6 +43,13 @@
       "when": 1769936325960,
       "tag": "0005_crazy_amazoness",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1770582225903,
+      "tag": "0006_thick_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }

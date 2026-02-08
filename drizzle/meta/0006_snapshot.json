@@ -1,0 +1,1156 @@
+{
+  "id": "990ecd16-43fc-40b9-85f1-12d13949c54b",
+  "prevId": "f7406d2a-1944-4210-8293-f5c23206f0c7",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.articulos_embeddings": {
+      "name": "articulos_embeddings",
+      "schema": "",
+      "columns": {
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(3072)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "articulos_embeddings_arti_cod_articulos_arti_cod_fk": {
+          "name": "articulos_embeddings_arti_cod_articulos_arti_cod_fk",
+          "tableFrom": "articulos_embeddings",
+          "tableTo": "articulos",
+          "columnsFrom": ["arti_cod"],
+          "columnsTo": ["arti_cod"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.articulos_imagenes": {
+      "name": "articulos_imagenes",
+      "schema": "",
+      "columns": {
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "img_cod": {
+          "name": "img_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pos_x": {
+          "name": "pos_x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pos_y": {
+          "name": "pos_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enunciado": {
+          "name": "enunciado",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "articulos_imagenes_pkey": {
+          "name": "articulos_imagenes_pkey",
+          "columns": ["arti_cod", "img_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.articulos_topicos": {
+      "name": "articulos_topicos",
+      "schema": "",
+      "columns": {
+        "mat_cod": {
+          "name": "mat_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sumario": {
+          "name": "sumario",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "articulos_topicos_pkey": {
+          "name": "articulos_topicos_pkey",
+          "columns": ["mat_cod", "arti_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.articulos": {
+      "name": "articulos",
+      "schema": "",
+      "columns": {
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "arti_titulo": {
+          "name": "arti_titulo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_subtitulo": {
+          "name": "arti_subtitulo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_fecha": {
+          "name": "arti_fecha",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_fecha_old": {
+          "name": "arti_fecha_old",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "col_cod": {
+          "name": "col_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ejm_cod": {
+          "name": "ejm_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_pag": {
+          "name": "arti_pag",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_contenido": {
+          "name": "arti_contenido",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_cota": {
+          "name": "arti_cota",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_cod2": {
+          "name": "arti_cod2",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "autor_cod": {
+          "name": "autor_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_editable": {
+          "name": "arti_editable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arti_observaciones": {
+          "name": "arti_observaciones",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_añopub": {
+          "name": "arti_añopub",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_mespub": {
+          "name": "arti_mespub",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_ejemplar": {
+          "name": "arti_ejemplar",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_serie": {
+          "name": "arti_serie",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_microfilm": {
+          "name": "arti_microfilm",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "search_vector": {
+          "name": "search_vector",
+          "type": "tsvector",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "arti_texto_plano": {
+          "name": "arti_texto_plano",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "articles_search_vector_idx": {
+          "name": "articles_search_vector_idx",
+          "columns": [
+            {
+              "expression": "search_vector",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "articles_publication_year_idx": {
+          "name": "articles_publication_year_idx",
+          "columns": [
+            {
+              "expression": "arti_añopub",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "articles_column_id_idx": {
+          "name": "articles_column_id_idx",
+          "columns": [
+            {
+              "expression": "col_cod",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "articles_date_idx": {
+          "name": "articles_date_idx",
+          "columns": [
+            {
+              "expression": "arti_fecha",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "articles_date_month_day_idx": {
+          "name": "articles_date_month_day_idx",
+          "columns": [
+            {
+              "expression": "EXTRACT(MONTH FROM \"arti_fecha\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "EXTRACT(DAY FROM \"arti_fecha\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.autores": {
+      "name": "autores",
+      "schema": "",
+      "columns": {
+        "autor_cod": {
+          "name": "autor_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "autor_nombre": {
+          "name": "autor_nombre",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "autor_referencia": {
+          "name": "autor_referencia",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pseudonimo_cod": {
+          "name": "pseudonimo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.descriptores": {
+      "name": "descriptores",
+      "schema": "",
+      "columns": {
+        "descriptor_cod": {
+          "name": "descriptor_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "descriptor_tipo": {
+          "name": "descriptor_tipo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descriptor_valor": {
+          "name": "descriptor_valor",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descriptor_propiedad": {
+          "name": "descriptor_propiedad",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descriptor_contenido": {
+          "name": "descriptor_contenido",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.desarrolladores": {
+      "name": "desarrolladores",
+      "schema": "",
+      "columns": {
+        "dev_cod": {
+          "name": "dev_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "dev_nombres": {
+          "name": "dev_nombres",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dev_apellidos": {
+          "name": "dev_apellidos",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dev_foto": {
+          "name": "dev_foto",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dev_linkedin_url": {
+          "name": "dev_linkedin_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dev_twitter_url": {
+          "name": "dev_twitter_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dev_resumen": {
+          "name": "dev_resumen",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensayos_articulos": {
+      "name": "ensayos_articulos",
+      "schema": "",
+      "columns": {
+        "ensayo_cod": {
+          "name": "ensayo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "articulo_cod": {
+          "name": "articulo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "palabra_enlace": {
+          "name": "palabra_enlace",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ensayos_articulos_pkey": {
+          "name": "ensayos_articulos_pkey",
+          "columns": ["ensayo_cod", "articulo_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensayos_embeddings": {
+      "name": "ensayos_embeddings",
+      "schema": "",
+      "columns": {
+        "ensayo_cod": {
+          "name": "ensayo_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(3072)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ensayos_embeddings_ensayo_cod_ensayos_ensayo_cod_fk": {
+          "name": "ensayos_embeddings_ensayo_cod_ensayos_ensayo_cod_fk",
+          "tableFrom": "ensayos_embeddings",
+          "tableTo": "ensayos",
+          "columnsFrom": ["ensayo_cod"],
+          "columnsTo": ["ensayo_cod"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensayos_imagenes": {
+      "name": "ensayos_imagenes",
+      "schema": "",
+      "columns": {
+        "ensayo_cod": {
+          "name": "ensayo_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "img_cod": {
+          "name": "img_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pos_x": {
+          "name": "pos_x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pos_y": {
+          "name": "pos_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enunciado": {
+          "name": "enunciado",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ensayos_imagenes_pkey": {
+          "name": "ensayos_imagenes_pkey",
+          "columns": ["ensayo_cod", "img_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensayos": {
+      "name": "ensayos",
+      "schema": "",
+      "columns": {
+        "ensayo_cod": {
+          "name": "ensayo_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ensayo_titulo": {
+          "name": "ensayo_titulo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ensayo_subtitulo": {
+          "name": "ensayo_subtitulo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ensayo_contenido": {
+          "name": "ensayo_contenido",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ensayo_observaciones": {
+          "name": "ensayo_observaciones",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_cod": {
+          "name": "intg_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ensayos_pub_cod_publicaciones_pub_cod_fk": {
+          "name": "ensayos_pub_cod_publicaciones_pub_cod_fk",
+          "tableFrom": "ensayos",
+          "tableTo": "publicaciones",
+          "columnsFrom": ["pub_cod"],
+          "columnsTo": ["pub_cod"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.imagenes": {
+      "name": "imagenes",
+      "schema": "",
+      "columns": {
+        "img_cod": {
+          "name": "img_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "img_prop": {
+          "name": "img_prop",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "img_contenido": {
+          "name": "img_contenido",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.palabras_clave_indice": {
+      "name": "palabras_clave_indice",
+      "schema": "",
+      "columns": {
+        "pc_cod": {
+          "name": "pc_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arti_cod": {
+          "name": "arti_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "posicion": {
+          "name": "posicion",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "palabras_clave_indice_palabras_clave_indicepc_cod_idx": {
+          "name": "palabras_clave_indice_palabras_clave_indicepc_cod_idx",
+          "columns": [
+            {
+              "expression": "pc_cod",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "palabras_clave_indice_pkey": {
+          "name": "palabras_clave_indice_pkey",
+          "columns": ["pc_cod", "arti_cod"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.palabras_clave": {
+      "name": "palabras_clave",
+      "schema": "",
+      "columns": {
+        "pc_cod": {
+          "name": "pc_cod",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pc_denom": {
+          "name": "pc_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "topi_cod": {
+          "name": "topi_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alias_pc_cod": {
+          "name": "alias_pc_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "excepcion": {
+          "name": "excepcion",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.integrantes": {
+      "name": "integrantes",
+      "schema": "",
+      "columns": {
+        "intg_cod": {
+          "name": "intg_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "intg_apds": {
+          "name": "intg_apds",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_nmbs": {
+          "name": "intg_nmbs",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inrg_cedula": {
+          "name": "inrg_cedula",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_facultad": {
+          "name": "intg_facultad",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_departamento": {
+          "name": "intg_departamento",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_foto": {
+          "name": "intg_foto",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_linkedin_url": {
+          "name": "intg_linkedin_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_twitter_url": {
+          "name": "intg_twitter_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intg_resumen": {
+          "name": "intg_resumen",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones_columnas": {
+      "name": "publicaciones_columnas",
+      "schema": "",
+      "columns": {
+        "col_cod": {
+          "name": "col_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "col_denom": {
+          "name": "col_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones_ejemplares": {
+      "name": "publicaciones_ejemplares",
+      "schema": "",
+      "columns": {
+        "ejm_cod": {
+          "name": "ejm_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ejm_num": {
+          "name": "ejm_num",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ejm_fecha": {
+          "name": "ejm_fecha",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones_localidades": {
+      "name": "publicaciones_localidades",
+      "schema": "",
+      "columns": {
+        "localidad_cod": {
+          "name": "localidad_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "localidad_denom": {
+          "name": "localidad_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicaciones": {
+      "name": "publicaciones",
+      "schema": "",
+      "columns": {
+        "pub_cod": {
+          "name": "pub_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pub_nombre": {
+          "name": "pub_nombre",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_fecha_fundacion": {
+          "name": "pub_fecha_fundacion",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pub_fecha_cierre": {
+          "name": "pub_fecha_cierre",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.materias": {
+      "name": "materias",
+      "schema": "",
+      "columns": {
+        "mat_cod": {
+          "name": "mat_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mat_denom": {
+          "name": "mat_denom",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mat_descripcion": {
+          "name": "mat_descripcion",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "materia": {
+          "name": "materia",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mat_padre": {
+          "name": "mat_padre",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tutores": {
+      "name": "tutores",
+      "schema": "",
+      "columns": {
+        "tutor_cod": {
+          "name": "tutor_cod",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tutor_nombres": {
+          "name": "tutor_nombres",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutor_titulo": {
+          "name": "tutor_titulo",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutor_foto_path": {
+          "name": "tutor_foto_path",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutor_linkedin_url": {
+          "name": "tutor_linkedin_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutor_twitter_url": {
+          "name": "tutor_twitter_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutor_resumen": {
+          "name": "tutor_resumen",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cv_url": {
+          "name": "cv_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

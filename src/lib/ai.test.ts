@@ -1,8 +1,5 @@
 // Mock the Google Generative AI module BEFORE importing
 vi.mock("@google/generative-ai", () => {
-  // Set env var before module loads
-  process.env.GEMINI_KEY = "test-gemini-key";
-
   const mockEmbedContent = vi.fn();
   const mockBatchEmbedContents = vi.fn();
 
@@ -23,19 +20,24 @@ vi.mock("@google/generative-ai", () => {
   };
 });
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { generateEmbedding, generateEmbeddingsBatch } from "./ai";
 
 describe("AI Embedding Functions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("GEMINI_KEY", "test-gemini-key");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   describe("generateEmbedding", () => {
     it("should generate embeddings for a single text", async () => {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const mockModel = new GoogleGenerativeAI("test-key").getGenerativeModel({
-        model: "text-embedding-004",
+        model: "models/gemini-embedding-001",
       });
 
       const mockEmbedding = {
@@ -57,7 +59,7 @@ describe("AI Embedding Functions", () => {
     it("should handle empty text", async () => {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const mockModel = new GoogleGenerativeAI("test-key").getGenerativeModel({
-        model: "text-embedding-004",
+        model: "models/gemini-embedding-001",
       });
 
       const mockEmbedding = {
@@ -79,7 +81,7 @@ describe("AI Embedding Functions", () => {
     it("should throw error when API fails", async () => {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const mockModel = new GoogleGenerativeAI("test-key").getGenerativeModel({
-        model: "text-embedding-004",
+        model: "models/gemini-embedding-001",
       });
 
       vi.mocked(mockModel.embedContent).mockRejectedValue(new Error("API Error"));
@@ -92,7 +94,7 @@ describe("AI Embedding Functions", () => {
     it("should generate embeddings for multiple texts", async () => {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const mockModel = new GoogleGenerativeAI("test-key").getGenerativeModel({
-        model: "text-embedding-004",
+        model: "models/gemini-embedding-001",
       });
 
       const mockBatchResult = {
@@ -114,15 +116,15 @@ describe("AI Embedding Functions", () => {
         requests: [
           {
             content: { role: "user", parts: [{ text: "text 1" }] },
-            model: "models/text-embedding-004",
+            model: "models/gemini-embedding-001",
           },
           {
             content: { role: "user", parts: [{ text: "text 2" }] },
-            model: "models/text-embedding-004",
+            model: "models/gemini-embedding-001",
           },
           {
             content: { role: "user", parts: [{ text: "text 3" }] },
-            model: "models/text-embedding-004",
+            model: "models/gemini-embedding-001",
           },
         ],
       });
