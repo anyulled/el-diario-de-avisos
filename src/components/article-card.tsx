@@ -7,7 +7,7 @@ export function ArticleCard({
   item,
   searchTerm,
 }: {
-  item: Omit<typeof articles.$inferSelect, "content" | "searchVector" | "plainText">;
+  item: Pick<typeof articles.$inferSelect, "id" | "title" | "subtitle" | "date" | "publicationYear" | "page">;
   searchTerm: string | null;
 }) {
   const href = searchTerm ? `/article/${item.id}?text=${encodeURIComponent(searchTerm)}` : `/article/${item.id}`;
