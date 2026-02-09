@@ -6,7 +6,7 @@ import { ScrollToResults } from "@/components/scroll-to-results";
 import { SearchFilters } from "@/components/search-filters";
 import { getNews, getNewsTypes, getPublications, SearchParams } from "./actions";
 
-export default async function Home({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export default async function Home({ searchParams }: Readonly<{ searchParams: Promise<SearchParams> }>) {
   const typesPromise = getNewsTypes();
   const pubsPromise = getPublications();
   const params = await searchParams;
@@ -27,7 +27,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
       <Navbar />
       <Hero />
       <SearchFilters types={types} publications={publications} />
-      <ScrollToResults shouldScroll={total > 0} scrollKey={scrollKey} />
+      <ScrollToResults shouldScroll={total > 0 && scrollKey.length > 0} scrollKey={scrollKey} />
       <div id="search-results" className="mt-8 container mx-auto px-4">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
