@@ -1,41 +1,41 @@
 name: Cypress Tests
 on:
-    push:
-        branches: [main, master]
-        paths-ignore:
-            - "**.md"
-            - "docs/**"
-    pull_request:
-        branches: [main, master]
-        paths-ignore:
-            - "**.md"
-            - "docs/**"
-    workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  pull_request:
+    branches: [main, master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    cypress-run:
-        runs-on: ubuntu-latest
+  cypress-run:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Cypress run
+        uses: cypress-io/github-action@v7
+        with:
+          start: npm run dev
+          wait-on: "http://localhost:3000"
+          record: true
+          parallel: true
         env:
-            CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-            DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        strategy:
-            fail-fast: false
-            matrix:
-                containers: [1, 2]
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-            - name: Cypress run
-              uses: cypress-io/github-action@v7
-              with:
-                  start: npm run dev
-                  wait-on: "http://localhost:3000"
-                  record: true
-                  parallel: true
-              env:
-                  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

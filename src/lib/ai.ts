@@ -1,11 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const EMBEDDING_MODEL = "models/gemini-embedding-001";
+
 const getModel = () => {
   if (!process.env.GEMINI_KEY) {
     throw new Error("Missing GEMINI_KEY in environment variables");
   }
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
-  return genAI.getGenerativeModel({ model: "models/gemini-embedding-001" });
+  return genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
 };
 
 export async function generateEmbedding(text: string): Promise<number[]> {
@@ -21,7 +23,7 @@ export async function generateEmbeddingsBatch(texts: string[]): Promise<number[]
   const result = await model.batchEmbedContents({
     requests: texts.map((text) => ({
       content: { role: "user", parts: [{ text }] },
-      model: "models/gemini-embedding-001",
+      model: EMBEDDING_MODEL,
     })),
   });
   return result.embeddings.map((e) => e.values);

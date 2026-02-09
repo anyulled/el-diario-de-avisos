@@ -7,8 +7,8 @@
  * Prevent Cypress from failing tests on uncaught exceptions
  */
 Cypress.on("uncaught:exception", (_err, _runnable) => {
-    /*
-     * Returning false here prevents Cypress from failing the test
-     */
-    return false;
+  /*
+   * Returning false here prevents Cypress from failing the test
+   */
+  return false;
 });

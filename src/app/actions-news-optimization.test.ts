@@ -15,6 +15,7 @@ vi.mock("next/cache", () => ({
 
 vi.mock("@/lib/rtf-content-converter", () => ({
   processRtfContent: vi.fn().mockResolvedValue("extract"),
+  stripHtml: vi.fn((html: string) => html),
 }));
 
 vi.mock("@/lib/news-order", () => ({
@@ -80,13 +81,13 @@ describe("getArticlesOnThisDay Performance", () => {
 
     // Mock the data returned by the query
     const chain = createMockChain([
-        {
-            id: 1,
-            title: "Test",
-            content: Buffer.from("content"),
-            plainText: "some large text",
-            searchVector: "..."
-        }
+      {
+        id: 1,
+        title: "Test",
+        content: Buffer.from("content"),
+        plainText: "some large text",
+        searchVector: "...",
+      },
     ]);
 
     mockSelect.mockReturnValue(chain);

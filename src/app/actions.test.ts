@@ -1,28 +1,28 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getNews } from './actions';
-import { db } from '@/db';
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { getNews } from "./actions";
+import { db } from "@/db";
 
 // Mock setup
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-vi.mock('@/db', () => ({
+vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
   },
 }));
 
-vi.mock('@/db/schema', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/db/schema')>();
+vi.mock("@/db/schema", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/db/schema")>();
   return {
     ...actual,
   };
 });
 
-vi.mock('@/lib/date-range', () => ({
+vi.mock("@/lib/date-range", () => ({
   normalizeDateRange: () => ({ start: null, end: null, isValidRange: true }),
 }));
 
-vi.mock('@/lib/news-order', () => ({
+vi.mock("@/lib/news-order", () => ({
   getNewsOrderBy: () => [],
 }));
 
@@ -38,12 +38,12 @@ interface MockChain {
   then: (resolve: (val: MockResult) => void, reject: (err: unknown) => void) => Promise<void>;
 }
 
-describe('getNews Performance', () => {
+describe("getNews Performance", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('should run queries in parallel', async () => {
+  it("should run queries in parallel", async () => {
     const stats = {
       activeQueries: 0,
       maxConcurrency: 0,
@@ -67,7 +67,7 @@ describe('getNews Performance', () => {
     const createMockChain = (result: MockResult): MockChain => {
       const chain: Partial<MockChain> = {};
 
-      const methods = ['from', '$dynamic', 'where', 'orderBy', 'limit', 'offset'] as const;
+      const methods = ["from", "$dynamic", "where", "orderBy", "limit", "offset"] as const;
       methods.forEach((method) => {
         chain[method] = vi.fn().mockReturnValue(chain as MockChain);
       });
@@ -82,12 +82,12 @@ describe('getNews Performance', () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
 
     mockSelect.mockImplementation((selection: { count?: unknown }) => {
-       // If selection has 'count', return count result
-       if (selection && selection.count) {
-           return createMockChain([{ count: 10 }]);
-       }
-       // Otherwise return data result
-       return createMockChain([]);
+      // If selection has 'count', return count result
+      if (selection && selection.count) {
+        return createMockChain([{ count: 10 }]);
+      }
+      // Otherwise return data result
+      return createMockChain([]);
     });
 
     await getNews({});

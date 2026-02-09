@@ -65,9 +65,7 @@ describe("ingestEntities Performance", () => {
 
     // Mock other helpers
     (processRtfContent as any).mockResolvedValue("processed content");
-    (generateEmbeddingsBatch as any).mockResolvedValue(
-      Array.from({ length: pendingCount }, () => Array(768).fill(0.1))
-    );
+    (generateEmbeddingsBatch as any).mockResolvedValue(Array.from({ length: pendingCount }, () => Array(768).fill(0.1)));
 
     // Mock Config
     const config = {
@@ -89,7 +87,7 @@ describe("ingestEntities Performance", () => {
 
     // Check values passed to insert
     if (insertCalls > 0) {
-        // console.log("Insert args:", mockDb.insert.mock.calls);
+      // console.log("Insert args:", mockDb.insert.mock.calls);
     }
   });
 });

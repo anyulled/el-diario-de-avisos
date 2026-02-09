@@ -349,7 +349,7 @@ export async function getArticleSection(columnId: number) {
   return result[0];
 }
 
-import { processRtfContent } from "@/lib/rtf-content-converter";
+import { processRtfContent, stripHtml } from "@/lib/rtf-content-converter";
 
 export async function getArticlesOnThisDay(day: number, month: number) {
   return await unstable_cache(
@@ -371,7 +371,9 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         news.map(async (item) => {
           const { content, plainText, ...rest } = item;
           const extract =
-            plainText !== null && plainText !== undefined ? plainText.slice(0, 500) : await processRtfContent(content as Buffer | null, { maxLength: 500 });
+            plainText !== null && plainText !== undefined
+              ? stripHtml(plainText).slice(0, 500)
+              : await processRtfContent(content as Buffer | null, { maxLength: 500 });
           return {
             ...rest,
             extract,

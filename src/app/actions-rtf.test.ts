@@ -1,21 +1,22 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getArticlesOnThisDay } from './actions';
-import { db } from '@/db';
-import { processRtfContent } from '@/lib/rtf-content-converter';
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { getArticlesOnThisDay } from "./actions";
+import { db } from "@/db";
+import { processRtfContent } from "@/lib/rtf-content-converter";
 
 // Mock setup
-vi.mock('@/db', () => ({
+vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
   },
 }));
 
-vi.mock('next/cache', () => ({
+vi.mock("next/cache", () => ({
   unstable_cache: <T>(fn: T) => fn,
 }));
 
-vi.mock('@/lib/rtf-content-converter', () => ({
-  processRtfContent: vi.fn().mockResolvedValue('processed extract'),
+vi.mock("@/lib/rtf-content-converter", () => ({
+  processRtfContent: vi.fn().mockResolvedValue("processed extract"),
+  stripHtml: vi.fn((html: string) => html),
 }));
 
 interface MockChain {
@@ -29,7 +30,7 @@ interface MockChain {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockChain = (returnData: any[]): MockChain => {
   const chain: Partial<MockChain> = {};
-  const methods = ['from', 'where', 'limit', 'orderBy'] as const;
+  const methods = ["from", "where", "limit", "orderBy"] as const;
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });
@@ -40,50 +41,62 @@ const createMockChain = (returnData: any[]): MockChain => {
   return chain as MockChain;
 };
 
-describe('getArticlesOnThisDay Optimization', () => {
+describe("getArticlesOnThisDay Optimization", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should use plainText column if available and NOT call processRtfContent', async () => {
+  it("should use plainText column if available and NOT call processRtfContent", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
-    mockSelect.mockReturnValue(createMockChain([{
-        id: 1,
-        content: Buffer.from('content'),
-        plainText: 'Pre-computed text'
-    }]));
+    mockSelect.mockReturnValue(
+      createMockChain([
+        {
+          id: 1,
+          content: Buffer.from("content"),
+          plainText: "Pre-computed text",
+        },
+      ]),
+    );
 
     const result = await getArticlesOnThisDay(1, 1);
 
-    expect(result[0].extract).toBe('Pre-computed text');
+    expect(result[0].extract).toBe("Pre-computed text");
     expect(processRtfContent).not.toHaveBeenCalled();
   });
 
-  it('should fallback to processRtfContent if plainText is null', async () => {
+  it("should fallback to processRtfContent if plainText is null", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
-    mockSelect.mockReturnValue(createMockChain([{
-        id: 1,
-        content: Buffer.from('content'),
-        plainText: null
-    }]));
+    mockSelect.mockReturnValue(
+      createMockChain([
+        {
+          id: 1,
+          content: Buffer.from("content"),
+          plainText: null,
+        },
+      ]),
+    );
 
     const result = await getArticlesOnThisDay(1, 1);
 
-    expect(result[0].extract).toBe('processed extract');
+    expect(result[0].extract).toBe("processed extract");
     expect(processRtfContent).toHaveBeenCalled();
   });
 
-  it('should use empty string from plainText and NOT call processRtfContent', async () => {
+  it("should use empty string from plainText and NOT call processRtfContent", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
-    mockSelect.mockReturnValue(createMockChain([{
-        id: 1,
-        content: Buffer.from('content'),
-        plainText: ''
-    }]));
+    mockSelect.mockReturnValue(
+      createMockChain([
+        {
+          id: 1,
+          content: Buffer.from("content"),
+          plainText: "",
+        },
+      ]),
+    );
 
     const result = await getArticlesOnThisDay(1, 1);
 
-    expect(result[0].extract).toBe('');
+    expect(result[0].extract).toBe("");
     expect(processRtfContent).not.toHaveBeenCalled();
   });
 });

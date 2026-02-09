@@ -1,4 +1,3 @@
-
 type NewsType = { id: number; name: string };
 
 /**
@@ -7,7 +6,10 @@ type NewsType = { id: number; name: string };
 async function simulateDbCall(): Promise<NewsType[]> {
   // 50ms latency
   await new Promise((resolve) => setTimeout(resolve, 50));
-  return [{ id: 1, name: "Type A" }, { id: 2, name: "Type B" }];
+  return [
+    { id: 1, name: "Type A" },
+    { id: 2, name: "Type B" },
+  ];
 }
 
 async function getNewsTypesUncached() {

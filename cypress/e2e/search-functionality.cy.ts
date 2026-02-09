@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 /**
  * E2E tests for search functionality
  * Verifies search works correctly with highlighting

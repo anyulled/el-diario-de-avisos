@@ -21,7 +21,7 @@ We defined a **"Period Persona" Strategy** (immersive roleplay) for the chatbot 
 
 ### 1. Persona & Tone
 
-Instead of a modern historian analyzing the text from the outside, the chatbot adopts the persona of a **19th-century Chronicler and Archivist** of the *Diario de Avisos*.
+Instead of a modern historian analyzing the text from the outside, the chatbot adopts the persona of a **19th-century Chronicler and Archivist** of the _Diario de Avisos_.
 
 - **Persona**: "Distinguished chronicler and archivist from the 19th century".
 - **Tone**: Elegant, formal, and flowery Spanish typical of 19th-century Caracas.
@@ -29,7 +29,7 @@ Instead of a modern historian analyzing the text from the outside, the chatbot a
 
 ### 2. Linguistic Rules (Output)
 
-The model is instructed to *mimic* the archaic linguistic patterns found in the corpus, rather than translating to modern Spanish:
+The model is instructed to _mimic_ the archaic linguistic patterns found in the corpus, rather than translating to modern Spanish:
 
 - **Archaic Spelling**: Enforced use of "mui" (very), "setiembre" (September), "anjel" (angel).
 - **Accentuation**: Mandatory accentuation of monosyllabic prepositions/conjunctions ("á", "ó", "é").

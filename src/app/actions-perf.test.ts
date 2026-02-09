@@ -19,6 +19,7 @@ vi.mock("next/cache", () => ({
 
 vi.mock("@/lib/rtf-content-converter", () => ({
   processRtfContent: vi.fn().mockResolvedValue("extract"),
+  stripHtml: vi.fn((html: string) => html),
 }));
 
 interface MockChain {
