@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
-// Mock dependencies
+
 vi.mock("@/lib/vector-store", () => ({
   findSimilarArticles: vi.fn(),
 }));
@@ -24,7 +24,6 @@ describe("Chat API Route", () => {
     const { createGroq } = await import("@ai-sdk/groq");
     const { streamText } = await import("ai");
 
-    // Mock similar articles with required 'type' and 'contentSnippet' fields
     vi.mocked(findSimilarArticles).mockResolvedValue([
       {
         id: 1,
@@ -33,6 +32,7 @@ describe("Chat API Route", () => {
         similarity: 0.85,
         type: "article",
         contentSnippet: "El concierto fue un éxito...",
+        publicationName: "El Diario de Avisos",
       },
       {
         id: 2,
@@ -41,14 +41,13 @@ describe("Chat API Route", () => {
         similarity: 0.78,
         type: "article",
         contentSnippet: "La ópera italiana...",
+        publicationName: "La Opinión Nacional",
       },
     ]);
 
-    // Mock Groq client
     const mockGroqModel = vi.fn();
     vi.mocked(createGroq).mockReturnValue(mockGroqModel as never);
 
-    // Mock streamText response
     const mockStreamResponse = {
       toUIMessageStreamResponse: vi.fn().mockReturnValue(
         new Response("mock stream", {
@@ -58,7 +57,6 @@ describe("Chat API Route", () => {
     };
     vi.mocked(streamText).mockReturnValue(mockStreamResponse as never);
 
-    // Create mock request
     const mockRequest = new Request("http://localhost:3000/api/chat", {
       method: "POST",
       body: JSON.stringify({
@@ -73,24 +71,20 @@ describe("Chat API Route", () => {
 
     const response = await POST(mockRequest);
 
-    // Verify vector store was called with limit 5
     expect(findSimilarArticles).toHaveBeenCalledWith("¿Qué conciertos hubo en 1885?", 5);
 
-    // Verify Groq was initialized
     expect(createGroq).toHaveBeenCalledWith({
       apiKey: "test-groq-key",
     });
 
-    // Verify streamText was called with proper context
     expect(streamText).toHaveBeenCalled();
     const callArgs = vi.mocked(streamText).mock.calls[0][0];
 
-    // Verify the system prompt includes the context articles
     expect(callArgs.system).toContain("Concierto en el Teatro Municipal");
     expect(callArgs.system).toContain("1885-03-15");
+    expect(callArgs.system).toContain("Fuente: El Diario de Avisos");
     expect(callArgs.messages).toBeDefined();
 
-    // Verify response
     expect(response).toBeInstanceOf(Response);
     expect(response.headers.get("Content-Type")).toBe("text/event-stream");
   });
@@ -100,7 +94,6 @@ describe("Chat API Route", () => {
     const { createGroq } = await import("@ai-sdk/groq");
     const { streamText } = await import("ai");
 
-    // Mock empty results
     vi.mocked(findSimilarArticles).mockResolvedValue([]);
 
     const mockGroqModel = vi.fn();
@@ -129,7 +122,6 @@ describe("Chat API Route", () => {
 
     await POST(mockRequest);
 
-    // Verify system prompt includes fallback message
     expect(streamText).toHaveBeenCalledWith(
       expect.objectContaining({
         system: expect.stringContaining("No se encontraron artículos específicos") as unknown as string,
@@ -213,7 +205,6 @@ describe("Chat API Route", () => {
 
     await POST(mockRequest);
 
-    // Verify the correct model is used
     expect(mockGroqModel).toHaveBeenCalledWith("llama-3.3-70b-versatile");
   });
 
@@ -222,7 +213,6 @@ describe("Chat API Route", () => {
     const { createGroq } = await import("@ai-sdk/groq");
     const { streamText } = await import("ai");
 
-    // Mock similar articles with IDs, type, and contentSnippet
     vi.mocked(findSimilarArticles).mockResolvedValue([
       {
         id: 42,
@@ -231,6 +221,7 @@ describe("Chat API Route", () => {
         similarity: 0.92,
         type: "article",
         contentSnippet: "El gran concierto de ópera...",
+        publicationName: "El Diario de Avisos",
       },
     ]);
 
@@ -263,11 +254,9 @@ describe("Chat API Route", () => {
     expect(streamText).toHaveBeenCalled();
     const callArgs = vi.mocked(streamText).mock.calls[0][0];
 
-    // Verify article link is included in context (current format uses path not [ID: XX])
     expect(callArgs.system).toContain("/article/42");
     expect(callArgs.system).toContain("Gran Concierto de Ópera");
 
-    // Verify linking instructions are present
     expect(callArgs.system).toContain("CITACIÓN DE FUENTES");
     expect(callArgs.system).toContain("/article/123");
     expect(callArgs.system).toContain("INCLUYE el enlace");

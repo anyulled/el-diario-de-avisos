@@ -7,7 +7,7 @@ export function ArticleCard({
   item,
   searchTerm,
 }: {
-  item: Pick<typeof articles.$inferSelect, "id" | "title" | "subtitle" | "date" | "publicationYear" | "page">;
+  item: Pick<typeof articles.$inferSelect, "id" | "title" | "subtitle" | "date" | "publicationYear" | "page"> & { publicationName?: string | null };
   searchTerm: string | null;
 }) {
   const href = searchTerm ? `/article/${item.id}?text=${encodeURIComponent(searchTerm)}` : `/article/${item.id}`;
@@ -36,7 +36,10 @@ export function ArticleCard({
         </div>
         <div className="bg-gray-50 dark:bg-zinc-950/50 p-4 border-t border-gray-100 dark:border-zinc-800">
           <div className="flex justify-between text-xs text-gray-400 uppercase tracking-wide font-medium">
-            {item.page ? <span>Pág. {item.page}</span> : <span>—</span>}
+            <div className="flex items-center gap-3">
+              {item.publicationName && <span className="text-amber-700 dark:text-amber-500 font-bold border-r border-gray-200 dark:border-zinc-700 pr-3">{item.publicationName}</span>}
+              {item.page ? <span>Pág. {item.page}</span> : <span>—</span>}
+            </div>
             <span title="Código de referencia">Ref: {item.id}</span>
           </div>
         </div>

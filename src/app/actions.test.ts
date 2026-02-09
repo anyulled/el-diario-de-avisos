@@ -35,6 +35,7 @@ interface MockChain {
   orderBy: () => MockChain;
   limit: () => MockChain;
   offset: () => MockChain;
+  leftJoin: () => MockChain;
   then: (resolve: (val: MockResult) => void, reject: (err: unknown) => void) => Promise<void>;
 }
 
@@ -67,7 +68,7 @@ describe("getNews Performance", () => {
     const createMockChain = (result: MockResult): MockChain => {
       const chain: Partial<MockChain> = {};
 
-      const methods = ["from", "$dynamic", "where", "orderBy", "limit", "offset"] as const;
+      const methods = ["from", "$dynamic", "where", "orderBy", "limit", "offset", "leftJoin"] as const;
       methods.forEach((method) => {
         chain[method] = vi.fn().mockReturnValue(chain as MockChain);
       });

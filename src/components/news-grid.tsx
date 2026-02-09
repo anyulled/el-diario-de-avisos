@@ -5,7 +5,7 @@ export function NewsGrid({
   news,
   searchTerm,
 }: {
-  news: Pick<typeof articles.$inferSelect, "id" | "title" | "subtitle" | "date" | "publicationYear" | "page">[];
+  news: (Pick<typeof articles.$inferSelect, "id" | "title" | "subtitle" | "date" | "publicationYear" | "page"> & { publicationName?: string | null })[];
   searchTerm: string | null;
 }) {
   if (news.length === 0) {

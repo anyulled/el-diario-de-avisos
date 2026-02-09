@@ -28,6 +28,7 @@ interface MockChain {
   limit: ReturnType<typeof vi.fn>;
   offset: ReturnType<typeof vi.fn>;
   orderBy: ReturnType<typeof vi.fn>;
+  leftJoin: ReturnType<typeof vi.fn>;
   then: (resolve: (value: unknown) => void) => Promise<void>;
   $dynamic: ReturnType<typeof vi.fn>;
   [key: string]: unknown;
@@ -36,7 +37,7 @@ interface MockChain {
 // Mock chain
 const createMockChain = (result: unknown[] = [{ count: 10 }]): MockChain => {
   const chain: Partial<MockChain> = {};
-  const methods = ["from", "where", "limit", "offset", "orderBy", "$dynamic"];
+  const methods = ["from", "where", "limit", "offset", "orderBy", "$dynamic", "leftJoin"];
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });

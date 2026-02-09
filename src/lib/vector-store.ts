@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { articleEmbeddings, articles, essayEmbeddings, essays } from "@/db/schema";
+import { articleEmbeddings, articles, essayEmbeddings, essays, publications } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { generateEmbedding } from "./ai";
 import { processRtfContent } from "./rtf-content-converter";
@@ -11,6 +11,7 @@ export interface SearchResult {
   similarity: number;
   type: "article" | "essay";
   contentSnippet: string;
+  publicationName?: string | null;
 }
 
 // Helper to process RTF/plain text content and return a plain text snippet
@@ -24,6 +25,7 @@ interface RawSearchResult {
   title: string | null;
   date: string | null;
   similarity: number;
+  publicationName?: string | null;
 }
 
 // Internal function for vector search of articles
@@ -36,9 +38,11 @@ async function findVectorArticles(embedding: number[], limit = 5): Promise<RawSe
       title: articles.title,
       date: articles.date,
       similarity,
+      publicationName: publications.name,
     })
     .from(articleEmbeddings)
     .innerJoin(articles, eq(articleEmbeddings.articleId, articles.id))
+    .leftJoin(publications, eq(articles.pubId, publications.id))
     .where(sql`${similarity} > 0.5`)
     .orderBy(sql`${articleEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector`)
     .limit(limit);
@@ -54,9 +58,11 @@ async function findVectorEssays(embedding: number[], limit = 5): Promise<RawSear
       title: essays.title,
       date: sql<null>`null`.as("date"),
       similarity,
+      publicationName: publications.name,
     })
     .from(essayEmbeddings)
     .innerJoin(essays, eq(essayEmbeddings.essayId, essays.id))
+    .leftJoin(publications, eq(essays.pubId, publications.id))
     .where(sql`${similarity} > 0.45`)
     .orderBy(sql`${essayEmbeddings.embedding} <=> ${JSON.stringify(embedding)}::vector`)
     .limit(limit);
@@ -70,8 +76,10 @@ async function findKeywordArticles(query: string, limit = 10): Promise<RawSearch
       title: articles.title,
       date: articles.date,
       similarity: sql<number>`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${query}))`,
+      publicationName: publications.name,
     })
     .from(articles)
+    .leftJoin(publications, eq(articles.pubId, publications.id))
     .where(sql`${articles.searchVector} @@ websearch_to_tsquery('spanish_unaccent', ${query})`)
     .orderBy(sql`ts_rank(${articles.searchVector}, websearch_to_tsquery('spanish_unaccent', ${query})) DESC`)
     .limit(limit);

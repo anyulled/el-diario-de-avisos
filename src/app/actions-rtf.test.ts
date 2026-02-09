@@ -24,13 +24,14 @@ interface MockChain {
   where: ReturnType<typeof vi.fn>;
   limit: ReturnType<typeof vi.fn>;
   orderBy: ReturnType<typeof vi.fn>;
+  leftJoin: ReturnType<typeof vi.fn>;
   then: (resolve: (value: unknown) => void) => Promise<void>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockChain = (returnData: any[]): MockChain => {
   const chain: Partial<MockChain> = {};
-  const methods = ["from", "where", "limit", "orderBy"] as const;
+  const methods = ["from", "where", "limit", "orderBy", "leftJoin"] as const;
   methods.forEach((method) => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });

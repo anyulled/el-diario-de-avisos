@@ -17,7 +17,7 @@ export function ArticleSwiper({
   articles: news,
   backgroundImage = "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2068&auto=format&fit=crop",
 }: {
-  articles: (Omit<typeof articles.$inferSelect, "content" | "searchVector" | "plainText"> & { extract: string })[];
+  articles: (Omit<typeof articles.$inferSelect, "content" | "searchVector" | "plainText"> & { extract: string; publicationName?: string | null })[];
   backgroundImage?: string;
 }) {
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
@@ -66,9 +66,16 @@ export function ArticleSwiper({
             <SwiperSlide key={item.id} className="min-h-[500px] flex items-center justify-center py-20">
               <div className="relative z-10 p-8 md:p-16 text-center text-white max-w-3xl mx-auto" data-swiper-parallax="-300">
                 <div className="mb-8" data-swiper-parallax="-200">
-                  <span className="inline-block px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-500/30 text-xs font-bold uppercase tracking-wider mb-4">
-                    {year}
-                  </span>
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    {item.publicationName && (
+                      <span className="inline-block px-4 py-1.5 rounded-full bg-zinc-800/50 text-white border border-zinc-700 text-xs font-bold uppercase tracking-wider">
+                        {item.publicationName}
+                      </span>
+                    )}
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-500/30 text-xs font-bold uppercase tracking-wider">
+                      {year}
+                    </span>
+                  </div>
                   <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight drop-shadow-lg">
                     <Link href={`/article/${item.id}`} className="hover:text-amber-300 transition-colors">
                       {formatArticleTitle(item.title) || "Sin Título"}

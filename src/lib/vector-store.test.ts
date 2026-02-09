@@ -13,6 +13,7 @@ vi.mock("@/db", () => {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     innerJoin: vi.fn().mockReturnThis(),
+    leftJoin: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     orderBy: vi.fn().mockReturnThis(),
     limit: vi.fn(() => Promise.resolve([])),
@@ -66,6 +67,7 @@ describe("vector-store", () => {
       interface MockQueryBuilder {
         from: ReturnType<typeof vi.fn>;
         innerJoin: ReturnType<typeof vi.fn>;
+        leftJoin: ReturnType<typeof vi.fn>;
         where: ReturnType<typeof vi.fn>;
         orderBy: ReturnType<typeof vi.fn>;
         limit: ReturnType<typeof vi.fn>;
@@ -74,6 +76,7 @@ describe("vector-store", () => {
       const mockQueryBuilder: MockQueryBuilder = {
         from: vi.fn().mockReturnThis(),
         innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
         orderBy: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValue(mockResults),
@@ -89,6 +92,7 @@ describe("vector-store", () => {
         const mockQuery = {
           from: vi.fn().mockReturnThis(),
           innerJoin: vi.fn().mockReturnThis(),
+          leftJoin: vi.fn().mockReturnThis(),
           where: vi.fn().mockImplementation(() => {
             if (isContentFetch) {
               return Promise.resolve([{ id: 1, content: Buffer.from("Test content") }]);
