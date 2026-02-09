@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { articleEmbeddings, articles, essayEmbeddings, essays, publications } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { generateEmbedding } from "./ai";
-import { processRtfContent } from "./rtf-content-converter";
+import { processRtfContent, stripHtml } from "./rtf-content-converter";
 
 export interface SearchResult {
   id: number;
@@ -159,12 +159,7 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
   // Build final results with content snippets (parallel processing)
   const articleResultsPromises = articleCandidates.map(async (article) => {
     const data = articleContentMap.get(article.id);
-    let snippet = "";
-    if (data?.snippet) {
-      snippet = data.snippet;
-    } else {
-      snippet = await getContentSnippet(data?.content ?? null);
-    }
+    const snippet = data?.snippet ? stripHtml(data.snippet) : await getContentSnippet(data?.content ?? null);
 
     return {
       ...article,
