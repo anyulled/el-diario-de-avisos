@@ -97,7 +97,7 @@ async function fetchArticleContent(ids: number[]): Promise<Map<number, { snippet
     .from(articles)
     .where(inArray(articles.id, ids));
 
-  return new Map(rows.map((r) => [r.id, { snippet: r.snippet, content: r.content }]));
+  return new Map(rows.map((r) => [r.id, { snippet: r.snippet ?? undefined, content: r.content }]));
 }
 
 // Fetch content for essays by IDs
