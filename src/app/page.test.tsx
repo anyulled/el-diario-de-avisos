@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import Home from "./page";
-import * as actions from "./actions";
+import * as actions from "@/actions/actions";
 
 // Mock the actions
-vi.mock("./actions", () => ({
+vi.mock("@/actions/actions", () => ({
   getNewsTypes: vi.fn(),
   getPublications: vi.fn(),
   getNews: vi.fn(),

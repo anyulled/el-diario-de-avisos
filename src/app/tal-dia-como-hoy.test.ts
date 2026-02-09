@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getArticlesOnThisDay } from "./actions";
+import { getArticlesOnThisDay } from "@/actions/actions";
 import { db } from "@/db";
 
 // Mock DB

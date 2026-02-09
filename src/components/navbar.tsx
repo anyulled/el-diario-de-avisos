@@ -1,4 +1,4 @@
-import { getEssays } from "@/app/actions";
+import { getEssays } from "@/actions/actions";
 import { NavbarUI } from "@/components/navbar-ui";
 import { unstable_cache } from "next/cache";
 

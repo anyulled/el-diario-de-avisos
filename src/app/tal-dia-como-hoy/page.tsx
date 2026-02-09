@@ -1,4 +1,4 @@
-import { getArticlesOnThisDay } from "@/app/actions";
+import { getArticlesOnThisDay } from "@/actions/actions";
 import { ArticleSwiper } from "@/components/article-swiper";
 import { Hero } from "@/components/hero";
 import { Navbar } from "@/components/navbar";

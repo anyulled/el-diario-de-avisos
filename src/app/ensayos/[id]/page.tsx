@@ -1,4 +1,4 @@
-import { getEssayById, getEssayMetadata } from "@/app/actions";
+import { getEssayById, getEssayMetadata } from "@/actions/actions";
 import { Navbar } from "@/components/navbar";
 import { processRtfContent } from "@/lib/rtf-html-converter";
 import { notFound } from "next/navigation";

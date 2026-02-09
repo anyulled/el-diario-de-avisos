@@ -1,4 +1,4 @@
-import { getArticleMetadata } from "@/app/actions";
+import { getArticleMetadata } from "@/actions/actions";
 import fs from "fs";
 import { ImageResponse } from "next/og";
 import path from "path";

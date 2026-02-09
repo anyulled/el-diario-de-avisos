@@ -22,7 +22,7 @@ import { ChatWidget } from "@/components/chat-widget";
 import { Footer } from "@/components/footer";
 import { MusicPlayer } from "@/components/music-player";
 import { Analytics } from "@vercel/analytics/react";
-import { getIntegrantesNames, getTutoresNames } from "./actions";
+import { getIntegrantesNames, getTutoresNames } from "@/actions/actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [integrantes, tutores] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);

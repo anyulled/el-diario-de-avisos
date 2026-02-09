@@ -1,7 +1,7 @@
 import { MemberCard } from "@/components/member-card";
 import { Navbar } from "@/components/navbar";
 import type { Metadata } from "next";
-import { getDevelopers, getDevelopersNames, getIntegrantes, getIntegrantesNames, getTutores, getTutoresNames } from "../actions";
+import { getDevelopers, getDevelopersNames, getIntegrantes, getIntegrantesNames, getTutores, getTutoresNames } from "@/actions/actions";
 
 const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop";
 

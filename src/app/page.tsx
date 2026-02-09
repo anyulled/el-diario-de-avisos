@@ -4,7 +4,7 @@ import { NewsGrid } from "@/components/news-grid";
 import { Pagination } from "@/components/pagination";
 import { ScrollToResults } from "@/components/scroll-to-results";
 import { SearchFilters } from "@/components/search-filters";
-import { getNews, getNewsTypes, getPublications, SearchParams } from "./actions";
+import { getNews, getNewsTypes, getPublications, SearchParams } from "@/actions/actions";
 
 export default async function Home({ searchParams }: Readonly<{ searchParams: Promise<SearchParams> }>) {
   const typesPromise = getNewsTypes();

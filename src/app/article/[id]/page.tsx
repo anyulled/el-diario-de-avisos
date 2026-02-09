@@ -1,4 +1,4 @@
-import { getArticleById, getArticleMetadata, getArticleSection } from "@/app/actions";
+import { getArticleById, getArticleMetadata, getArticleSection } from "@/actions/actions";
 import { Navbar } from "@/components/navbar";
 import { processRtfContent } from "@/lib/rtf-html-converter";
 import { highlightText } from "@/lib/search-highlighter";

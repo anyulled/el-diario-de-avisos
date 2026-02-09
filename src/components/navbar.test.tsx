@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Navbar } from "./navbar";
-import * as actions from "@/app/actions";
+import * as actions from "@/actions/actions";
 
 // Mock the actions
-vi.mock("@/app/actions", () => ({
+vi.mock("@/actions/actions", () => ({
   getEssays: vi.fn(),
 }));
 
