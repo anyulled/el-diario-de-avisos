@@ -27,11 +27,12 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
   const { id } = await params;
   const { text: searchTerm } = await searchParams;
   const article = await getArticleById(Number(id));
-  const section = article.columnId ? await getArticleSection(article.columnId) : null;
 
   if (!article) {
     notFound();
   }
+
+  const section = article.columnId ? await getArticleSection(article.columnId) : null;
 
   const rawHtmlContent = await processRtfContent(article.content as Buffer | string | null, id);
 
