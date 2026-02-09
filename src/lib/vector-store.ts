@@ -86,18 +86,18 @@ async function findKeywordArticles(query: string, limit = 10): Promise<RawSearch
 }
 
 // Fetch content for articles by IDs
-async function fetchArticleContent(ids: number[]): Promise<Map<number, { snippet?: string; content: Buffer | null }>> {
+async function fetchArticleContent(ids: number[]): Promise<Map<number, { snippet?: string | null; content: Buffer | null }>> {
   if (ids.length === 0) return new Map();
   const rows = await db
     .select({
       id: articles.id,
-      snippet: sql<string>`substring(${articles.plainText} from 1 for 1000)`,
+      snippet: sql<string | null>`substring(${articles.plainText} from 1 for 1000)`,
       content: sql<Buffer | null>`CASE WHEN ${articles.plainText} IS NULL THEN ${articles.content} ELSE NULL END`,
     })
     .from(articles)
     .where(inArray(articles.id, ids));
 
-  return new Map(rows.map((r) => [r.id, { snippet: r.snippet ?? undefined, content: r.content }]));
+  return new Map(rows.map((r) => [r.id, { snippet: r.snippet, content: r.content }]));
 }
 
 // Fetch content for essays by IDs
