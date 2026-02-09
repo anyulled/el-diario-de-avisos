@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { articleEmbeddings, articles, essayEmbeddings, essays, publications } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { generateEmbedding } from "./ai";
-import { processRtfContent } from "./rtf-content-converter";
+import { processRtfContent, stripHtml } from "./rtf-content-converter";
 
 export interface SearchResult {
   id: number;
@@ -86,10 +86,18 @@ async function findKeywordArticles(query: string, limit = 10): Promise<RawSearch
 }
 
 // Fetch content for articles by IDs
-async function fetchArticleContent(ids: number[]): Promise<Map<number, Buffer | null>> {
+async function fetchArticleContent(ids: number[]): Promise<Map<number, { snippet?: string; content: Buffer | null }>> {
   if (ids.length === 0) return new Map();
-  const rows = await db.select({ id: articles.id, content: articles.content }).from(articles).where(inArray(articles.id, ids));
-  return new Map(rows.map((r) => [r.id, r.content as Buffer | null]));
+  const rows = await db
+    .select({
+      id: articles.id,
+      snippet: sql<string>`substring(${articles.plainText} from 1 for 1000)`,
+      content: sql<Buffer | null>`CASE WHEN ${articles.plainText} IS NULL THEN ${articles.content} ELSE NULL END`,
+    })
+    .from(articles)
+    .where(inArray(articles.id, ids));
+
+  return new Map(rows.map((r) => [r.id, { snippet: r.snippet ?? undefined, content: r.content }]));
 }
 
 // Fetch content for essays by IDs
@@ -150,8 +158,9 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
 
   // Build final results with content snippets (parallel processing)
   const articleResultsPromises = articleCandidates.map(async (article) => {
-    const content = articleContentMap.get(article.id) ?? null;
-    const snippet = await getContentSnippet(content);
+    const data = articleContentMap.get(article.id);
+    const snippet = data?.snippet ? stripHtml(data.snippet) : await getContentSnippet(data?.content ?? null);
+
     return {
       ...article,
       contentSnippet: snippet,
