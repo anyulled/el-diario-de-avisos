@@ -21,6 +21,7 @@ type MockResult = Record<string, unknown>;
 interface MockChain {
   from: () => MockChain;
   where: () => MockChain;
+  leftJoin: () => MockChain;
   limit: () => MockChain;
   then: (resolve: (val: MockResult[]) => void) => Promise<void>;
 }
@@ -30,6 +31,7 @@ const createMockChain = (result: MockResult[]) => {
   const chain: Partial<MockChain> = {};
   chain.from = vi.fn().mockReturnValue(chain as MockChain);
   chain.where = vi.fn().mockReturnValue(chain as MockChain);
+  chain.leftJoin = vi.fn().mockReturnValue(chain as MockChain);
   chain.limit = vi.fn().mockReturnValue(chain as MockChain);
   chain.then = (resolve) => Promise.resolve(result).then(resolve);
   return chain as MockChain;

@@ -141,7 +141,13 @@ export async function getNews(params: SearchParams) {
 }
 
 export async function getIntegrantes() {
-  return await db.select().from(members);
+  return await db
+    .select({
+      ...getTableColumns(members),
+      publicationName: publications.name,
+    })
+    .from(members)
+    .leftJoin(publications, eq(members.pubId, publications.id));
 }
 
 export async function getTutores() {
@@ -158,8 +164,10 @@ export const getIntegrantesNames = unstable_cache(
       .select({
         firstName: members.firstName,
         lastName: members.lastName,
+        publicationName: publications.name,
       })
-      .from(members);
+      .from(members)
+      .leftJoin(publications, eq(members.pubId, publications.id));
   },
   ["integrantes-names"],
   { revalidate: 3600, tags: ["integrantes"] },

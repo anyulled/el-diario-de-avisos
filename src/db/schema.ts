@@ -119,6 +119,7 @@ export const members = pgTable("integrantes", {
   twitterUrl: varchar("intg_twitter_url", { length: 255 }),
   resume: varchar("intg_resumen"),
   cvUrl: varchar("cv_url", { length: 255 }),
+  pubId: integer("pub_cod").references(() => publications.id),
 });
 
 export const subjects = pgTable("materias", {

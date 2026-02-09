@@ -49,6 +49,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);
 
+  const integrantesByPublication = integrantes.reduce(
+    (acc, member) => {
+      const pubName = member.publicationName || "Equipo de Investigación";
+      if (!acc[pubName]) {
+        acc[pubName] = [];
+      }
+      acc[pubName].push(member);
+      return acc;
+    },
+    {} as Record<string, typeof integrantes>,
+  );
+
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950 pb-20">
       <div className="relative h-[50vh] w-full bg-zinc-900 overflow-hidden">
@@ -65,30 +77,31 @@ export default async function AboutPage() {
       </div>
 
       <div className="container mx-auto px-4 py-20 max-w-5xl space-y-24">
-        <section className="animate-slide-up [animation-delay:400ms] opacity-0 [animation-fill-mode:forwards]">
-          <div className="flex items-center gap-4 mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading whitespace-nowrap">Integrantes del Equipo</h2>
-            <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {integrantes.map((i) => (
-              <MemberCard
-                key={i.id}
-                firstName={i.firstName}
-                photoPath={i.photo}
-                lastName={i.lastName}
-                subtitle={i.faculty}
-                resume={i.resume}
-                subtitleTone="muted"
-                eyebrow={i.department}
-                linkedinUrl={i.linkedinUrl}
-                twitterUrl={i.twitterUrl}
-                cvUrl={i.cvUrl}
-                fallbackLetter="I"
-              />
-            ))}
-          </div>
-        </section>
+        {Object.entries(integrantesByPublication).map(([pubName, members], index) => (
+          <section key={pubName} className="animate-slide-up opacity-0 [animation-fill-mode:forwards]" style={{ animationDelay: `${400 + index * 200}ms` }}>
+            <div className="flex items-center gap-4 mb-10">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading whitespace-nowrap">{pubName}</h2>
+              <div className="h-px bg-gray-200 dark:bg-zinc-800 flex-1"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {members.map((i) => (
+                <MemberCard
+                  key={i.id}
+                  firstName={i.firstName}
+                  photoPath={i.photo}
+                  lastName={i.lastName}
+                  subtitle={i.faculty}
+                  eyebrow={i.department}
+                  resume={i.resume}
+                  linkedinUrl={i.linkedinUrl}
+                  twitterUrl={i.twitterUrl}
+                  cvUrl={i.cvUrl}
+                  fallbackLetter="I"
+                />
+              ))}
+            </div>
+          </section>
+        ))}
 
         <section className="animate-slide-up [animation-delay:600ms] opacity-0 [animation-fill-mode:forwards]">
           <div className="flex items-center gap-4 mb-10">
