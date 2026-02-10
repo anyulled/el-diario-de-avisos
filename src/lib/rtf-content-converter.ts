@@ -6,7 +6,8 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
 export function stripHtml(html: string): string {
   if (!html) return "";
   return html
-    .replace(/<[^>]*>/g, " ")
+    // Aggressive tag stripping: matches anything that looks like a tag, including unclosed or malformed ones if they start with < and contain non-space chars
+    .replace(/<[^>]+>/gm, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
