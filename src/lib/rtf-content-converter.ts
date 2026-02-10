@@ -4,8 +4,9 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
+  if (!html) return "";
   return html
-    .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
+    .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
