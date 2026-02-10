@@ -1,12 +1,19 @@
 import ChatInterface from "@/components/chat-interface";
 import { Navbar } from "@/components/navbar";
+import { getArticleCount } from "@/lib/articles";
 
 export const metadata = {
   title: "Asistente del Archivo | Noticias Musicales en el Diario de Avisos",
   description: "Conversa con la historia de nuestros archivos a través de nuestro asistente inteligente.",
 };
 
-export default function ChatPage() {
+export default async function ChatPage() {
+  const articleCount = await getArticleCount();
+  // Fallback static number if DB fails or returns 0, matching the user's intent
+  const fallbackCount = "22,900+";
+
+  const displayCount = articleCount > 0 ? `${(Math.floor(articleCount / 100) * 100).toLocaleString("en-US")}+` : fallbackCount;
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950">
       <Navbar />
@@ -27,7 +34,7 @@ export default function ChatPage() {
             <p className="text-sm text-gray-500">No solo palabras clave, entiende el contexto de tu consulta.</p>
           </div>
           <div className="p-6 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-sm">
-            <h4 className="font-bold mb-2 dark:text-white">Acceso a 10,000+ Artículos</h4>
+            <h4 className="font-bold mb-2 dark:text-white">Acceso a {displayCount} Artículos</h4>
             <p className="text-sm text-gray-500">Recuperación instantánea de décadas de periodismo.</p>
           </div>
           <div className="p-6 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-sm">
