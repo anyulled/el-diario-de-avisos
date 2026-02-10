@@ -61,10 +61,10 @@ export async function processRtfContent(content: Buffer | string | null, options
     const plainText = stripHtml(html);
     return maxLength ? plainText.slice(0, maxLength) : plainText;
   } catch (error) {
-    // Fallback: return raw content if available
+    // Fallback: return raw content if available, ensuring HTML is stripped
     console.debug("RTF content processing failed, using fallback:", error);
     const fallback = Buffer.isBuffer(content) ? decodeBuffer(content) : String(content);
-    const result = fallback || "";
+    const result = stripHtml(fallback || "");
     return maxLength ? result.slice(0, maxLength) : result;
   }
 }
