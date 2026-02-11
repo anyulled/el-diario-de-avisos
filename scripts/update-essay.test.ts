@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { processPage, processPdf, loadPdf, updateEssayInDb } from "./update-essay";
-import type { PdfPage, PdfData } from "./update-essay";
+import { processPage, processPdf, loadPdf, updateEssayInDb } from "./update-essay-logic";
+import type { PdfPage, PdfData } from "./update-essay-logic";
 
 // Mock pdf2json
 vi.mock("pdf2json", () => {

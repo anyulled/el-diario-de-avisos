@@ -38,11 +38,11 @@ export default defineConfig({
         "**/*.sql",
         "**/*.jpg",
         "**/*.jpeg",
-        "src/app/fonts/**",
+        "scripts/update-essay.ts",
       ],
       // @ts-expect-error - 'all' is valid at runtime but missing from types in this version
       all: false,
-      include: ["scripts/update-essay.ts", "src/db/schema.ts"],
+      include: ["scripts/update-essay-logic.ts", "src/db/schema.ts"],
       thresholds: {
         lines: 90,
         functions: 90,
