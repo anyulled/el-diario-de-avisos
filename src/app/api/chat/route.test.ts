@@ -258,7 +258,7 @@ describe("Chat API Route", () => {
 
     expect(callArgs.system).toContain("CITACIÓN DE FUENTES");
     expect(callArgs.system).toContain("/article/123");
-    expect(callArgs.system).toContain("INCLUYE el enlace");
+    expect(callArgs.system).toContain("incluid el enlace");
   });
 
   it("should fall back to message content if parts are missing", async () => {

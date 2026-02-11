@@ -6,17 +6,17 @@ import { eq } from "drizzle-orm";
 /**
  * PDF Data structure (partial)
  */
-interface PdfText {
+export interface PdfText {
   y: number;
   x: number;
   R: Array<{ T: string; TS: number[] }>;
 }
 
-interface PdfPage {
+export interface PdfPage {
   Texts: PdfText[];
 }
 
-interface PdfData {
+export interface PdfData {
   Pages: PdfPage[];
 }
 
@@ -33,10 +33,51 @@ Options:
   --pageEnd     The ending page number (1-based, optional)
 `;
 
-async function main(): Promise<void> {
+export async function loadPdf(absolutePath: string): Promise<PdfData> {
+  const pdfParser = new PDFParser();
+  return new Promise<PdfData>((resolve, reject) => {
+    pdfParser.on("pdfParser_dataError", (errData: Error | { parserError: Error }) => {
+      if ("parserError" in errData) {
+        reject(errData.parserError);
+      } else {
+        reject(errData);
+      }
+    });
+    pdfParser.on("pdfParser_dataReady", (readyData: PdfData) => {
+      resolve(readyData);
+    });
+    pdfParser.loadPDF(absolutePath);
+  });
+}
+
+export function processPdf(pdfData: PdfData, pageStart = 1, pageEnd: number | null = null): string {
+  const startIdx = Math.max(0, pageStart - 1);
+  const endIdx = pageEnd ? Math.min(pdfData.Pages.length, pageEnd) : pdfData.Pages.length;
+
+  const htmlContentParts = pdfData.Pages.slice(startIdx, endIdx).map((page) => processPage(page));
+
+  const rawHtmlContent = htmlContentParts.join("\n<hr/>\n");
+
+  return rawHtmlContent
+    .replace(/<p>\s*<\/p>/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/<\/p>\s*<p>/g, "</p>\n<p>");
+}
+
+export async function updateEssayInDb(id: number, htmlContent: string): Promise<void> {
   const { db } = await import("../src/db");
   const { essays } = await import("../src/db/schema");
 
+  await db
+    .update(essays)
+    .set({
+      content: Buffer.from(htmlContent),
+    })
+    .where(eq(essays.id, id));
+}
+
+/* V8 ignore start */
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const idArg = args.indexOf("--id");
   const fileArg = args.indexOf("--file");
@@ -63,46 +104,13 @@ async function main(): Promise<void> {
     console.log(`Reading PDF from: ${absolutePath}`);
     console.log(`Processing pages: ${pageStart} to ${pageEnd || "end"}`);
 
-    const pdfParser = new PDFParser();
-
-    const pdfData = await new Promise<PdfData>((resolve, reject) => {
-      pdfParser.on("pdfParser_dataError", (errData: Error | { parserError: Error }) => {
-        if ("parserError" in errData) {
-          reject(errData.parserError);
-        } else {
-          reject(errData);
-        }
-      });
-      pdfParser.on("pdfParser_dataReady", (readyData: PdfData) => {
-        resolve(readyData);
-      });
-      pdfParser.loadPDF(absolutePath);
-    });
-
-    // Iterate through pages
-    const startIdx = Math.max(0, pageStart - 1);
-    const endIdx = pageEnd ? Math.min(pdfData.Pages.length, pageEnd) : pdfData.Pages.length;
-
-    const htmlContentParts = pdfData.Pages.slice(startIdx, endIdx).map((page) => processPage(page));
-
-    const rawHtmlContent = htmlContentParts.join("\n<hr/>\n");
-
-    // Clean up empty tags and excessive whitespace (regex is safe)
-    const htmlContent = rawHtmlContent
-      .replace(/<p>\s*<\/p>/g, "")
-      .replace(/\s+/g, " ")
-      .replace(/<\/p>\s*<p>/g, "</p>\n<p>");
+    const pdfData = await loadPdf(absolutePath);
+    const htmlContent = processPdf(pdfData, pageStart, pageEnd);
 
     console.log(`Extracted HTML length: ${htmlContent.length} chars`);
     console.log(`Updating essay ID: ${id}`);
 
-    // Update query
-    await db
-      .update(essays)
-      .set({
-        content: Buffer.from(htmlContent),
-      })
-      .where(eq(essays.id, id));
+    await updateEssayInDb(id, htmlContent);
 
     console.log("✅ Essay updated successfully.");
   } catch (error) {
@@ -110,17 +118,23 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 }
+/* V8 ignore stop */
 
-main()
-  .catch(console.error)
-  .finally(() => {
-    process.exit();
-  });
+// Only run main if this file is being executed directly
+/* V8 ignore start */
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main()
+    .catch(console.error)
+    .finally(() => {
+      process.exit();
+    });
+}
+/* V8 ignore stop */
 
 /**
  * Process a single PDF page into HTML
  */
-function processPage(page: PdfPage): string {
+export function processPage(page: PdfPage): string {
   const texts = [...(page.Texts || [])].sort((a: PdfText, b: PdfText) => {
     if (Math.abs(a.y - b.y) < 0.5) {
       return a.x - b.x;
