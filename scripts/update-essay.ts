@@ -53,9 +53,11 @@ async function main(): Promise<void> {
 
 // Only run main if this file is being executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main()
-    .catch(console.error)
-    .finally(() => {
-      process.exit();
-    });
+  try {
+    await main();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    process.exit();
+  }
 }
