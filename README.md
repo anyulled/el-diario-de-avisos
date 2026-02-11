@@ -15,6 +15,10 @@
 - **`music/`**: Assets for the application's audio playback features.
 - **`docs/`**: Technical documentation and Architecture Decision Records (ADRs).
 
+## 🤖 AI Assistant Rules
+
+Follow the mandatory [Verification Policy](file:///Users/alrs/Documents/el-diario-de-avisos/PROJECT_RULES.md) before reporting any task as complete. Assistants must pass `type-check` and `lint` project-wide.
+
 ## ✨ Key Features
 
 - **Historical Search**: Full-text and semantic search across 19th-century articles.
