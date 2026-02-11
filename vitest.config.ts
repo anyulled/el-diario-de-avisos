@@ -20,8 +20,13 @@ export default defineConfig({
         "src/lib/providers/**",
         "src/lib/styles.ts",
         "src/lib/types.ts",
-        "src/db/index.ts",
-        "src/db/migrate.ts",
+        "src/db/**",
+
+        "**/*.ico",
+        "**/*.png",
+        "**/*.svg",
+        "**/*.css",
+        "src/actions/actions.ts",
       ],
       // @ts-expect-error - 'all' is valid at runtime but missing from types in this version
       all: true,
