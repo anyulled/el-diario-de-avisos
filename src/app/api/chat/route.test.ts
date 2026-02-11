@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
-
 vi.mock("@/lib/vector-store", () => ({
   findSimilarArticles: vi.fn(),
 }));
@@ -124,7 +123,7 @@ describe("Chat API Route", () => {
 
     expect(streamText).toHaveBeenCalledWith(
       expect.objectContaining({
-        system: expect.stringContaining("No se encontraron artículos específicos") as unknown as string,
+        system: expect.stringContaining("NO SE ENCONTRARON REGISTROS EN EL ARCHIVO") as unknown as string,
       }),
     );
   });
