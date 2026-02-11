@@ -7,48 +7,49 @@ import chalk from "chalk";
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
-  const latestMessage = messages[messages.length - 1];
+  try {
+    const { messages } = await req.json();
+    const latestMessage = messages[messages.length - 1];
 
-  // Extract text content from UIMessage parts
-  const latestContent =
-    latestMessage.parts
-      ?.filter((part: { type: string }) => part.type === "text")
-      .map((part: { text: string }) => part.text)
-      .join("") ||
-    latestMessage.content ||
-    "";
+    // Extract text content from UIMessage parts
+    const latestContent =
+      latestMessage.parts
+        ?.filter((part: { type: string }) => part.type === "text")
+        .map((part: { text: string }) => part.text)
+        .join("") ||
+      latestMessage.content ||
+      "";
 
-  console.log(chalk.blue.bold("🤖 [Chatbot] Received prompt:"), chalk.blue(latestContent));
+    console.log(chalk.blue.bold("🤖 [Chatbot] Received prompt:"), chalk.blue(latestContent));
 
-  // 1. Find relevant context from the newspaper archives
-  const contextArticles = await findSimilarArticles(latestContent, 5);
+    // 1. Find relevant context from the newspaper archives
+    const contextArticles = await findSimilarArticles(latestContent, 5);
 
-  if (contextArticles.length > 0) {
-    console.log(chalk.green(`📚 [Context] Found ${contextArticles.length} relevant articles:`));
-    contextArticles.forEach((a, i) => {
-      const source = a.publicationName ? ` - ${a.publicationName}` : "";
-      console.log(chalk.cyan(`   ${i + 1}. [${a.id}] ${a.title} (${a.date || "N/A"})${source}`));
-    });
-  } else {
-    console.log(chalk.yellow("⚠️ [Context] No relevant articles found."));
-  }
+    if (contextArticles.length > 0) {
+      console.log(chalk.green(`📚 [Context] Found ${contextArticles.length} relevant articles:`));
+      contextArticles.forEach((a, i) => {
+        const source = a.publicationName ? ` - ${a.publicationName}` : "";
+        console.log(chalk.cyan(`   ${i + 1}. [${a.id}] ${a.title} (${a.date || "N/A"})${source}`));
+      });
+    } else {
+      console.log(chalk.yellow("⚠️ [Context] No relevant articles found."));
+    }
 
-  const contextString =
-    contextArticles.length > 0
-      ? contextArticles
-          .map((a) => {
-            const linkPath = a.type === "essay" ? `/ensayos/${a.id}` : `/article/${a.id}`;
-            const dateInfo = a.date ? `(${a.date})` : "(Ensayo)";
-            const sourceInfo = a.publicationName ? ` - Fuente: ${a.publicationName}` : "";
-            const contentPreview = a.contentSnippet ? `\n  Contenido: "${a.contentSnippet}"` : "";
-            return `- "${a.title}" ${dateInfo} [${a.type === "essay" ? "Ensayo" : "Artículo"}]${sourceInfo} - Enlace: ${linkPath}${contentPreview}`;
-          })
-          .join("\n\n")
-      : "";
+    const contextString =
+      contextArticles.length > 0
+        ? contextArticles
+            .map((a) => {
+              const linkPath = a.type === "essay" ? `/ensayos/${a.id}` : `/article/${a.id}`;
+              const dateInfo = a.date ? `(${a.date})` : "(Ensayo)";
+              const sourceInfo = a.publicationName ? ` - Fuente: ${a.publicationName}` : "";
+              const contentPreview = a.contentSnippet ? `\n  Contenido: "${a.contentSnippet}"` : "";
+              return `- "${a.title}" ${dateInfo} [${a.type === "essay" ? "Ensayo" : "Artículo"}]${sourceInfo} - Enlace: ${linkPath}${contentPreview}`;
+            })
+            .join("\n\n")
+        : "";
 
-  // 2. Augment the prompt
-  const baseSystemPrompt = String.raw`
+    // 2. Augment the prompt
+    const baseSystemPrompt = String.raw`
 Eres un distinguido cronista y archivero del "Diario de Avisos de Caracas", transportado desde el siglo XIX al presente por las artes de la tecnología.
 Tu lenguaje debe ser el castellano elegante, formal y florido de la Caracas decimonónica, siguiendo estrictamente los usos ortográficos y gramaticales de la época.
 
@@ -84,60 +85,62 @@ REGLAS DE ORO DE TU COMPORTAMIENTO:
    - Ejemplo correcto: [Crónica del Teatro](/article/1246)
    - Ejemplo INCORRECTO: [Crónica del Teatro]\(/article/1246\)
    - Presta atención al tipo indicado en el contexto para usar el enlace correcto.
+   - EXHAUSTIVIDAD: Debes revisar meticulosamente todos los artículos i ensayos proveídos en el contexto. Si varios de ellos contienen información pertinente a la pregunta del usuario, DEBES integrarlos todos en vuestra respuesta, aunque esta resulte de mayor extensión. No omitáis detalle alguno que pueda ser de provecho para el curioso lector.
    - IMPORTANTE: Lee el contenido proporcionado en el contexto y úsalo para responder con detalle. No digas que no tienes información si el contenido está presente.
 `;
 
-  const contextInstructions =
-    contextArticles.length > 0
-      ? `
+    const contextInstructions =
+      contextArticles.length > 0
+        ? `
 CONTEXTO DE NUESTRAS GAZETAS Y ENSAYOS (Usa estos datos para vuestras respuestas):
 ${contextString}
 
-INSTRUCCIONES DE USO DEL CONTEXTO:
-1. EXHAUSTIVIDAD: Debéis revisar TODOS los artículos i ensayos proporcionados. Si varios de ellos contienen información pertinente para la consulta, INCORPORADLOS en vuestra crónica para ofrecer un relato rico i detallado, aun cuando esto alargue vuestra respuesta.
-2. CITACIÓN: Citad el título, **la fuente** i fecha de la nota como se hacía en las mejores publicaciones de antaño.
-3. ENLACES: INCLUYE el enlace usando el formato markdown [Título](url) SIN barras invertidas para cada fuente mencionada.
+Si los datos arriba expuestos son de provecho, citad el título, **la fuente** i fecha de la nota como se hacía en las mejores publicaciones de antaño, e INCLUYE el enlace usando el formato markdown [Título](url) SIN barras invertidas.
 `
-      : `
+        : `
 CONTEXTO DE NUESTRAS GAZETAS Y ENSAYOS:
 NO SE ENCONTRARON REGISTROS EN EL ARCHIVO PARA ESTA CONSULTA.
 
 INSTRUCCIÓN CRÍTICA (ANTI-ALUCINACIÓN):
 No existe información sobre este tema en nuestros registros históricos.
-1. DEBES responder cortésmente en tu estilo decimonónico que, tras revisar diligentemente nuestras gazetas y archivos, no habéis hallado mención alguna sobre el particular.
+1. DEBES responder cortésmente en tu estilo decimonónico que, tras revisar diligentemente nuestras gazetas i archivos, no habéis hallado mención alguna sobre el particular.
 2. NO inventes títulos de noticias, ni fechas, ni nombres de colaboradores.
 3. NO generes ningún enlace falso ni citaciones. Si no está en el contexto, no existe para Vos.
 `;
 
-  const systemPrompt = baseSystemPrompt + contextInstructions;
+    const systemPrompt = baseSystemPrompt + contextInstructions;
 
-  const groq = createGroq({
-    apiKey: process.env.GROQ_KEY,
-  });
+    const groq = createGroq({
+      apiKey: process.env.GROQ_KEY,
+    });
 
-  // Convert UIMessage format to CoreMessage format for streamText
-  const coreMessages = messages.map((msg: { role: string; parts?: Array<{ type: string; text?: string }>; content?: string }) => {
-    // Extract text from parts if present, otherwise use content
-    const textContent =
-      msg.parts
-        ?.filter((part) => part.type === "text")
-        .map((part) => part.text)
-        .join("") ||
-      msg.content ||
-      "";
+    // Convert UIMessage format to CoreMessage format for streamText
+    const coreMessages = messages.map((msg: { role: string; parts?: Array<{ type: string; text?: string }>; content?: string }) => {
+      // Extract text from parts if present, otherwise use content
+      const textContent =
+        msg.parts
+          ?.filter((part) => part.type === "text")
+          .map((part) => part.text)
+          .join("") ||
+        msg.content ||
+        "";
 
-    return {
-      role: msg.role,
-      content: textContent,
-    };
-  });
+      return {
+        role: msg.role,
+        content: textContent,
+      };
+    });
 
-  // 3. Stream the response using Groq (Llama 3)
-  const result = streamText({
-    model: groq("llama-3.3-70b-versatile"),
-    system: systemPrompt,
-    messages: coreMessages,
-  });
+    // 3. Stream the response using Groq (Llama 3)
+    const result = streamText({
+      model: groq("llama-3.3-70b-versatile"),
+      system: systemPrompt,
+      messages: coreMessages,
+    });
 
-  return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    console.error(chalk.red("❌ [Error] Chat API:"), error);
+    return Response.json({ error: "Ha ocurrido un error en vuestra consulta." }, { status: 500 });
+  }
 }

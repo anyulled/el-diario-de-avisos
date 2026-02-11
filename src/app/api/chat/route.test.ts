@@ -296,4 +296,71 @@ describe("Chat API Route", () => {
 
     expect(findSimilarArticles).toHaveBeenCalledWith("Direct content without parts", 5);
   });
+
+  it("should handle unexpected errors in POST", async () => {
+    const { findSimilarArticles } = await import("@/lib/vector-store");
+    vi.mocked(findSimilarArticles).mockRejectedValue(new Error("Database error"));
+
+    const mockRequest = new Request("http://localhost:3000/api/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        messages: [{ role: "user", parts: [{ type: "text", text: "Error test" }] }],
+      }),
+    });
+
+    const response = await POST(mockRequest);
+    expect(response.status).toBe(500);
+    const result = (await response.json()) as { error: string };
+    expect(result.error).toBe("Ha ocurrido un error en vuestra consulta.");
+  });
+
+  it("should fall back to empty string if no content or parts found", async () => {
+    const { findSimilarArticles } = await import("@/lib/vector-store");
+    vi.mocked(findSimilarArticles).mockResolvedValue([]);
+
+    const mockRequest = new Request("http://localhost:3000/api/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        messages: [
+          {
+            // No content, no parts
+            role: "user",
+          },
+        ],
+      }),
+    });
+
+    await POST(mockRequest);
+    expect(findSimilarArticles).toHaveBeenCalledWith("", 5);
+  });
+
+  it("should handle message with empty parts array", async () => {
+    const { findSimilarArticles } = await import("@/lib/vector-store");
+    vi.mocked(findSimilarArticles).mockResolvedValue([]);
+
+    const mockRequest = new Request("http://localhost:3000/api/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        messages: [{ role: "user", parts: [] }],
+      }),
+    });
+
+    await POST(mockRequest);
+    expect(findSimilarArticles).toHaveBeenCalledWith("", 5);
+  });
+
+  it("should handle message with parts but no text part", async () => {
+    const { findSimilarArticles } = await import("@/lib/vector-store");
+    vi.mocked(findSimilarArticles).mockResolvedValue([]);
+
+    const mockRequest = new Request("http://localhost:3000/api/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        messages: [{ role: "user", parts: [{ type: "image", image: "base64" }] }],
+      }),
+    });
+
+    await POST(mockRequest);
+    expect(findSimilarArticles).toHaveBeenCalledWith("", 5);
+  });
 });
