@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
     getLatestContent,
     convertToModelMessages,
@@ -94,7 +94,9 @@ describe("chat-request-runner", () => {
             const response = new Response(mockStream);
             const validatedResponse = await validateAndReturnStream(response);
             const reader = validatedResponse.body?.getReader();
-            const { value } = await reader!.read();
+            if (!reader) throw new Error("No reader");
+            const { value } = await reader.read();
+            if (!value) throw new Error("No value");
             expect(new TextDecoder().decode(value)).toContain("text-delta");
         });
 
@@ -131,11 +133,13 @@ describe("chat-request-runner", () => {
             const response = new Response(mockStream);
             const validatedResponse = await validateAndReturnStream(response);
             const reader = validatedResponse.body?.getReader();
+            if (!reader) throw new Error("No reader");
 
-            // Read first chunk
-            await reader!.read();
-            // Read second chunk
-            const { value } = await reader!.read();
+            /* Read first chunk */
+            await reader.read();
+            /* Read second chunk */
+            const { value } = await reader.read();
+            if (!value) throw new Error("No value");
             expect(new TextDecoder().decode(value)).toContain("working");
         });
     });
@@ -146,9 +150,11 @@ describe("chat-request-runner", () => {
         });
 
         it("should try the first provider in the chain", async () => {
-            // This is harder to test without full AI SDK mocks, 
-            // but we can at least verify it throws if provider fails
-            const chain = [{ provider: "invalid" as any, modelId: "m1" }];
+            /*
+             * This is harder to test without full AI SDK mocks, 
+             * but we can at least verify it throws if provider fails
+             */
+            const chain = [{ provider: "invalid" as unknown as { id: string }, modelId: "m1" }];
             await expect(executeWithFallback(chain, [], "prompt")).rejects.toThrow();
         });
     });
@@ -156,25 +162,27 @@ describe("chat-request-runner", () => {
     describe("handleError", () => {
         it("should fallback on rate limit (429)", async () => {
             const chain = [
-                { provider: "p1" as any, modelId: "m1" },
-                { provider: "p2" as any, modelId: "m2" }
+                { provider: "p1" as unknown as { id: string }, modelId: "m1" },
+                { provider: "p2" as unknown as { id: string }, modelId: "m2" }
             ];
             const error = { statusCode: 429, message: "Too many requests" };
 
-            // We can't easily mock the recursive call to executeWithFallback in the same file 
-            // but we can verify it doesn't throw a terminal error
+            /*
+             * We can't easily mock the recursive call to executeWithFallback in the same file
+             * but we can verify it doesn't throw a terminal error
+             */
             try {
-                await (handleError as any)(error, chain, [], "prompt");
+                await (handleError as (error: unknown, chain: unknown[], messages: unknown[], prompt: string) => Promise<Response>)(error, chain, [], "prompt");
             } catch (e) {
-                // It might still fail because p2 is invalid, but it shouldn't be a 429 re-thrown
-                expect((e as any).statusCode).not.toBe(429);
+                /* It might still fail because p2 is invalid, but it shouldn't be a 429 re-thrown */
+                expect((e as { statusCode?: number }).statusCode).not.toBe(429);
             }
         });
 
         it("should not fallback on 400 client error", async () => {
-            const chain = [{ provider: "p1" as any, modelId: "m1" }];
+            const chain = [{ provider: "p1" as unknown as { id: string }, modelId: "m1" }];
             const error = { statusCode: 400, message: "Bad Request" };
-            await expect((handleError as any)(error, chain, [], "prompt")).rejects.toThrow("Bad Request");
+            await expect((handleError as (error: unknown, chain: unknown[], messages: unknown[], prompt: string) => Promise<Response>)(error, chain, [], "prompt")).rejects.toThrow("Bad Request");
         });
     });
 
@@ -187,7 +195,7 @@ describe("chat-request-runner", () => {
 
     describe("formatContextString", () => {
         it("should format essays correctly", () => {
-            const results: any[] = [
+            const results: Array<{ id: number; title: string; type: string; contentSnippet: string; publicationName: string }> = [
                 { id: 1, title: "Essay 1", type: "essay", contentSnippet: "Content...", publicationName: "Pub 1" }
             ];
             const output = formatContextString(results);
@@ -205,7 +213,7 @@ describe("chat-request-runner", () => {
 
     describe("convertToModelMessages", () => {
         it("should handle mixed parts correctly", () => {
-            const messages: any[] = [
+            const messages: Array<{ role: string; parts: Array<{ type: string; text: string }> }> = [
                 { role: "user", parts: [{ type: "text", text: "Hello" }, { type: "other", text: "skip" }] }
             ];
             const modelMessages = convertToModelMessages(messages);
