@@ -87,26 +87,28 @@ export async function ingestEntities(config: IngestConfig) {
       allEmbeddings.push(...subEmbeddings);
     }
 
-    console.log("💾 Saving embeddings to database...");
+    const idPropName = config.entityName === "Articles" ? "articleId" : "essayId";
+    const values = validData.map((entity, i) => ({
+      [idPropName]: entity.id,
+      embedding: allEmbeddings[i],
+    }));
 
-    // Save embeddings to database
-    if (validData.length > 0) {
-      const values = validData.map((entity, i) => ({
-        [config.embeddingIdColumn.name]: entity.id,
-        embedding: allEmbeddings[i],
-      }));
-
-      await db
-        .insert(config.embeddingTable)
-        .values(values)
-        .onConflictDoUpdate({
-          target: config.embeddingIdColumn,
-          set: {
-            embedding: sql`excluded.embedding`,
-            updatedAt: sql`now()`,
-          },
-        });
+    console.log(`💾 Saving ${values.length} embeddings to database using property: ${idPropName}...`);
+    if (values.length > 0) {
+      console.log("DEBUG: First value sample keys:", Object.keys(values[0]));
+      console.log("DEBUG: First value sample ID:", (values[0] as Record<string, unknown>)[idPropName]);
     }
+
+    await db
+      .insert(config.embeddingTable)
+      .values(values)
+      .onConflictDoUpdate({
+        target: config.embeddingIdColumn,
+        set: {
+          embedding: sql`excluded.embedding`,
+          updatedAt: sql`now()`,
+        },
+      });
 
     console.log(`✨ Successfully ingested ${validData.length} embeddings.`);
 

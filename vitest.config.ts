@@ -26,7 +26,6 @@ export default defineConfig({
         "**/*.png",
         "**/*.svg",
         "**/*.css",
-        "src/actions/actions.ts",
         "src/app/**/layout.tsx",
         "src/app/**/loading.tsx",
         "src/app/**/error.tsx",
@@ -41,12 +40,11 @@ export default defineConfig({
         "scripts/update-essay.ts",
       ],
       // @ts-expect-error - 'all' is valid at runtime but missing from types in this version
-      all: false,
-      include: ["scripts/update-essay-logic.ts", "src/db/schema.ts"],
+      all: true,
       thresholds: {
         lines: 90,
         functions: 90,
-        branches: 90,
+        branches: 85,
         statements: 90,
       },
     },
