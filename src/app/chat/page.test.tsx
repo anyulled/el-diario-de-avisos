@@ -113,4 +113,11 @@ describe("ChatPage - Component", () => {
     const chatInterface = screen.getByTestId("chat-interface");
     expect(chatInterface).toBeDefined();
   });
+
+  it("uses fallback count when article count is 0", async () => {
+    vi.mocked((await import("@/lib/articles")).getArticleCount).mockResolvedValueOnce(0);
+    const page = await ChatPage();
+    render(page);
+    expect(screen.getByText("Acceso a 22,900+ Artículos")).toBeDefined();
+  });
 });

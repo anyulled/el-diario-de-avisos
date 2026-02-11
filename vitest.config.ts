@@ -19,7 +19,6 @@ export default defineConfig({
         "**/mockData",
         "src/lib/providers/**",
         "src/lib/styles.ts",
-        "src/lib/types.ts",
         "src/db/**",
         "scripts/test_date_parser.sql",
         "**/*.ico",

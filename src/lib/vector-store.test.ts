@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as ai from "./ai";
 import { findSimilarArticles } from "./vector-store";
+import { db } from "@/db";
 
 // Mock the AI module
 vi.mock("./ai", () => ({
@@ -111,6 +112,29 @@ describe("vector-store", () => {
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].id).toBe(1);
       expect(results[0].contentSnippet).toBeDefined();
+    });
+
+    it("should include keyword results for articles", async () => {
+
+      const mockEmbedding = new Array(1536).fill(0.1);
+      vi.mocked(ai.generateEmbedding).mockResolvedValue(mockEmbedding);
+      const mockResult = { id: 2, title: "Keyword Match", date: "2024-01-01", similarity: 0.8 };
+
+      // Better mock for Drizzle's thenable query builder
+      const mockQuery: any = {
+        from: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        then: vi.fn((onFullfilled) => Promise.resolve([mockResult]).then(onFullfilled))
+      };
+
+      vi.mocked(db.select).mockReturnValue(mockQuery);
+
+      const results = await findSimilarArticles("test", 1);
+      expect(results.some(r => r.id === 2)).toBe(true);
     });
   });
 });

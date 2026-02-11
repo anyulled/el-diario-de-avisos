@@ -26,9 +26,9 @@ vi.mock("../src/lib/rtf-content-converter", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
-    eq: vi.fn((a, b) => ({ type: "eq", a, b })),
-    isNull: vi.fn((col) => ({ type: "isNull", col })),
-    sql: vi.fn((strings, ...values) => ({ type: "sql", strings, values })),
+    eq: vi.fn((a: unknown, b: unknown) => ({ type: "eq", a, b })),
+    isNull: vi.fn((col: unknown) => ({ type: "isNull", col })),
+    sql: vi.fn((strings: unknown, ...values: unknown[]) => ({ type: "sql", strings, values })),
 }));
 
 vi.mock("../src/db/schema", () => ({
@@ -59,28 +59,35 @@ import { processRtfContent } from "../src/lib/rtf-content-converter";
 describe("scripts/ingest", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.spyOn(console, "log").mockImplementation(() => { });
-        vi.spyOn(console, "error").mockImplementation(() => { });
+        vi.spyOn(console, "log").mockImplementation(() => {
+            /* Noop */
+        });
+        vi.spyOn(console, "error").mockImplementation(() => {
+            /* Noop */
+        });
     });
 
-    const setupDbMock = (countResult: any[], entityResult?: any[]) => {
-        let callCount = 0;
+    type MockCountResult = Array<{ count?: number }>;
+    type MockEntityResult = Array<{ id: number; title: string; content: Buffer }>;
+
+    const setupDbMock = (countResult: MockCountResult, entityResult?: MockEntityResult) => {
+        const state = { callCount: 0 };
         vi.mocked(db.select).mockImplementation(() => {
-            callCount++;
+            state.callCount++;
             const mockChain = {
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => {
-                    // First call is for count query
-                    if (callCount === 1) {
+                    /* First call is for count query */
+                    if (state.callCount === 1) {
                         return Promise.resolve(countResult);
                     }
-                    // Second call is for entity query (if provided)
+                    /* Second call is for entity query (if provided) */
                     return mockChain;
                 }),
-                limit: vi.fn(() => Promise.resolve(entityResult || [])),
+                limit: vi.fn(() => Promise.resolve(entityResult ?? [])),
             };
-            return mockChain as any;
+            return mockChain as unknown as ReturnType<typeof db.select>;
         });
     };
 
@@ -89,21 +96,21 @@ describe("scripts/ingest", () => {
             values: vi.fn().mockReturnThis(),
             onConflictDoUpdate: vi.fn(() => Promise.resolve()),
         };
-        vi.mocked(db.insert).mockReturnValue(mockChain as any);
+        vi.mocked(db.insert).mockReturnValue(mockChain as unknown as ReturnType<typeof db.insert>);
         return mockChain;
     };
 
     describe("getPendingCounts", () => {
         it("should return pending counts for articles and essays", async () => {
-            let callCount = 0;
+            const state = { callCount: 0 };
             vi.mocked(db.select).mockImplementation(() => {
-                callCount++;
-                const result = callCount === 1 ? [{ count: 5 }] : [{ count: 3 }];
+                state.callCount++;
+                const result = state.callCount === 1 ? [{ count: 5 }] : [{ count: 3 }];
                 return {
                     from: vi.fn().mockReturnThis(),
                     leftJoin: vi.fn().mockReturnThis(),
                     where: vi.fn(() => Promise.resolve(result)),
-                } as any;
+                } as unknown as ReturnType<typeof db.select>;
             });
 
             const result = await getPendingCounts();
@@ -116,7 +123,7 @@ describe("scripts/ingest", () => {
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }) as any);
+            }) as unknown as ReturnType<typeof db.select>);
 
             const result = await getPendingCounts();
 
@@ -128,7 +135,7 @@ describe("scripts/ingest", () => {
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => Promise.resolve([{}])),
-            }) as any);
+            }) as unknown as ReturnType<typeof db.select>);
 
             const result = await getPendingCounts();
 
@@ -141,8 +148,8 @@ describe("scripts/ingest", () => {
             entityName: "Articles",
             entityTable: { id: "articles.id", title: "articles.title", content: "articles.content" },
             embeddingTable: { articleId: "articleEmbeddings.articleId" },
-            entityIdColumn: "articles.id" as any,
-            embeddingIdColumn: "articleEmbeddings.articleId" as any,
+            entityIdColumn: "articles.id" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
+            embeddingIdColumn: "articleEmbeddings.articleId" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
             batchLimit: 500,
             embeddingBatchSize: 100,
         };
@@ -236,8 +243,8 @@ describe("scripts/ingest", () => {
                 entityName: "Essays",
                 entityTable: { id: "essays.id", title: "essays.title", content: "essays.content" },
                 embeddingTable: { essayId: "essayEmbeddings.essayId" },
-                entityIdColumn: "essays.id" as any,
-                embeddingIdColumn: "essayEmbeddings.essayId" as any,
+                entityIdColumn: "essays.id" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
+                embeddingIdColumn: "essayEmbeddings.essayId" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
                 batchLimit: 100,
                 embeddingBatchSize: 100,
             };
@@ -316,27 +323,29 @@ describe("scripts/ingest", () => {
 
     describe("runContinuousMode", () => {
         it("should run ingestion until all entities have embeddings", async () => {
-            let ingestCallCount = 0;
+            const state = { ingestCallCount: 0 };
 
             vi.mocked(db.select).mockImplementation(() => {
-                ingestCallCount++;
-                // First ingest: articles=0, essays=0 (skip both)
-                // First getPendingCounts: articles=5, essays=3 (continue)
-                // Second ingest: articles=0, essays=0 (skip both)
-                // Second getPendingCounts: articles=0, essays=0 (exit)
+                state.ingestCallCount++;
+                /*
+                 * First ingest: articles=0, essays=0 (skip both)
+                 * First getPendingCounts: articles=5, essays=3 (continue)
+                 * Second ingest: articles=0, essays=0 (skip both)
+                 * Second getPendingCounts: articles=0, essays=0 (exit)
+                 */
 
                 const results = [
-                    [{ count: 0 }], // First ingest - articles count
-                    [{ count: 0 }], // First ingest - essays count
-                    [{ count: 5 }], // First getPendingCounts - articles
-                    [{ count: 3 }], // First getPendingCounts - essays
-                    [{ count: 0 }], // Second ingest - articles count
-                    [{ count: 0 }], // Second ingest - essays count
-                    [{ count: 0 }], // Second getPendingCounts - articles
-                    [{ count: 0 }], // Second getPendingCounts - essays
+                    [{ count: 0 }],
+                    [{ count: 0 }],
+                    [{ count: 5 }],
+                    [{ count: 3 }],
+                    [{ count: 0 }],
+                    [{ count: 0 }],
+                    [{ count: 0 }],
+                    [{ count: 0 }],
                 ];
 
-                const result = results[ingestCallCount - 1] || [{ count: 0 }];
+                const result = results[state.ingestCallCount - 1] ?? [{ count: 0 }];
 
                 return {
                     from: vi.fn().mockReturnThis(),

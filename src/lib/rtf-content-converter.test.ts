@@ -52,6 +52,15 @@ describe("rtf-content-converter", () => {
       expect(result).toBe("Hello");
     });
 
+    it("should return empty string for null/undefined content", async () => {
+      expect(await processRtfContent(null)).toBe("");
+    });
+
+    it("should handle plain text with preserveParagraphs: false", async () => {
+      const text = "Para 1\n\nPara 2";
+      expect(await processRtfContent(text, { preserveParagraphs: false })).toBe("Para 1 Para 2");
+    });
+
     it("should handle errors by falling back to raw content", async () => {
       const content = "{\\rtf1 ERROR_PLEASE}";
       const result = await processRtfContent(content);
@@ -81,5 +90,11 @@ describe("rtf-content-converter", () => {
       const result = await processRtfContent(content);
       expect(result).toBe("Año");
     });
+  });
+
+  it("processRtfContent should return empty string for null content", async () => {
+    const { processRtfContent } = await import("./rtf-content-converter");
+    const result = await processRtfContent(null);
+    expect(result).toBe("");
   });
 });

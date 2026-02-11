@@ -56,14 +56,14 @@ export async function getRelevantContext(content: string): Promise<SearchResult[
 export function formatContextString(articles: SearchResult[]): string {
   return articles.length > 0
     ? articles
-        .map((a) => {
-          const linkPath = a.type === "essay" ? `/ensayos/${a.id}` : `/article/${a.id}`;
-          const dateInfo = a.date ? `(${a.date})` : "(Ensayo)";
-          const sourceInfo = a.publicationName ? ` - Fuente: ${a.publicationName}` : "";
-          const contentPreview = a.contentSnippet ? `\n  Contenido: "${a.contentSnippet}"` : "";
-          return `- "${a.title}" ${dateInfo} [${a.type === "essay" ? "Ensayo" : "Artículo"}]${sourceInfo} - Enlace: ${linkPath}${contentPreview}`;
-        })
-        .join("\n\n")
+      .map((a) => {
+        const linkPath = a.type === "essay" ? `/ensayos/${a.id}` : `/article/${a.id}`;
+        const dateInfo = a.date ? `(${a.date})` : "(Ensayo)";
+        const sourceInfo = a.publicationName ? ` - Fuente: ${a.publicationName}` : "";
+        const contentPreview = a.contentSnippet ? `\n  Contenido: "${a.contentSnippet}"` : "";
+        return `- "${a.title}" ${dateInfo} [${a.type === "essay" ? "Ensayo" : "Artículo"}]${sourceInfo} - Enlace: ${linkPath}${contentPreview}`;
+      })
+      .join("\n\n")
     : "";
 }
 
@@ -267,7 +267,7 @@ export async function executeWithFallback(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleError(error: any, chain: ModelConfig[], messages: ModelMessage[], prompt: string): Promise<Response> {
+export async function handleError(error: any, chain: ModelConfig[], messages: ModelMessage[], prompt: string): Promise<Response> {
   const { provider } = chain[0];
   const err = error as { statusCode?: number; code?: string; message?: string };
   console.warn(chalk.yellow(`⚠️ [Warning] Provider ${provider} failed:`), err.message);

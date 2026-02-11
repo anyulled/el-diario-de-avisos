@@ -77,4 +77,34 @@ describe("AIProviderRegistry", () => {
 
     expect(checkHealthSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("should re-check health after cache expiration", async () => {
+    const service = createService();
+    const groqProvider = service["providers"].get("groq");
+    if (!groqProvider) throw new Error("Groq provider not found");
+    const checkHealthSpy = vi.spyOn(groqProvider, "checkHealth").mockResolvedValue(true);
+
+    // Initial check
+    await service.getWorkingModel();
+
+    // Fast-forward time (5 minutes + 1 ms)
+    vi.setSystemTime(Date.now() + 5 * 60 * 1000 + 1);
+
+    await service.getWorkingModel();
+    expect(checkHealthSpy).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
+
+  it("should return the first model if all models are unhealthy", async () => {
+    const service = createService();
+    // Spy on all providers and make them unhealthy
+    service["providers"].forEach(provider => {
+      vi.spyOn(provider, "checkHealth").mockResolvedValue(false);
+    });
+
+    const result = await service.getWorkingModel();
+    expect(result.config.provider).toBe("groq");
+    expect(result.config.modelId).toBe("llama-3.3-70b-versatile");
+  });
 });
