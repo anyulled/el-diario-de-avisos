@@ -5,6 +5,11 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  */
 export function stripHtml(html: string): string {
   return html
+    // Decode common HTML entities to ensure tags are stripped
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
     // Standard HTML tag removal
     .replace(/<[^>]*>/g, " ")
     // Unicode-encoded tags
