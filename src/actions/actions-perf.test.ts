@@ -117,8 +117,10 @@ describe("getArticlesOnThisDay Performance", () => {
     expect(callArgs).toBeDefined();
     expect(callArgs).toHaveProperty("content");
 
-    // Note: We cannot easily verify that content is a SQL expression vs a Column object
-    // in this test environment due to mocking/transpilation complexities with Drizzle's sql tag.
-    // However, we verified in isolation that sql`` produces a SQL object, so the code logic holds.
+    /**
+     * Note: We cannot easily verify that content is a SQL expression vs a Column object
+     * in this test environment due to mocking/transpilation complexities with Drizzle's sql tag.
+     * However, we verified in isolation that sql`` produces a SQL object, so the code logic holds.
+     */
   });
 });
