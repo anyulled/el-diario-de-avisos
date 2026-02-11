@@ -2,10 +2,10 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^2.0.18",
     "@ai-sdk/google": "^3.0.24",
-    "@ai-sdk/groq": "^3.0.21",
+    "@ai-sdk/groq": "^3.0.22",
     "@ai-sdk/moonshotai": "^2.0.3",
     "@ai-sdk/openai": "^3.0.26",
-    "@ai-sdk/react": "^3.0.70",
+    "@ai-sdk/react": "^3.0.81",
     "@cerebras/cerebras_cloud_sdk": "^1.64.1",
     "@google/generative-ai": "^0.24.1",
     "@iarna/rtf-to-html": "^1.1.0",
