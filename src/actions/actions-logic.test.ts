@@ -34,13 +34,16 @@ describe("getArticlesOnThisDay Logic", () => {
     const chain: any = {};
     const methods = ["from", "leftJoin", "where", "orderBy", "limit"];
     methods.forEach((method) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       chain[method] = vi.fn().mockReturnValue(chain);
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     chain.then = (resolve: any) => {
-        resolve(data);
-        return Promise.resolve();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      resolve(data);
+      return Promise.resolve();
     };
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return chain;
   };
 
@@ -48,7 +51,7 @@ describe("getArticlesOnThisDay Logic", () => {
     const mockData = [
       { id: 1, plainText: "Simple text", content: null },
     ];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     (db.select as any).mockReturnValue(createMockChain(mockData));
 
     const result = await getArticlesOnThisDay(1, 1);
@@ -61,7 +64,7 @@ describe("getArticlesOnThisDay Logic", () => {
     const mockData = [
       { id: 2, plainText: null, content: Buffer.from("rtf") },
     ];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     (db.select as any).mockReturnValue(createMockChain(mockData));
 
     const result = await getArticlesOnThisDay(1, 1);
