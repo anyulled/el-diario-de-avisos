@@ -51,7 +51,7 @@ describe("getArticlesOnThisDay Conditional Content Fetch", () => {
   });
 
   it("should fetch content conditionally to avoid large payloads when plainText is available", async () => {
-    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    const mockSelect = vi.mocked(db.select);
     mockSelect.mockReturnValue(createMockChain());
 
     await getArticlesOnThisDay(1, 1);
