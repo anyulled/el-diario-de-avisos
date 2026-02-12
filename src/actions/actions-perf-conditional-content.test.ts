@@ -12,7 +12,7 @@ vi.mock("@/db", () => ({
 
 vi.mock("next/cache", () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <F extends (...args: any[]) => any>(fn: F) => fn,
 }));
 
 vi.mock("@/lib/rtf-content-converter", () => ({
