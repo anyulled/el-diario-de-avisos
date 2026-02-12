@@ -37,7 +37,7 @@ const createMockChain = (): MockChain => {
     chain[method] = vi.fn().mockReturnValue(chain);
   });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  chain.then = (resolve: any) => {
+  chain.then = (resolve: (value: unknown[]) => void) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     resolve([{ id: 1, title: "Test Article", content: Buffer.from("content"), plainText: "text" }]);
     return Promise.resolve();
