@@ -65,11 +65,13 @@ describe("chat-request-runner", () => {
     describe("constructSystemPrompt", () => {
         it("should include context when available", () => {
             const articles = [{
-                id: "1",
+                id: 1,
                 title: "Test Article",
                 contentSnippet: "Snippet",
                 type: "article" as const,
-                score: 0.9
+                score: 0.9,
+                date: "2024-01-01",
+                similarity: 0.9,
             }];
             const prompt = constructSystemPrompt(articles);
             expect(prompt).toContain("Test Article");
@@ -154,7 +156,7 @@ describe("chat-request-runner", () => {
              * This is harder to test without full AI SDK mocks, 
              * but we can at least verify it throws if provider fails
              */
-            const chain = [{ provider: "invalid" as unknown as { id: string }, modelId: "m1" }];
+            const chain = [{ provider: "invalid", modelId: "m1" }];
             await expect(executeWithFallback(chain, [], "prompt")).rejects.toThrow();
         });
     });
@@ -162,8 +164,8 @@ describe("chat-request-runner", () => {
     describe("handleError", () => {
         it("should fallback on rate limit (429)", async () => {
             const chain = [
-                { provider: "p1" as unknown as { id: string }, modelId: "m1" },
-                { provider: "p2" as unknown as { id: string }, modelId: "m2" }
+                { provider: "p1", modelId: "m1" },
+                { provider: "p2", modelId: "m2" }
             ];
             const error = { statusCode: 429, message: "Too many requests" };
 
@@ -180,7 +182,7 @@ describe("chat-request-runner", () => {
         });
 
         it("should not fallback on 400 client error", async () => {
-            const chain = [{ provider: "p1" as unknown as { id: string }, modelId: "m1" }];
+            const chain = [{ provider: "p1", modelId: "m1" }];
             const error = { statusCode: 400, message: "Bad Request" };
             await expect((handleError as (error: unknown, chain: unknown[], messages: unknown[], prompt: string) => Promise<Response>)(error, chain, [], "prompt")).rejects.toThrow("Bad Request");
         });
@@ -195,8 +197,8 @@ describe("chat-request-runner", () => {
 
     describe("formatContextString", () => {
         it("should format essays correctly", () => {
-            const results: Array<{ id: number; title: string; type: string; contentSnippet: string; publicationName: string }> = [
-                { id: 1, title: "Essay 1", type: "essay", contentSnippet: "Content...", publicationName: "Pub 1" }
+            const results = [
+                { id: 1, title: "Essay 1", type: "essay" as const, contentSnippet: "Content...", publicationName: "Pub 1", date: "2024-01-01", similarity: 0.9 }
             ];
             const output = formatContextString(results);
             expect(output).toContain("Ensayo");
@@ -213,8 +215,8 @@ describe("chat-request-runner", () => {
 
     describe("convertToModelMessages", () => {
         it("should handle mixed parts correctly", () => {
-            const messages: Array<{ role: string; parts: Array<{ type: string; text: string }> }> = [
-                { role: "user", parts: [{ type: "text", text: "Hello" }, { type: "other", text: "skip" }] }
+            const messages: Array<{ role: string; parts: Array<{ type: string; text: string }>; content: string }> = [
+                { role: "user", parts: [{ type: "text", text: "Hello" }, { type: "other", text: "skip" }], content: "fallback" }
             ];
             const modelMessages = convertToModelMessages(messages);
             expect(modelMessages[0].content).toHaveLength(1);

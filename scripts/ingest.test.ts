@@ -72,9 +72,11 @@ describe("scripts/ingest", () => {
 
     const setupDbMock = (countResult: MockCountResult, entityResult?: MockEntityResult) => {
         const state = { callCount: 0 };
-        vi.mocked(db.select).mockImplementation(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        vi.mocked(db.select).mockImplementation((): any => {
             state.callCount++;
-            const mockChain = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const mockChain: any = {
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => {
@@ -87,7 +89,8 @@ describe("scripts/ingest", () => {
                 }),
                 limit: vi.fn(() => Promise.resolve(entityResult ?? [])),
             };
-            return mockChain as unknown as ReturnType<typeof db.select>;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return mockChain;
         });
     };
 
@@ -103,14 +106,16 @@ describe("scripts/ingest", () => {
     describe("getPendingCounts", () => {
         it("should return pending counts for articles and essays", async () => {
             const state = { callCount: 0 };
-            vi.mocked(db.select).mockImplementation(() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            vi.mocked(db.select).mockImplementation((): any => {
                 state.callCount++;
                 const result = state.callCount === 1 ? [{ count: 5 }] : [{ count: 3 }];
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return {
                     from: vi.fn().mockReturnThis(),
                     leftJoin: vi.fn().mockReturnThis(),
                     where: vi.fn(() => Promise.resolve(result)),
-                } as unknown as ReturnType<typeof db.select>;
+                } as any;
             });
 
             const result = await getPendingCounts();
@@ -119,11 +124,13 @@ describe("scripts/ingest", () => {
         });
 
         it("should return 0 when no pending entities", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            vi.mocked(db.select).mockImplementation((): any => ({
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }) as unknown as ReturnType<typeof db.select>);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }) as any);
 
             const result = await getPendingCounts();
 
@@ -131,11 +138,13 @@ describe("scripts/ingest", () => {
         });
 
         it("should handle undefined count gracefully", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            vi.mocked(db.select).mockImplementation((): any => ({
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => Promise.resolve([{}])),
-            }) as unknown as ReturnType<typeof db.select>);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }) as any);
 
             const result = await getPendingCounts();
 
@@ -144,7 +153,8 @@ describe("scripts/ingest", () => {
     });
 
     describe("ingestEntities", () => {
-        const mockConfig = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mockConfig: any = {
             entityName: "Articles",
             entityTable: { id: "articles.id", title: "articles.title", content: "articles.content" },
             embeddingTable: { articleId: "articleEmbeddings.articleId" },
@@ -239,7 +249,8 @@ describe("scripts/ingest", () => {
         });
 
         it("should use correct property name for essays", async () => {
-            const essayConfig = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+            const essayConfig: any = {
                 entityName: "Essays",
                 entityTable: { id: "essays.id", title: "essays.title", content: "essays.content" },
                 embeddingTable: { essayId: "essayEmbeddings.essayId" },
@@ -325,7 +336,8 @@ describe("scripts/ingest", () => {
         it("should run ingestion until all entities have embeddings", async () => {
             const state = { ingestCallCount: 0 };
 
-            vi.mocked(db.select).mockImplementation(() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            vi.mocked(db.select).mockImplementation((): any => {
                 state.ingestCallCount++;
                 /*
                  * First ingest: articles=0, essays=0 (skip both)
@@ -347,11 +359,12 @@ describe("scripts/ingest", () => {
 
                 const result = results[state.ingestCallCount - 1] ?? [{ count: 0 }];
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return {
                     from: vi.fn().mockReturnThis(),
                     leftJoin: vi.fn().mockReturnThis(),
                     where: vi.fn(() => Promise.resolve(result)),
-                };
+                } as any;
             });
 
             await runContinuousMode();
@@ -362,11 +375,13 @@ describe("scripts/ingest", () => {
         });
 
         it("should exit immediately if no pending entities", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            vi.mocked(db.select).mockImplementation((): any => ({
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }));
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }) as any);
 
             await runContinuousMode();
 
@@ -386,11 +401,13 @@ describe("scripts/ingest", () => {
         });
 
         it("should run continuous mode when --all flag is present", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            vi.mocked(db.select).mockImplementation((): any => ({
                 from: vi.fn().mockReturnThis(),
                 leftJoin: vi.fn().mockReturnThis(),
                 where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }));
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }) as any);
 
             await runCli(["--all"]);
 
