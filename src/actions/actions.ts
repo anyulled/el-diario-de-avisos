@@ -365,12 +365,14 @@ export async function getArticlesOnThisDay(day: number, month: number) {
   return await unstable_cache(
     async () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { searchVector, plainText, ...columns } = getTableColumns(articles);
+      const { searchVector, plainText, content, ...columns } = getTableColumns(articles);
       const news = await db
         .select({
           ...columns,
           // Optimization: Only fetch the first 500 characters of plainText to avoid fetching large text fields
           plainText: sql<string>`substring(${articles.plainText} from 1 for 500)`,
+          // Optimization: Avoid fetching large content BLOB if plainText is available
+          content: sql<Buffer | null>`CASE WHEN ${articles.plainText} IS NULL THEN ${articles.content} ELSE NULL END`,
           publicationName: publications.name,
         })
         .from(articles)

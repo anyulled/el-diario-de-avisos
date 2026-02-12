@@ -52,3 +52,8 @@
 
 **Learning:** Cached `getEssayById` using `unstable_cache`. Since `essay.content` is a `Buffer` (bytea), it must be manually converted to Base64 before caching and back to Buffer after retrieval, as `unstable_cache` serializes to JSON inefficiently for Buffers.
 **Action:** Always handle Buffer serialization manually when using `unstable_cache` with Drizzle `bytea` columns.
+
+## 2026-02-05 - Conditional Content Fetch
+
+**Learning:** `getArticlesOnThisDay` was fetching the large `content` (bytea) column even when `plainText` was available, wasting bandwidth.
+**Action:** Use conditional SQL fetch `sql<Buffer | null>\`CASE WHEN ${table.plainText} IS NULL THEN ${table.content} ELSE NULL END\`` to avoid transferring large blobs when a lighter alternative exists.
