@@ -86,8 +86,10 @@ describe("vector-store", () => {
       vi.mocked(db.select).mockReturnValue(mockQueryBuilder as unknown as ReturnType<typeof db.select>);
 
       // Improved mock implementation for db.select to handle different types of queries
-      vi.mocked(db.select).mockImplementation(((selection: { content?: unknown } | undefined) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      vi.mocked(db.select).mockImplementation(((selection: any) => {
         // Safe check for content fetch without JSON.stringify circular Drizzle objects
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         const isContentFetch = selection && selection.content !== undefined;
 
         const mockQuery = {
@@ -121,6 +123,7 @@ describe("vector-store", () => {
       const mockResult = { id: 2, title: "Keyword Match", date: "2024-01-01", similarity: 0.8 };
 
       // Better mock for Drizzle's thenable query builder
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockQuery: any = {
         from: vi.fn().mockReturnThis(),
         leftJoin: vi.fn().mockReturnThis(),
