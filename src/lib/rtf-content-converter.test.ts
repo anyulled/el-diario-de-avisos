@@ -24,10 +24,12 @@ describe("rtf-content-converter", () => {
       vi.spyOn(rtfEncodingHandler, "rtfToHtml").mockRejectedValue(new Error("Mock Error"));
 
       const input = "{\\rtf1\\invalid... <b>Bold</b>}";
-      // Expected: "Mock Error" triggers catch block.
-      // Fallback is input string.
-      // stripHtml(input) -> "{\\rtf1\\invalid... Bold }"
-      // Note: stripHtml replaces tags with a space, so <b>Bold</b> becomes " Bold " (condensed to one space by whitespace replacement)
+      /**
+       * Expected: "Mock Error" triggers catch block.
+       * Fallback is input string.
+       * stripHtml(input) -> "{\\rtf1\\invalid... Bold }"
+       * Note: stripHtml replaces tags with a space, so <b>Bold</b> becomes " Bold " (condensed to one space by whitespace replacement)
+       */
       const expected = "{\\rtf1\\invalid... Bold }";
 
       const result = await processRtfContent(input);
