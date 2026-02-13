@@ -10,7 +10,7 @@ import { processRtfContent } from "../src/lib/rtf-content-converter";
 /**
  * Configuration for ingesting different entity types
  */
-interface IngestConfig {
+export interface IngestConfig {
   entityName: string;
   entityTable: typeof articles | typeof essays;
   embeddingTable: typeof articleEmbeddings | typeof essayEmbeddings;

@@ -1,105 +1,215 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
-  getNews,
-  getIntegrantes,
-  getTutores,
-  getDevelopers,
-  getArticleById,
-  getEssays,
-  getEssayById,
-  getArticleSection,
-  getArticlesOnThisDay,
+    getArticlesOnThisDay,
+    getNews,
+    getArticleById,
+    getEssays,
+    getEssayById,
+    getNewsTypes,
+    getPublications,
+    getIntegrantesNames,
+    getTutoresNames,
+    getDevelopersNames,
+    getArticleMetadata,
+    getEssayMetadata,
+    getArticleSection
 } from "./actions";
 import { db } from "@/db";
 
 // Mock setup
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+vi.mock("@/db", () => ({
+  db: {
+    select: vi.fn(),
+  },
+}));
 
-vi.mock("@/db", () => {
-  const mockChain = {
-    from: vi.fn().mockReturnThis(),
-    $dynamic: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    offset: vi.fn().mockReturnThis(),
-    leftJoin: vi.fn().mockReturnThis(),
-    then: vi.fn().mockImplementation((resolve) => resolve([])),
-  };
-  return {
-    db: {
-      select: vi.fn().mockReturnValue(mockChain),
-    },
-  };
-});
+vi.mock("next/cache", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  unstable_cache: (fn: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return fn;
+  },
+}));
 
-vi.mock("@/db/schema", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/db/schema")>();
-  return {
-    ...actual,
-  };
-});
-
-vi.mock("@/lib/date-range", () => ({
-  normalizeDateRange: () => ({ start: null, end: null, isValidRange: true }),
+vi.mock("@/lib/rtf-content-converter", () => ({
+  processRtfContent: vi.fn().mockResolvedValue("extract"),
+  stripHtml: vi.fn((html: string) => html),
 }));
 
 vi.mock("@/lib/news-order", () => ({
-  getNewsOrderBy: () => [],
+  getNewsOrderBy: vi.fn().mockReturnValue([]),
 }));
 
-type MockResult = Record<string, unknown>[];
+vi.mock("@/lib/date-range", () => ({
+  normalizeDateRange: vi.fn().mockReturnValue({ start: null, end: null, isValidRange: false }),
+}));
 
-interface MockChain {
-  from: () => MockChain;
-  $dynamic: () => MockChain;
-  where: () => MockChain;
-  orderBy: () => MockChain;
-  limit: () => MockChain;
-  offset: () => MockChain;
-  leftJoin: () => MockChain;
-  then: (resolve: (val: MockResult) => void, reject: (err: unknown) => void) => Promise<void>;
-}
+// Mock chain
+const createMockChain = (result: unknown[] = [{ count: 10 }]): unknown => {
+  const chain: Record<string, unknown> = {};
+  const methods = ["from", "where", "limit", "offset", "orderBy", "$dynamic", "leftJoin"];
+  methods.forEach((method) => {
+    chain[method] = vi.fn().mockReturnValue(chain);
+  });
 
-describe("getNews Performance", () => {
+  chain.then = (resolve: (value: unknown) => void) => {
+    resolve(result);
+    return Promise.resolve();
+  };
+  return chain;
+};
+
+describe("Server Actions", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("getArticleSection returns section", async () => {
-    const result = await getArticleSection(1);
-    expect(result).toBeUndefined(); // Mock returns empty array[0]
+  describe("getNews", () => {
+    it("should fetch news with pagination", async () => {
+        const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+        // First call for count, second for data
+        mockSelect
+            .mockReturnValueOnce(createMockChain([{ count: 20 }]))
+            .mockReturnValueOnce(createMockChain([{ id: 1, title: "Article 1" }]));
+
+        const result = await getNews({ page: 1 });
+        expect(result.total).toBe(20);
+        expect(result.data).toHaveLength(1);
+    });
   });
 
-  it("should run queries in parallel", async () => {
-    // ... existing test ...
-  });
+  describe("getArticleById", () => {
+    it("should fetch article by id and handle buffer content", async () => {
+        const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+        const mockContent = Buffer.from("test");
+        mockSelect.mockReturnValue(createMockChain([{
+            id: 1,
+            title: "Article 1",
+            content: mockContent,
+            plainText: "text"
+        }]));
 
-  it("getIntegrantes returns data", async () => {
-    const result = await getIntegrantes();
-    expect(result).toBeDefined();
-  });
-
-  it("getTutores returns data", async () => {
-    const result = await getTutores();
-    expect(result).toBeDefined();
-  });
-
-  it("getDevelopers returns data", async () => {
-    const result = await getDevelopers();
-    expect(result).toBeDefined();
-  });
-
-  it("getEssays returns data with fallback groupName", async () => {
-    // Mock db.select().from().leftJoin().then()
-    const mockSelect = db.select as any;
-    mockSelect.mockReturnValueOnce({
-      from: vi.fn().mockReturnThis(),
-      leftJoin: vi.fn().mockReturnThis(),
-      then: vi.fn().mockImplementation((resolve) => resolve([{ id: 1, title: 'Essay', groupName: null }])),
+        const result = await getArticleById(1);
+        expect(result).toBeDefined();
+        if (result) {
+            expect(result.id).toBe(1);
+            // Unstable_cache serialization check handling
+            expect(Buffer.isBuffer(result.content)).toBe(true);
+        }
     });
 
-    const result = await getEssays();
-    expect(result[0].groupName).toBe("Publicación Desconocida");
+    it("should return null if not found", async () => {
+        const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+        mockSelect.mockReturnValue(createMockChain([]));
+
+        const result = await getArticleById(999);
+        expect(result).toBeUndefined();
+    });
+  });
+
+  describe("getEssays", () => {
+      it("should fetch list of essays", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, title: "Essay 1", groupName: "Pub 1" }]));
+
+          const result = await getEssays();
+          expect(result).toHaveLength(1);
+          expect(result[0].title).toBe("Essay 1");
+      });
+  });
+
+  describe("getEssayById", () => {
+      it("should fetch essay by id", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, title: "Essay 1", content: Buffer.from("content") }]));
+
+          const result = await getEssayById(1);
+          expect(result).toBeDefined();
+          if (result) {
+              expect(result.title).toBe("Essay 1");
+          }
+      });
+  });
+
+  describe("Metadata & Lookup Functions", () => {
+      it("should fetch news types", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, name: "Type 1" }]));
+          const result = await getNewsTypes();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch publications", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, name: "Pub 1" }]));
+          const result = await getPublications();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch integrantes names", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ firstName: "John", lastName: "Doe" }]));
+          const result = await getIntegrantesNames();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch tutores names", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ names: "Tutor 1" }]));
+          const result = await getTutoresNames();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch developers names", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ firstName: "Dev", lastName: "One" }]));
+          const result = await getDevelopersNames();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch article metadata", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, title: "Meta" }]));
+          const result = await getArticleMetadata(1);
+          expect(result).toBeDefined();
+      });
+
+      it("should fetch essay metadata", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, title: "Meta" }]));
+          const result = await getEssayMetadata(1);
+          expect(result).toBeDefined();
+      });
+
+      it("should fetch article section", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, name: "Section 1" }]));
+          const result = await getArticleSection(1);
+          expect(result).toBeDefined();
+      });
+  });
+
+  describe("getArticlesOnThisDay Performance", () => {
+    it("should NOT include plainText in return value (optimized)", async () => {
+      const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+      // Mock the data returned by the query
+      const chain = createMockChain([
+        {
+          id: 1,
+          title: "Test",
+          content: Buffer.from("content"),
+          plainText: "some large text",
+          searchVector: "...",
+        },
+      ]);
+
+      mockSelect.mockReturnValue(chain);
+
+      const result = await getArticlesOnThisDay(1, 1);
+
+      // Check the first item
+      expect(result[0]).not.toHaveProperty("plainText");
+    });
   });
 });
