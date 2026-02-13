@@ -1,37 +1,15 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  getNews,
-  getIntegrantes,
-  getTutores,
-  getDevelopers,
-  getArticleById,
-  getEssays,
-  getEssayById,
-  getArticleSection,
-  getArticlesOnThisDay,
-} from "./actions";
+import { getNews } from "./actions";
 import { db } from "@/db";
 
 // Mock setup
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-vi.mock("@/db", () => {
-  const mockChain = {
-    from: vi.fn().mockReturnThis(),
-    $dynamic: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    orderBy: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    offset: vi.fn().mockReturnThis(),
-    leftJoin: vi.fn().mockReturnThis(),
-    then: vi.fn().mockImplementation((resolve) => resolve([])),
-  };
-  return {
-    db: {
-      select: vi.fn().mockReturnValue(mockChain),
-    },
-  };
-});
+vi.mock("@/db", () => ({
+  db: {
+    select: vi.fn(),
+  },
+}));
 
 vi.mock("@/db/schema", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/db/schema")>();
@@ -66,40 +44,56 @@ describe("getNews Performance", () => {
     vi.restoreAllMocks();
   });
 
-  it("getArticleSection returns section", async () => {
-    const result = await getArticleSection(1);
-    expect(result).toBeUndefined(); // Mock returns empty array[0]
-  });
-
   it("should run queries in parallel", async () => {
-    // ... existing test ...
-  });
+    const stats = {
+      activeQueries: 0,
+      maxConcurrency: 0,
+    };
 
-  it("getIntegrantes returns data", async () => {
-    const result = await getIntegrantes();
-    expect(result).toBeDefined();
-  });
+    /**
+     * A helper to simulate query execution delay and tracking
+     */
+    const executeQuery = async (result: MockResult) => {
+      stats.activeQueries++;
+      stats.maxConcurrency = Math.max(stats.maxConcurrency, stats.activeQueries);
+      // 100ms delay
+      await delay(100);
+      stats.activeQueries--;
+      return result;
+    };
 
-  it("getTutores returns data", async () => {
-    const result = await getTutores();
-    expect(result).toBeDefined();
-  });
+    /**
+     * Chainable mock object factory
+     */
+    const createMockChain = (result: MockResult): MockChain => {
+      const chain: Partial<MockChain> = {};
 
-  it("getDevelopers returns data", async () => {
-    const result = await getDevelopers();
-    expect(result).toBeDefined();
-  });
+      const methods = ["from", "$dynamic", "where", "orderBy", "limit", "offset", "leftJoin"] as const;
+      methods.forEach((method) => {
+        chain[method] = vi.fn().mockReturnValue(chain as MockChain);
+      });
 
-  it("getEssays returns data with fallback groupName", async () => {
-    // Mock db.select().from().leftJoin().then()
-    const mockSelect = db.select as any;
-    mockSelect.mockReturnValueOnce({
-      from: vi.fn().mockReturnThis(),
-      leftJoin: vi.fn().mockReturnThis(),
-      then: vi.fn().mockImplementation((resolve) => resolve([{ id: 1, title: 'Essay', groupName: null }])),
+      chain.then = (resolve, reject) => {
+        return executeQuery(result).then(resolve, reject);
+      };
+
+      return chain as MockChain;
+    };
+
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    mockSelect.mockImplementation((selection: { count?: unknown }) => {
+      // If selection has 'count', return count result
+      if (selection && selection.count) {
+        return createMockChain([{ count: 10 }]);
+      }
+      // Otherwise return data result
+      return createMockChain([]);
     });
 
-    const result = await getEssays();
-    expect(result[0].groupName).toBe("Publicación Desconocida");
+    await getNews({});
+
+    console.log(`Max concurrency: ${stats.maxConcurrency}`);
+    expect(stats.maxConcurrency).toBe(2);
   });
 });

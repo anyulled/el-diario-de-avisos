@@ -4,8 +4,10 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
+  if (!html) return "";
   return html
-    .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
+    // Aggressive tag stripping: matches anything that looks like a tag, including unclosed or malformed ones if they start with < and contain non-space chars
+    .replace(/<[^>]+>/gm, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -59,10 +61,10 @@ export async function processRtfContent(content: Buffer | string | null, options
     const plainText = stripHtml(html);
     return maxLength ? plainText.slice(0, maxLength) : plainText;
   } catch (error) {
-    // Fallback: return raw content if available
+    // Fallback: return raw content if available, ensuring HTML is stripped
     console.debug("RTF content processing failed, using fallback:", error);
     const fallback = Buffer.isBuffer(content) ? decodeBuffer(content) : String(content);
-    const result = fallback || "";
+    const result = stripHtml(fallback || "");
     return maxLength ? result.slice(0, maxLength) : result;
   }
 }

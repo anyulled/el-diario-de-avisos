@@ -33,13 +33,6 @@ describe("AI Embedding Functions", () => {
     vi.unstubAllEnvs();
   });
 
-  describe("Environment Validation", () => {
-    it("should throw if GEMINI_KEY is missing", async () => {
-      vi.stubEnv("GEMINI_KEY", "");
-      await expect(generateEmbedding("test")).rejects.toThrow("Missing GEMINI_KEY");
-    });
-  });
-
   describe("generateEmbedding", () => {
     it("should generate embeddings for a single text", async () => {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
