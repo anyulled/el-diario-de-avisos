@@ -52,4 +52,9 @@ describe("normalizeDateRange", () => {
       isValidRange: true,
     });
   });
+
+  it("returns null for non-existent dates", () => {
+    const result = normalizeDateRange({ start: "2024-02-31", end: null });
+    expect(result.start).toBeNull();
+  });
 });

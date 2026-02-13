@@ -87,26 +87,28 @@ export async function ingestEntities(config: IngestConfig) {
       allEmbeddings.push(...subEmbeddings);
     }
 
-    console.log("💾 Saving embeddings to database...");
+    const idPropName = config.entityName === "Articles" ? "articleId" : "essayId";
+    const values = validData.map((entity, i) => ({
+      [idPropName]: entity.id,
+      embedding: allEmbeddings[i],
+    }));
 
-    // Save embeddings to database
-    if (validData.length > 0) {
-      const values = validData.map((entity, i) => ({
-        [config.embeddingIdColumn.name]: entity.id,
-        embedding: allEmbeddings[i],
-      }));
-
-      await db
-        .insert(config.embeddingTable)
-        .values(values)
-        .onConflictDoUpdate({
-          target: config.embeddingIdColumn,
-          set: {
-            embedding: sql`excluded.embedding`,
-            updatedAt: sql`now()`,
-          },
-        });
+    console.log(`💾 Saving ${values.length} embeddings to database using property: ${idPropName}...`);
+    if (values.length > 0) {
+      console.log("DEBUG: First value sample keys:", Object.keys(values[0]));
+      console.log("DEBUG: First value sample ID:", (values[0] as Record<string, unknown>)[idPropName]);
     }
+
+    await db
+      .insert(config.embeddingTable)
+      .values(values)
+      .onConflictDoUpdate({
+        target: config.embeddingIdColumn,
+        set: {
+          embedding: sql`excluded.embedding`,
+          updatedAt: sql`now()`,
+        },
+      });
 
     console.log(`✨ Successfully ingested ${validData.length} embeddings.`);
 
@@ -162,6 +164,59 @@ export async function ingest() {
   await ingestEssays();
 }
 
+/**
+ * Check pending counts for articles and essays
+ */
+export async function getPendingCounts() {
+  const pendingArticles = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(articles)
+    .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
+    .where(isNull(articleEmbeddings.articleId));
+
+  const pendingEssays = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(essays)
+    .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
+    .where(isNull(essayEmbeddings.essayId));
+
+  return {
+    articles: pendingArticles[0]?.count ?? 0,
+    essays: pendingEssays[0]?.count ?? 0,
+  };
+}
+
+/**
+ * Run ingestion in continuous mode until all entities have embeddings
+ */
+export async function runContinuousMode() {
+  console.log("🔄 Running in continuous mode (--all)...");
+  while (true) {
+    await ingest();
+
+    const pending = await getPendingCounts();
+
+    if (pending.articles === 0 && pending.essays === 0) {
+      console.log("✨ All ingestion complete!");
+      break;
+    }
+    console.log("⏳ Continuing to next batch...");
+  }
+}
+
+/**
+ * Main CLI entry point
+ */
+export async function runCli(args: string[]) {
+  const runAll = args.includes("--all");
+
+  if (runAll) {
+    await runContinuousMode();
+  } else {
+    await ingest();
+  }
+}
+
 // Run if called directly
 const isMainModule = () => {
   // Check if running in a CommonJS environment
@@ -178,41 +233,8 @@ const isMainModule = () => {
 };
 
 if (isMainModule()) {
-  const args = process.argv.slice(2);
-  const runAll = args.includes("--all");
-
-  const run = async () => {
-    if (runAll) {
-      console.log("🔄 Running in continuous mode (--all)...");
-      while (true) {
-        // We need to re-check counts inside the loop
-        await ingest();
-
-        // Helper function to check pending count:
-        const pendingArticles = await db
-          .select({ count: sql<number>`count(*)::int` })
-          .from(articles)
-          .leftJoin(articleEmbeddings, eq(articles.id, articleEmbeddings.articleId))
-          .where(isNull(articleEmbeddings.articleId));
-
-        const pendingEssays = await db
-          .select({ count: sql<number>`count(*)::int` })
-          .from(essays)
-          .leftJoin(essayEmbeddings, eq(essays.id, essayEmbeddings.essayId))
-          .where(isNull(essayEmbeddings.essayId));
-
-        if ((pendingArticles[0]?.count ?? 0) === 0 && (pendingEssays[0]?.count ?? 0) === 0) {
-          console.log("✨ All ingestion complete!");
-          break;
-        }
-        console.log("⏳ Continuing to next batch...");
-      }
-    } else {
-      await ingest();
-    }
-  };
-
-  run()
+  runCli(process.argv.slice(2))
     .catch(console.error)
     .finally(() => process.exit());
 }
+

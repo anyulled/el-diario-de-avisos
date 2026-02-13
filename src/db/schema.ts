@@ -1,36 +1,40 @@
 import { sql } from "drizzle-orm";
 import { boolean, customType, index, integer, pgTable, primaryKey, serial, text, timestamp, varchar, vector } from "drizzle-orm/pg-core";
 
-const bytea = customType<{ data: Buffer }>({
+export function decodeBytea(value: unknown): Buffer {
+  if (Buffer.isBuffer(value)) return value;
+  if (typeof value === "string") return Buffer.from(value);
+  /*
+   * Handle object representation from Drizzle when using getTableColumns()
+   * Format: {type: 'Buffer', data: [1, 2, 3, ...]}
+   */
+  if (value && typeof value === "object") {
+    if ("type" in value && "data" in value) {
+      const obj = value as { type: string; data: number[] };
+      if (obj.type.toLowerCase() === "buffer" && Array.isArray(obj.data)) {
+        return Buffer.from(obj.data);
+      }
+    }
+    // Fallback for other object formats
+    if ("data" in value) {
+      const data = (value as { data: unknown }).data;
+      if (Buffer.isBuffer(data)) return data;
+      if (Array.isArray(data)) return Buffer.from(data);
+    }
+  }
+  throw new Error(`Unexpected bytea value type: ${typeof value}`);
+}
+
+export const bytea = customType<{ data: Buffer }>({
   dataType() {
     return "bytea";
   },
   fromDriver(value: unknown): Buffer {
-    if (Buffer.isBuffer(value)) return value;
-    if (typeof value === "string") return Buffer.from(value);
-    /*
-     * Handle object representation from Drizzle when using getTableColumns()
-     * Format: {type: 'Buffer', data: [1, 2, 3, ...]}
-     */
-    if (value && typeof value === "object") {
-      if ("type" in value && "data" in value) {
-        const obj = value as { type: string; data: number[] };
-        if (obj.type === "Buffer" && Array.isArray(obj.data)) {
-          return Buffer.from(obj.data);
-        }
-      }
-      // Fallback for other object formats
-      if ("data" in value) {
-        const data = (value as { data: unknown }).data;
-        if (Buffer.isBuffer(data)) return data;
-        if (Array.isArray(data)) return Buffer.from(data);
-      }
-    }
-    throw new Error(`Unexpected bytea value type: ${typeof value}`);
+    return decodeBytea(value);
   },
 });
 
-const tsvector = customType<{ data: string }>({
+export const tsvector = customType<{ data: string }>({
   dataType() {
     return "tsvector";
   },
