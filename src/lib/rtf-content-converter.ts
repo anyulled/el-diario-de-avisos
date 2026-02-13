@@ -7,19 +7,22 @@ export function stripHtml(html: string): string {
   // eslint-disable-next-line no-restricted-syntax
   let decoded = html;
 
+  const entities: Record<string, string> = {
+    "&lt;": "<",
+    "&gt;": ">",
+    "&amp;": "&",
+    "&nbsp;": " ",
+    "&quot;": '"',
+    "&#39;": "'",
+  };
+
   /**
    * Perform bounded multi-pass decoding to handle double-encoded entities (e.g. &amp;lt;)
-   * without introducing infinite recursion vulnerabilities.
+   * without introducing infinite recursion vulnerabilities via chained replace calls.
    */
   // eslint-disable-next-line no-restricted-syntax
-  for (let i = 0; i < 2; i++) {
-    decoded = decoded
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&amp;/g, "&")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'");
+  for (let i = 0; i < 3; i++) {
+    decoded = decoded.replace(/&(lt|gt|amp|nbsp|quot|#39);/g, (match) => entities[match]);
   }
 
   return decoded
