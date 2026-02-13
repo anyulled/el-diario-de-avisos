@@ -1,5 +1,19 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getArticlesOnThisDay, getNews, getArticleById, getEssays, getEssayById } from "./actions";
+import {
+    getArticlesOnThisDay,
+    getNews,
+    getArticleById,
+    getEssays,
+    getEssayById,
+    getNewsTypes,
+    getPublications,
+    getIntegrantesNames,
+    getTutoresNames,
+    getDevelopersNames,
+    getArticleMetadata,
+    getEssayMetadata,
+    getArticleSection
+} from "./actions";
 import { db } from "@/db";
 
 // Mock setup
@@ -114,6 +128,64 @@ describe("Server Actions", () => {
           if (result) {
               expect(result.title).toBe("Essay 1");
           }
+      });
+  });
+
+  describe("Metadata & Lookup Functions", () => {
+      it("should fetch news types", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, name: "Type 1" }]));
+          const result = await getNewsTypes();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch publications", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, name: "Pub 1" }]));
+          const result = await getPublications();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch integrantes names", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ firstName: "John", lastName: "Doe" }]));
+          const result = await getIntegrantesNames();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch tutores names", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ names: "Tutor 1" }]));
+          const result = await getTutoresNames();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch developers names", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ firstName: "Dev", lastName: "One" }]));
+          const result = await getDevelopersNames();
+          expect(result).toHaveLength(1);
+      });
+
+      it("should fetch article metadata", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, title: "Meta" }]));
+          const result = await getArticleMetadata(1);
+          expect(result).toBeDefined();
+      });
+
+      it("should fetch essay metadata", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, title: "Meta" }]));
+          const result = await getEssayMetadata(1);
+          expect(result).toBeDefined();
+      });
+
+      it("should fetch article section", async () => {
+          const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+          mockSelect.mockReturnValue(createMockChain([{ id: 1, name: "Section 1" }]));
+          const result = await getArticleSection(1);
+          expect(result).toBeDefined();
       });
   });
 

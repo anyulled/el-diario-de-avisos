@@ -4,15 +4,23 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
-  // Decode common HTML entities first to ensure tags are recognized
-  const decoded = html
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    // Decode ampersand last to avoid double-unescaping
-    .replace(/&amp;/g, "&");
+  // eslint-disable-next-line no-restricted-syntax
+  let decoded = html;
+
+  /**
+   * Perform bounded multi-pass decoding to handle double-encoded entities (e.g. &amp;lt;)
+   * without introducing infinite recursion vulnerabilities.
+   */
+  // eslint-disable-next-line no-restricted-syntax
+  for (let i = 0; i < 2; i++) {
+    decoded = decoded
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+  }
 
   return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
