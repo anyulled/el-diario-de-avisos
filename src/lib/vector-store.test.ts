@@ -121,6 +121,7 @@ describe("vector-store", () => {
       const mockResult = { id: 2, title: "Keyword Match", date: "2024-01-01", similarity: 0.8 };
 
       // Better mock for Drizzle's thenable query builder
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mockQuery: any = {
         from: vi.fn().mockReturnThis(),
         leftJoin: vi.fn().mockReturnThis(),

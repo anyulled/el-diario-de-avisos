@@ -8,10 +8,11 @@ export function stripHtml(html: string): string {
   const decoded = html
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
     .replace(/&nbsp;/g, " ")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    // Decode ampersand last to avoid double-unescaping
+    .replace(/&amp;/g, "&");
 
   return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
