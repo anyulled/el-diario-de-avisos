@@ -22,7 +22,10 @@ export function stripHtml(html: string): string {
    */
   // eslint-disable-next-line no-restricted-syntax
   for (let i = 0; i < 3; i++) {
-    decoded = decoded.replace(/&(lt|gt|amp|nbsp|quot|#39);/g, (match) => entities[match]);
+    decoded = decoded
+      .replace(/&(lt|gt|amp|nbsp|quot|#39);/g, (match) => entities[match])
+      .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)));
   }
 
   return decoded
