@@ -1,53 +1,46 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-    getPendingCounts,
-    ingest,
-    ingestArticles,
-    ingestEntities,
-    ingestEssays,
-    runCli,
-    runContinuousMode,
-} from "./ingest";
+import { getPendingCounts, ingest, ingestArticles, ingestEntities, ingestEssays, runCli, runContinuousMode } from "./ingest";
 
 // Mock dependencies
 vi.mock("../src/db", () => ({
-    db: {
-        select: vi.fn(),
-        insert: vi.fn(),
-    },
+  db: {
+    select: vi.fn(),
+    insert: vi.fn(),
+  },
 }));
 
 vi.mock("../src/lib/ai", () => ({
-    generateEmbeddingsBatch: vi.fn(),
+  generateEmbeddingsBatch: vi.fn(),
 }));
 
 vi.mock("../src/lib/rtf-content-converter", () => ({
-    processRtfContent: vi.fn(),
+  processRtfContent: vi.fn(),
 }));
 
 vi.mock("drizzle-orm", () => ({
-    eq: vi.fn((a: unknown, b: unknown) => ({ type: "eq", a, b })),
-    isNull: vi.fn((col: unknown) => ({ type: "isNull", col })),
-    sql: vi.fn((strings: unknown, ...values: unknown[]) => ({ type: "sql", strings, values })),
+  eq: vi.fn((a: unknown, b: unknown) => ({ type: "eq", a, b })),
+  isNull: vi.fn((col: unknown) => ({ type: "isNull", col })),
+  sql: vi.fn((strings: unknown, ...values: unknown[]) => ({ type: "sql", strings, values })),
 }));
 
 vi.mock("../src/db/schema", () => ({
-    articles: {
-        id: "articles.id",
-        title: "articles.title",
-        content: "articles.content",
-    },
-    essays: {
-        id: "essays.id",
-        title: "essays.title",
-        content: "essays.content",
-    },
-    articleEmbeddings: {
-        articleId: "articleEmbeddings.articleId",
-    },
-    essayEmbeddings: {
-        essayId: "essayEmbeddings.essayId",
-    },
+  articles: {
+    id: "articles.id",
+    title: "articles.title",
+    content: "articles.content",
+  },
+  essays: {
+    id: "essays.id",
+    title: "essays.title",
+    content: "essays.content",
+  },
+  articleEmbeddings: {
+    articleId: "articleEmbeddings.articleId",
+  },
+  essayEmbeddings: {
+    essayId: "essayEmbeddings.essayId",
+  },
 }));
 
 // Import mocked modules
@@ -55,355 +48,346 @@ import { db } from "../src/db";
 import { generateEmbeddingsBatch } from "../src/lib/ai";
 import { processRtfContent } from "../src/lib/rtf-content-converter";
 
-
 describe("scripts/ingest", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        vi.spyOn(console, "log").mockImplementation(() => {
-            /* Noop */
-        });
-        vi.spyOn(console, "error").mockImplementation(() => {
-            /* Noop */
-        });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "log").mockImplementation(() => {
+      /* Noop */
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {
+      /* Noop */
+    });
+  });
+
+  type MockCountResult = Array<{ count?: number }>;
+  type MockEntityResult = Array<{ id: number; title: string; content: Buffer }>;
+
+  const setupDbMock = (countResult: MockCountResult, entityResult?: MockEntityResult) => {
+    const state = { callCount: 0 };
+    vi.mocked(db.select).mockImplementation(() => {
+      state.callCount++;
+      const mockChain = {
+        from: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn(() => {
+          /* First call is for count query */
+          if (state.callCount === 1) {
+            return Promise.resolve(countResult);
+          }
+          /* Second call is for entity query (if provided) */
+          return mockChain;
+        }),
+        limit: vi.fn(() => Promise.resolve(entityResult ?? [])),
+      };
+      return mockChain as unknown as ReturnType<typeof db.select>;
+    });
+  };
+
+  const setupInsertMock = () => {
+    const mockChain = {
+      values: vi.fn().mockReturnThis(),
+      onConflictDoUpdate: vi.fn(() => Promise.resolve()),
+    };
+    vi.mocked(db.insert).mockReturnValue(mockChain as unknown as ReturnType<typeof db.insert>);
+    return mockChain;
+  };
+
+  describe("getPendingCounts", () => {
+    it("should return pending counts for articles and essays", async () => {
+      const state = { callCount: 0 };
+      vi.mocked(db.select).mockImplementation(() => {
+        state.callCount++;
+        const result = state.callCount === 1 ? [{ count: 5 }] : [{ count: 3 }];
+        return {
+          from: vi.fn().mockReturnThis(),
+          leftJoin: vi.fn().mockReturnThis(),
+          where: vi.fn(() => Promise.resolve(result)),
+        } as unknown as ReturnType<typeof db.select>;
+      });
+
+      const result = await getPendingCounts();
+
+      expect(result).toEqual({ articles: 5, essays: 3 });
     });
 
-    type MockCountResult = Array<{ count?: number }>;
-    type MockEntityResult = Array<{ id: number; title: string; content: Buffer }>;
+    it("should return 0 when no pending entities", async () => {
+      vi.mocked(db.select).mockImplementation(
+        () =>
+          ({
+            from: vi.fn().mockReturnThis(),
+            leftJoin: vi.fn().mockReturnThis(),
+            where: vi.fn(() => Promise.resolve([{ count: 0 }])),
+          }) as unknown as ReturnType<typeof db.select>,
+      );
 
-    const setupDbMock = (countResult: MockCountResult, entityResult?: MockEntityResult) => {
-        const state = { callCount: 0 };
-        vi.mocked(db.select).mockImplementation(() => {
-            state.callCount++;
-            const mockChain = {
-                from: vi.fn().mockReturnThis(),
-                leftJoin: vi.fn().mockReturnThis(),
-                where: vi.fn(() => {
-                    /* First call is for count query */
-                    if (state.callCount === 1) {
-                        return Promise.resolve(countResult);
-                    }
-                    /* Second call is for entity query (if provided) */
-                    return mockChain;
-                }),
-                limit: vi.fn(() => Promise.resolve(entityResult ?? [])),
-            };
-            return mockChain as unknown as ReturnType<typeof db.select>;
-        });
+      const result = await getPendingCounts();
+
+      expect(result).toEqual({ articles: 0, essays: 0 });
+    });
+
+    it("should handle undefined count gracefully", async () => {
+      vi.mocked(db.select).mockImplementation(
+        () =>
+          ({
+            from: vi.fn().mockReturnThis(),
+            leftJoin: vi.fn().mockReturnThis(),
+            where: vi.fn(() => Promise.resolve([{}])),
+          }) as unknown as ReturnType<typeof db.select>,
+      );
+
+      const result = await getPendingCounts();
+
+      expect(result).toEqual({ articles: 0, essays: 0 });
+    });
+  });
+
+  describe("ingestEntities", () => {
+    const mockConfig = {
+      entityName: "Articles",
+      entityTable: { id: "articles.id", title: "articles.title", content: "articles.content" } as any,
+      embeddingTable: { articleId: "articleEmbeddings.articleId" } as any,
+      entityIdColumn: "articles.id" as any,
+      embeddingIdColumn: "articleEmbeddings.articleId" as any,
+      batchLimit: 500,
+      embeddingBatchSize: 100,
     };
 
-    const setupInsertMock = () => {
-        const mockChain = {
-            values: vi.fn().mockReturnThis(),
-            onConflictDoUpdate: vi.fn(() => Promise.resolve()),
-        };
-        vi.mocked(db.insert).mockReturnValue(mockChain as unknown as ReturnType<typeof db.insert>);
-        return mockChain;
-    };
+    it("should skip ingestion when all entities have embeddings", async () => {
+      setupDbMock([{ count: 0 }]);
 
-    describe("getPendingCounts", () => {
-        it("should return pending counts for articles and essays", async () => {
-            const state = { callCount: 0 };
-            vi.mocked(db.select).mockImplementation(() => {
-                state.callCount++;
-                const result = state.callCount === 1 ? [{ count: 5 }] : [{ count: 3 }];
-                return {
-                    from: vi.fn().mockReturnThis(),
-                    leftJoin: vi.fn().mockReturnThis(),
-                    where: vi.fn(() => Promise.resolve(result)),
-                } as unknown as ReturnType<typeof db.select>;
-            });
+      await ingestEntities(mockConfig);
 
-            const result = await getPendingCounts();
-
-            expect(result).toEqual({ articles: 5, essays: 3 });
-        });
-
-        it("should return 0 when no pending entities", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
-                from: vi.fn().mockReturnThis(),
-                leftJoin: vi.fn().mockReturnThis(),
-                where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }) as unknown as ReturnType<typeof db.select>);
-
-            const result = await getPendingCounts();
-
-            expect(result).toEqual({ articles: 0, essays: 0 });
-        });
-
-        it("should handle undefined count gracefully", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
-                from: vi.fn().mockReturnThis(),
-                leftJoin: vi.fn().mockReturnThis(),
-                where: vi.fn(() => Promise.resolve([{}])),
-            }) as unknown as ReturnType<typeof db.select>);
-
-            const result = await getPendingCounts();
-
-            expect(result).toEqual({ articles: 0, essays: 0 });
-        });
+      expect(console.log).toHaveBeenCalledWith("✅ All articles already have embeddings.");
     });
 
-    describe("ingestEntities", () => {
-        const mockConfig = {
-            entityName: "Articles",
-            entityTable: { id: "articles.id", title: "articles.title", content: "articles.content" },
-            embeddingTable: { articleId: "articleEmbeddings.articleId" },
-            entityIdColumn: "articles.id" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
-            embeddingIdColumn: "articleEmbeddings.articleId" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
-            batchLimit: 500,
-            embeddingBatchSize: 100,
-        };
+    it("should process entities without embeddings successfully", async () => {
+      setupDbMock(
+        [{ count: 2 }],
+        [
+          { id: 1, title: "Article 1", content: Buffer.from("Content 1") },
+          { id: 2, title: "Article 2", content: Buffer.from("Content 2") },
+        ],
+      );
+      setupInsertMock();
 
-        it("should skip ingestion when all entities have embeddings", async () => {
-            setupDbMock([{ count: 0 }]);
+      vi.mocked(processRtfContent).mockResolvedValue("Processed content");
+      vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1), new Array(1536).fill(0.2)]);
 
-            await ingestEntities(mockConfig);
+      await ingestEntities(mockConfig);
 
-            expect(console.log).toHaveBeenCalledWith("✅ All articles already have embeddings.");
-        });
-
-        it("should process entities without embeddings successfully", async () => {
-            setupDbMock(
-                [{ count: 2 }],
-                [
-                    { id: 1, title: "Article 1", content: Buffer.from("Content 1") },
-                    { id: 2, title: "Article 2", content: Buffer.from("Content 2") },
-                ]
-            );
-            setupInsertMock();
-
-            vi.mocked(processRtfContent).mockResolvedValue("Processed content");
-            vi.mocked(generateEmbeddingsBatch).mockResolvedValue([
-                new Array(1536).fill(0.1),
-                new Array(1536).fill(0.2),
-            ]);
-
-            await ingestEntities(mockConfig);
-
-            expect(vi.mocked(processRtfContent)).toHaveBeenCalledTimes(2);
-            expect(vi.mocked(generateEmbeddingsBatch)).toHaveBeenCalledTimes(1);
-            expect(vi.mocked(db.insert)).toHaveBeenCalled();
-            expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Successfully ingested"));
-        });
-
-        it("should handle no valid content in batch", async () => {
-            setupDbMock([{ count: 1 }], [{ id: 1, title: "Article 1", content: Buffer.from("") }]);
-
-            vi.mocked(processRtfContent).mockResolvedValue("   ");
-
-            await ingestEntities(mockConfig);
-
-            expect(console.log).toHaveBeenCalledWith("⚠️ No valid content found in this batch.");
-            expect(vi.mocked(generateEmbeddingsBatch)).not.toHaveBeenCalled();
-        });
-
-        it("should handle embedding generation errors gracefully", async () => {
-            setupDbMock([{ count: 1 }], [{ id: 1, title: "Article 1", content: Buffer.from("Content") }]);
-
-            vi.mocked(processRtfContent).mockResolvedValue("Valid content");
-            vi.mocked(generateEmbeddingsBatch).mockRejectedValue(new Error("API Error"));
-
-            await ingestEntities(mockConfig);
-
-            expect(console.error).toHaveBeenCalledWith(
-                expect.stringContaining("Articles ingestion failed"),
-                expect.any(Error)
-            );
-        });
-
-        it("should process embeddings in sub-batches", async () => {
-            const largeConfig = { ...mockConfig, embeddingBatchSize: 2 };
-
-            setupDbMock(
-                [{ count: 5 }],
-                [
-                    { id: 1, title: "A1", content: Buffer.from("C1") },
-                    { id: 2, title: "A2", content: Buffer.from("C2") },
-                    { id: 3, title: "A3", content: Buffer.from("C3") },
-                    { id: 4, title: "A4", content: Buffer.from("C4") },
-                    { id: 5, title: "A5", content: Buffer.from("C5") },
-                ]
-            );
-            setupInsertMock();
-
-            vi.mocked(processRtfContent).mockResolvedValue("Processed content");
-            vi.mocked(generateEmbeddingsBatch).mockResolvedValue([
-                new Array(1536).fill(0.1),
-                new Array(1536).fill(0.2),
-            ]);
-
-            await ingestEntities(largeConfig);
-
-            // Should be called 3 times: ceil(5/2) = 3
-            expect(vi.mocked(generateEmbeddingsBatch)).toHaveBeenCalledTimes(3);
-        });
-
-        it("should use correct property name for essays", async () => {
-            const essayConfig = {
-                entityName: "Essays",
-                entityTable: { id: "essays.id", title: "essays.title", content: "essays.content" },
-                embeddingTable: { essayId: "essayEmbeddings.essayId" },
-                entityIdColumn: "essays.id" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
-                embeddingIdColumn: "essayEmbeddings.essayId" as unknown as Parameters<typeof import("drizzle-orm").eq>[0],
-                batchLimit: 100,
-                embeddingBatchSize: 100,
-            };
-
-            setupDbMock([{ count: 1 }], [{ id: 1, title: "Essay 1", content: Buffer.from("Content") }]);
-            setupInsertMock();
-
-            vi.mocked(processRtfContent).mockResolvedValue("Processed content");
-            vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1)]);
-
-            await ingestEntities(essayConfig);
-
-            expect(console.log).toHaveBeenCalledWith(expect.stringContaining("property: essayId"));
-        });
-
-        it("should show remaining count when batch is incomplete", async () => {
-            setupDbMock([{ count: 10 }], [{ id: 1, title: "Article 1", content: Buffer.from("Content") }]);
-            setupInsertMock();
-
-            vi.mocked(processRtfContent).mockResolvedValue("Processed content");
-            vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1)]);
-
-            await ingestEntities(mockConfig);
-
-            expect(console.log).toHaveBeenCalledWith(
-                expect.stringContaining("Remaining articles without embeddings: 9")
-            );
-        });
-
-        it("should show completion message when all entities processed", async () => {
-            setupDbMock([{ count: 1 }], [{ id: 1, title: "Article 1", content: Buffer.from("Content") }]);
-            setupInsertMock();
-
-            vi.mocked(processRtfContent).mockResolvedValue("Processed content");
-            vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1)]);
-
-            await ingestEntities(mockConfig);
-
-            expect(console.log).toHaveBeenCalledWith(
-                expect.stringContaining("All articles now have embeddings!")
-            );
-        });
+      expect(vi.mocked(processRtfContent)).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(generateEmbeddingsBatch)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(db.insert)).toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Successfully ingested"));
     });
 
-    describe("ingestArticles", () => {
-        it("should call ingestEntities with correct article configuration", async () => {
-            setupDbMock([{ count: 0 }]);
+    it("should handle no valid content in batch", async () => {
+      setupDbMock([{ count: 1 }], [{ id: 1, title: "Article 1", content: Buffer.from("") }]);
 
-            await ingestArticles();
+      vi.mocked(processRtfContent).mockResolvedValue("   ");
 
-            expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
-        });
+      await ingestEntities(mockConfig);
+
+      expect(console.log).toHaveBeenCalledWith("⚠️ No valid content found in this batch.");
+      expect(vi.mocked(generateEmbeddingsBatch)).not.toHaveBeenCalled();
     });
 
-    describe("ingestEssays", () => {
-        it("should call ingestEntities with correct essay configuration", async () => {
-            setupDbMock([{ count: 0 }]);
+    it("should handle embedding generation errors gracefully", async () => {
+      setupDbMock([{ count: 1 }], [{ id: 1, title: "Article 1", content: Buffer.from("Content") }]);
 
-            await ingestEssays();
+      vi.mocked(processRtfContent).mockResolvedValue("Valid content");
+      vi.mocked(generateEmbeddingsBatch).mockRejectedValue(new Error("API Error"));
 
-            expect(console.log).toHaveBeenCalledWith("🚀 Starting Essays Ingestion...");
-        });
+      await ingestEntities(mockConfig);
+
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Articles ingestion failed"), expect.any(Error));
     });
 
-    describe("ingest", () => {
-        it("should call both ingestArticles and ingestEssays in sequence", async () => {
-            setupDbMock([{ count: 0 }]);
+    it("should process embeddings in sub-batches", async () => {
+      const largeConfig = { ...mockConfig, embeddingBatchSize: 2 };
 
-            await ingest();
+      setupDbMock(
+        [{ count: 5 }],
+        [
+          { id: 1, title: "A1", content: Buffer.from("C1") },
+          { id: 2, title: "A2", content: Buffer.from("C2") },
+          { id: 3, title: "A3", content: Buffer.from("C3") },
+          { id: 4, title: "A4", content: Buffer.from("C4") },
+          { id: 5, title: "A5", content: Buffer.from("C5") },
+        ],
+      );
+      setupInsertMock();
 
-            expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
-            expect(console.log).toHaveBeenCalledWith("--------------------------------");
-            expect(console.log).toHaveBeenCalledWith("🚀 Starting Essays Ingestion...");
-        });
+      vi.mocked(processRtfContent).mockResolvedValue("Processed content");
+      vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1), new Array(1536).fill(0.2)]);
+
+      await ingestEntities(largeConfig);
+
+      // Should be called 3 times: ceil(5/2) = 3
+      expect(vi.mocked(generateEmbeddingsBatch)).toHaveBeenCalledTimes(3);
     });
 
-    describe("runContinuousMode", () => {
-        it("should run ingestion until all entities have embeddings", async () => {
-            const state = { ingestCallCount: 0 };
+    it("should use correct property name for essays", async () => {
+      const essayConfig = {
+        entityName: "Essays",
+        entityTable: { id: "essays.id", title: "essays.title", content: "essays.content" } as any,
+        embeddingTable: { essayId: "essayEmbeddings.essayId" } as any,
+        entityIdColumn: "essays.id" as any,
+        embeddingIdColumn: "essayEmbeddings.essayId" as any,
+        batchLimit: 100,
+        embeddingBatchSize: 100,
+      };
 
-            vi.mocked(db.select).mockImplementation(() => {
-                state.ingestCallCount++;
-                /*
-                 * First ingest: articles=0, essays=0 (skip both)
-                 * First getPendingCounts: articles=5, essays=3 (continue)
-                 * Second ingest: articles=0, essays=0 (skip both)
-                 * Second getPendingCounts: articles=0, essays=0 (exit)
-                 */
+      setupDbMock([{ count: 1 }], [{ id: 1, title: "Essay 1", content: Buffer.from("Content") }]);
+      setupInsertMock();
 
-                const results = [
-                    [{ count: 0 }],
-                    [{ count: 0 }],
-                    [{ count: 5 }],
-                    [{ count: 3 }],
-                    [{ count: 0 }],
-                    [{ count: 0 }],
-                    [{ count: 0 }],
-                    [{ count: 0 }],
-                ];
+      vi.mocked(processRtfContent).mockResolvedValue("Processed content");
+      vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1)]);
 
-                const result = results[state.ingestCallCount - 1] ?? [{ count: 0 }];
+      await ingestEntities(essayConfig);
 
-                return {
-                    from: vi.fn().mockReturnThis(),
-                    leftJoin: vi.fn().mockReturnThis(),
-                    where: vi.fn(() => Promise.resolve(result)),
-                };
-            });
-
-            await runContinuousMode();
-
-            expect(console.log).toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
-            expect(console.log).toHaveBeenCalledWith("⏳ Continuing to next batch...");
-            expect(console.log).toHaveBeenCalledWith("✨ All ingestion complete!");
-        });
-
-        it("should exit immediately if no pending entities", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
-                from: vi.fn().mockReturnThis(),
-                leftJoin: vi.fn().mockReturnThis(),
-                where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }));
-
-            await runContinuousMode();
-
-            expect(console.log).toHaveBeenCalledWith("✨ All ingestion complete!");
-            expect(console.log).not.toHaveBeenCalledWith("⏳ Continuing to next batch...");
-        });
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("property: essayId"));
     });
 
-    describe("runCli", () => {
-        it("should run normal mode when no --all flag", async () => {
-            setupDbMock([{ count: 0 }]);
+    it("should show remaining count when batch is incomplete", async () => {
+      setupDbMock([{ count: 10 }], [{ id: 1, title: "Article 1", content: Buffer.from("Content") }]);
+      setupInsertMock();
 
-            await runCli([]);
+      vi.mocked(processRtfContent).mockResolvedValue("Processed content");
+      vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1)]);
 
-            expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
-            expect(console.log).not.toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
-        });
+      await ingestEntities(mockConfig);
 
-        it("should run continuous mode when --all flag is present", async () => {
-            vi.mocked(db.select).mockImplementation(() => ({
-                from: vi.fn().mockReturnThis(),
-                leftJoin: vi.fn().mockReturnThis(),
-                where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-            }));
-
-            await runCli(["--all"]);
-
-            expect(console.log).toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
-        });
-
-        it("should handle other arguments gracefully", async () => {
-            setupDbMock([{ count: 0 }]);
-
-            await runCli(["--verbose", "--debug"]);
-
-            expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
-            expect(console.log).not.toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
-        });
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Remaining articles without embeddings: 9"));
     });
+
+    it("should show completion message when all entities processed", async () => {
+      setupDbMock([{ count: 1 }], [{ id: 1, title: "Article 1", content: Buffer.from("Content") }]);
+      setupInsertMock();
+
+      vi.mocked(processRtfContent).mockResolvedValue("Processed content");
+      vi.mocked(generateEmbeddingsBatch).mockResolvedValue([new Array(1536).fill(0.1)]);
+
+      await ingestEntities(mockConfig);
+
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("All articles now have embeddings!"));
+    });
+  });
+
+  describe("ingestArticles", () => {
+    it("should call ingestEntities with correct article configuration", async () => {
+      setupDbMock([{ count: 0 }]);
+
+      await ingestArticles();
+
+      expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
+    });
+  });
+
+  describe("ingestEssays", () => {
+    it("should call ingestEntities with correct essay configuration", async () => {
+      setupDbMock([{ count: 0 }]);
+
+      await ingestEssays();
+
+      expect(console.log).toHaveBeenCalledWith("🚀 Starting Essays Ingestion...");
+    });
+  });
+
+  describe("ingest", () => {
+    it("should call both ingestArticles and ingestEssays in sequence", async () => {
+      setupDbMock([{ count: 0 }]);
+
+      await ingest();
+
+      expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
+      expect(console.log).toHaveBeenCalledWith("--------------------------------");
+      expect(console.log).toHaveBeenCalledWith("🚀 Starting Essays Ingestion...");
+    });
+  });
+
+  describe("runContinuousMode", () => {
+    it("should run ingestion until all entities have embeddings", async () => {
+      const state = { ingestCallCount: 0 };
+
+      vi.mocked(db.select).mockImplementation(() => {
+        state.ingestCallCount++;
+        /*
+         * First ingest: articles=0, essays=0 (skip both)
+         * First getPendingCounts: articles=5, essays=3 (continue)
+         * Second ingest: articles=0, essays=0 (skip both)
+         * Second getPendingCounts: articles=0, essays=0 (exit)
+         */
+
+        const results = [[{ count: 0 }], [{ count: 0 }], [{ count: 5 }], [{ count: 3 }], [{ count: 0 }], [{ count: 0 }], [{ count: 0 }], [{ count: 0 }]];
+
+        const result = results[state.ingestCallCount - 1] ?? [{ count: 0 }];
+
+        return {
+          from: vi.fn().mockReturnThis(),
+          leftJoin: vi.fn().mockReturnThis(),
+          where: vi.fn(() => Promise.resolve(result)),
+        } as any;
+      });
+
+      await runContinuousMode();
+
+      expect(console.log).toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
+      expect(console.log).toHaveBeenCalledWith("⏳ Continuing to next batch...");
+      expect(console.log).toHaveBeenCalledWith("✨ All ingestion complete!");
+    });
+
+    it("should exit immediately if no pending entities", async () => {
+      vi.mocked(db.select).mockImplementation(
+        () =>
+          ({
+            from: vi.fn().mockReturnThis(),
+            leftJoin: vi.fn().mockReturnThis(),
+            where: vi.fn(() => Promise.resolve([{ count: 0 }])),
+          }) as any,
+      );
+
+      await runContinuousMode();
+
+      expect(console.log).toHaveBeenCalledWith("✨ All ingestion complete!");
+      expect(console.log).not.toHaveBeenCalledWith("⏳ Continuing to next batch...");
+    });
+  });
+
+  describe("runCli", () => {
+    it("should run normal mode when no --all flag", async () => {
+      setupDbMock([{ count: 0 }]);
+
+      await runCli([]);
+
+      expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
+      expect(console.log).not.toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
+    });
+
+    it("should run continuous mode when --all flag is present", async () => {
+      vi.mocked(db.select).mockImplementation(
+        () =>
+          ({
+            from: vi.fn().mockReturnThis(),
+            leftJoin: vi.fn().mockReturnThis(),
+            where: vi.fn(() => Promise.resolve([{ count: 0 }])),
+          }) as any,
+      );
+
+      await runCli(["--all"]);
+
+      expect(console.log).toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
+    });
+
+    it("should handle other arguments gracefully", async () => {
+      setupDbMock([{ count: 0 }]);
+
+      await runCli(["--verbose", "--debug"]);
+
+      expect(console.log).toHaveBeenCalledWith("🚀 Starting Articles Ingestion...");
+      expect(console.log).not.toHaveBeenCalledWith("🔄 Running in continuous mode (--all)...");
+    });
+  });
 });
+
+/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
