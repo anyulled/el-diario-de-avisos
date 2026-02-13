@@ -3,7 +3,6 @@ import { articleEmbeddings, articles, essayEmbeddings, essays, publications } fr
 import { eq, inArray, sql } from "drizzle-orm";
 import { generateEmbedding } from "./ai";
 import { processRtfContent, stripHtml } from "./rtf-content-converter";
-import chalk from "chalk";
 
 export interface SearchResult {
   id: number;
@@ -110,8 +109,6 @@ async function fetchEssayContent(ids: number[]): Promise<Map<number, Buffer | nu
 
 // Main hybrid search function
 export async function findSimilarArticles(query: string, limit = 5): Promise<SearchResult[]> {
-  console.log(chalk.gray(`🔍 [Search] Hybrid query: "${query}"`));
-
   // Generate embedding once for reuse in both vector searches
   const embedding = await generateEmbedding(query);
 
@@ -121,12 +118,6 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
     findVectorEssays(embedding, limit),
     findKeywordArticles(query, 10),
   ]);
-
-  console.log(
-    chalk.magenta(`   - Vector Articles: ${vectorResults.length}`),
-    chalk.magenta(`| Vector Essays: ${essayResults.length}`),
-    chalk.yellow(`| Keyword Search: ${keywordResults.length}`),
-  );
 
   // Track seen IDs by type to avoid duplicates within the same type
   const seenArticleIds = new Set<number>();

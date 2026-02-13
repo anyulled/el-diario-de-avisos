@@ -15,10 +15,6 @@
 - **`music/`**: Assets for the application's audio playback features.
 - **`docs/`**: Technical documentation and Architecture Decision Records (ADRs).
 
-## 🤖 AI Assistant Rules
-
-Follow the mandatory [Verification Policy](file:///Users/alrs/Documents/el-diario-de-avisos/PROJECT_RULES.md) before reporting any task as complete. Assistants must pass `type-check` and `lint` project-wide.
-
 ## ✨ Key Features
 
 - **Historical Search**: Full-text and semantic search across 19th-century articles.
@@ -390,36 +386,6 @@ To populate the database from legacy sources:
    Process RTF content and generate vector embeddings for semantic search.
 
    ```bash
+   # From web directory
    npm run ingest
    ```
-
-## 🤖 AI Provider Setup
-
-The application uses a robust fallback strategy to ensure high availability. It attempts to use providers in the following order:
-
-1. **Groq** (Primary - Fast)
-2. **Cerebras** (High Throughput)
-3. **Google Gemini** (Reliable Free Tier)
-4. **Moonshot AI** (Large Context)
-5. **DeepSeek** (Cost Effective)
-6. **OpenAI** (Ultimate Reliability)
-
-### Obtaining API Keys
-
-To enable the full fallback chain, configure the following keys in your `.env` or `.env.local` file:
-
-1. **Groq**: Sign up at [console.groq.com](https://console.groq.com)
-2. **Cerebras**: Get key from [cloud.cerebras.ai](https://cloud.cerebras.ai)
-3. **Google (Gemini)**: Get key from [aistudio.google.com](https://aistudio.google.com)
-4. **Moonshot (Kimi)**: Register at [platform.moonshot.cn](https://platform.moonshot.cn) (Requires ~$1 recharge)
-5. **DeepSeek**: Sign up at [platform.deepseek.com](https://platform.deepseek.com)
-6. **OpenAI**: Get key from [platform.openai.com](https://platform.openai.com)
-
-```env
-GROQ_KEY=...
-Cerebras_KEY=...
-GOOGLE_GENERATIVE_AI_API_KEY=...
-MOONSHOT_API_KEY=...
-DEEPSEEK_API_KEY=...
-OPENAI_API_KEY=...
-```

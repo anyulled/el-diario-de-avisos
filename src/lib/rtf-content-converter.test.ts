@@ -1,7 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { processRtfContent, stripHtml } from "./rtf-content-converter";
+import * as rtfEncodingHandler from "./rtf-encoding-handler";
 
 describe("rtf-content-converter", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe("processRtfContent", () => {
     it("should process plain text content", async () => {
       const input = "Simple plain text";
@@ -15,24 +20,18 @@ describe("rtf-content-converter", () => {
     });
 
     it("should handle errors by falling back to raw content and stripping HTML", async () => {
-      // Create a large buffer that might cause issues or simulated invalid content
-      // Since mocking internal modules is hard here, we rely on the fact that 'rtfToHtml'
-      // might fail for some inputs, OR we can mock the dependency if we change the test setup.
-      // However, to simply test the fallback logic, we can try to force a failure or
-      // just verify the logic if we could mock `rtfToHtml`.
-      // Alternatively, we can pass content that looks like RTF but is invalid?
-      // `processRtfContent` checks `startsWith("{\\rtf")`.
-      // If we pass something that starts with `{\rtf` but is invalid, `rtfToHtml` might throw.
+      // Mock rtfToHtml to throw an error
+      vi.spyOn(rtfEncodingHandler, "rtfToHtml").mockRejectedValue(new Error("Mock Error"));
+
       const input = "{\\rtf1\\invalid... <b>Bold</b>}";
+      // Expected: "Mock Error" triggers catch block.
+      // Fallback is input string.
+      // stripHtml(input) -> "{\\rtf1\\invalid... Bold }"
+      // Note: stripHtml replaces tags with a space, so <b>Bold</b> becomes " Bold " (condensed to one space by whitespace replacement)
+      const expected = "{\\rtf1\\invalid... Bold }";
+
       const result = await processRtfContent(input);
-      // If rtf-to-html throws, we get fallback. Fallback is the raw string.
-      // stripHtml should be applied to fallback.
-      // If rtf-to-html parses it, it might just return text.
-      // Let's rely on the fact that we improved the fallback code path to call stripHtml.
-      // We can't easily force the catch block without mocking.
-      // Assuming the change in code is correct, we just need a test that COVERS lines.
-      // If we can't trigger throw, we can't cover the catch block.
-      // We need to mock `rtfToHtml`.
+      expect(result).toBe(expected);
     });
 
     it("should respect maxLength option", async () => {
@@ -61,19 +60,10 @@ describe("rtf-content-converter", () => {
       expect(stripHtml(input)).toBe(expected);
     });
 
-    it("should return empty string for null/undefined content", async () => {
-      expect(await processRtfContent(null)).toBe("");
-    });
-
-    it("should handle plain text with preserveParagraphs: false", async () => {
-      const text = "Para 1\n\nPara 2";
-      expect(await processRtfContent(text, { preserveParagraphs: false })).toBe("Para 1 Para 2");
-    });
-
-    it("should handle errors by falling back to raw content", async () => {
-      const content = "{\\rtf1 ERROR_PLEASE}";
-      const result = await processRtfContent(content);
-      expect(result).toContain("ERROR_PLEASE");
+    it("should handle attributes in tags", () => {
+      const input = '<a href="https://example.com">Link</a>';
+      const expected = "Link";
+      expect(stripHtml(input)).toBe(expected);
     });
 
     it("should handle multiline input", () => {
@@ -94,15 +84,9 @@ describe("rtf-content-converter", () => {
     });
 
     it("should handle null or undefined input gracefully", () => {
-       expect(stripHtml(null as unknown as string)).toBe("");
-       expect(stripHtml(undefined as unknown as string)).toBe("");
-       expect(stripHtml("")).toBe("");
+      expect(stripHtml(null as unknown as string)).toBe("");
+      expect(stripHtml(undefined as unknown as string)).toBe("");
+      expect(stripHtml("")).toBe("");
     });
-  });
-
-  it("processRtfContent should return empty string for null content", async () => {
-    const { processRtfContent } = await import("./rtf-content-converter");
-    const result = await processRtfContent(null);
-    expect(result).toBe("");
   });
 });

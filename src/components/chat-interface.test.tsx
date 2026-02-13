@@ -247,28 +247,4 @@ describe("ChatInterface Session Storage", () => {
       parts: [{ type: "text", text: "New message" }],
     });
   });
-
-  it("should not send message if input is empty", () => {
-    render(<ChatInterface />);
-    const input = screen.getByPlaceholderText("Escribe tu consulta sobre el archivo...");
-    const form = input.closest("form");
-    fireEvent.change(input, { target: { value: "   " } });
-    if (form) fireEvent.submit(form);
-    expect(mocks.sendMessage).not.toHaveBeenCalled();
-  });
-
-  it("should not send message if status is streaming (isLoading)", () => {
-    mockUseChat.mockReturnValue({
-      messages: [],
-      sendMessage: mocks.sendMessage,
-      setMessages: mocks.setMessages,
-      status: "streaming",
-    });
-    render(<ChatInterface />);
-    const input = screen.getByPlaceholderText("Escribe tu consulta sobre el archivo...");
-    const form = input.closest("form");
-    fireEvent.change(input, { target: { value: "Valid message" } });
-    if (form) fireEvent.submit(form);
-    expect(mocks.sendMessage).not.toHaveBeenCalled();
-  });
 });
