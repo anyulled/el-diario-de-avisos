@@ -378,8 +378,10 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         .from(articles)
         .leftJoin(publications, eq(articles.pubId, publications.id))
         .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`)
-        // Random ordering for "On This Day" feature to show different articles
-        // This is not a cryptographic operation, so RANDOM() is safe here.
+        /**
+         * Random ordering for "On This Day" feature to show different articles
+         * This is not a cryptographic operation, so RANDOM() is safe here.
+         */
         .orderBy(sql`RANDOM()`)
         .limit(10);
 
