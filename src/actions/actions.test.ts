@@ -105,8 +105,8 @@ describe("getNews Performance", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
       then: vi.fn().mockImplementation(async (resolve: any) => {
         await delay(100);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        resolve([]);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+        (resolve as any)([]);
       }),
     });
 
