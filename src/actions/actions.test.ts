@@ -1,19 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  getNews,
-  getIntegrantes,
-  getTutores,
-  getDevelopers,
-  getArticleById,
-  getEssays,
-  getEssayById,
-  getArticleSection,
-  getArticlesOnThisDay,
-} from "./actions";
+import { getIntegrantes, getTutores, getDevelopers, getEssays, getArticleSection } from "./actions";
 import { db } from "@/db";
-
-// Mock setup
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 vi.mock("@/db", () => {
   const mockChain = {
@@ -24,7 +11,8 @@ vi.mock("@/db", () => {
     limit: vi.fn().mockReturnThis(),
     offset: vi.fn().mockReturnThis(),
     leftJoin: vi.fn().mockReturnThis(),
-    then: vi.fn().mockImplementation((resolve) => resolve([])),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+    then: vi.fn().mockImplementation((resolve: any) => resolve([])),
   };
   return {
     db: {
@@ -48,19 +36,6 @@ vi.mock("@/lib/news-order", () => ({
   getNewsOrderBy: () => [],
 }));
 
-type MockResult = Record<string, unknown>[];
-
-interface MockChain {
-  from: () => MockChain;
-  $dynamic: () => MockChain;
-  where: () => MockChain;
-  orderBy: () => MockChain;
-  limit: () => MockChain;
-  offset: () => MockChain;
-  leftJoin: () => MockChain;
-  then: (resolve: (val: MockResult) => void, reject: (err: unknown) => void) => Promise<void>;
-}
-
 describe("getNews Performance", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -68,11 +43,8 @@ describe("getNews Performance", () => {
 
   it("getArticleSection returns section", async () => {
     const result = await getArticleSection(1);
-    expect(result).toBeUndefined(); // Mock returns empty array[0]
-  });
-
-  it("should run queries in parallel", async () => {
-    // ... existing test ...
+    // Mock returns empty array[0]
+    expect(result).toBeUndefined();
   });
 
   it("getIntegrantes returns data", async () => {
@@ -92,11 +64,14 @@ describe("getNews Performance", () => {
 
   it("getEssays returns data with fallback groupName", async () => {
     // Mock db.select().from().leftJoin().then()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     const mockSelect = db.select as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     mockSelect.mockReturnValueOnce({
       from: vi.fn().mockReturnThis(),
       leftJoin: vi.fn().mockReturnThis(),
-      then: vi.fn().mockImplementation((resolve) => resolve([{ id: 1, title: 'Essay', groupName: null }])),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+      then: vi.fn().mockImplementation((resolve: any) => resolve([{ id: 1, title: "Essay", groupName: null }])),
     });
 
     const result = await getEssays();
