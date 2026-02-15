@@ -27,7 +27,21 @@ export function stripHtml(html: string): string {
    */
   while (decoded !== previous && iterations < 5) {
     previous = decoded;
-    decoded = decoded.replace(/&(?:lt|gt|amp|quot|#39|#60|#62);/g, (match) => entityMap[match] || match);
+    decoded = decoded.replace(/&(?:[a-zA-Z0-9#]+);/g, (match) => {
+      // Handle named entities
+      if (entityMap[match]) {
+        return entityMap[match];
+      }
+      // Handle numeric entities
+      if (match.startsWith("&#")) {
+        const isHex = match.startsWith("&#x") || match.startsWith("&#X");
+        const code = isHex ? parseInt(match.slice(3, -1), 16) : parseInt(match.slice(2, -1), 10);
+        if (!isNaN(code)) {
+          return String.fromCharCode(code);
+        }
+      }
+      return match;
+    });
     iterations++;
   }
 
