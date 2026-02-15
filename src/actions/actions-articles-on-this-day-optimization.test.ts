@@ -82,4 +82,35 @@ describe("getArticlesOnThisDay Optimization", () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(selectArgs.plainText).toHaveProperty("queryChunks");
   });
+
+  it("should handle null plainText by processing content (fallback)", async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    mockSelect.mockReturnValue(createMockChain([{
+      id: 1,
+      content: Buffer.from("rtf content"),
+      plainText: null,
+    }]));
+
+    const result = await getArticlesOnThisDay(1, 1);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].extract).toBe("extract");
+  });
+
+  it("should use plainText when present (optimized path)", async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    mockSelect.mockReturnValue(createMockChain([{
+      id: 1,
+      content: null,
+      plainText: "snippet",
+    }]));
+
+    const result = await getArticlesOnThisDay(1, 1);
+
+    expect(result).toHaveLength(1);
+    // StripHtml mock returns input
+    expect(result[0].extract).toBe("snippet");
+  });
 });

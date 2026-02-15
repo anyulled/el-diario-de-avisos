@@ -21,6 +21,30 @@ describe("rtf-content-converter", () => {
       expect(stripHtml("<p>Hello <b>World</b></p>")).toBe("Hello World");
       expect(stripHtml("Multiple    spaces")).toBe("Multiple spaces");
     });
+
+    it("should decode named entities and strip tags", () => {
+      expect(stripHtml("Vapor &lt;i&gt;test&lt;/i&gt;")).toBe("Vapor test");
+    });
+
+    it("should decode decimal entities and strip tags", () => {
+      expect(stripHtml("Vapor &#60;i&#62;test&#60;/i&#62;")).toBe("Vapor test");
+    });
+
+    it("should decode hex entities and strip tags", () => {
+      expect(stripHtml("Vapor &#x3C;i&#x3E;test&#x3C;/i&#x3E;")).toBe("Vapor test");
+    });
+
+    it("should handle double encoded entities", () => {
+      expect(stripHtml("&amp;lt;i&amp;gt;test&amp;lt;/i&amp;gt;")).toBe("test");
+    });
+
+    it("should handle unknown entities gracefully", () => {
+      expect(stripHtml("Unknown &foo; entity")).toBe("Unknown &foo; entity");
+    });
+
+    it("should handle mixed entities", () => {
+      expect(stripHtml("Mix &lt;b&gt;bold&lt;/b&gt; and &#x3C;i&#x3E;italic&#x3C;/i&#x3E;")).toBe("Mix bold and italic");
+    });
   });
 
   describe("processRtfContent", () => {
