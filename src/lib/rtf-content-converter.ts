@@ -4,13 +4,32 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
-  // Decode common HTML entities to ensure tags are recognized and removed
-  const decoded = html
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+  // eslint-disable-next-line no-restricted-syntax
+  let decoded = html;
+  // eslint-disable-next-line no-restricted-syntax
+  let previous = "";
+  // eslint-disable-next-line no-restricted-syntax
+  let iterations = 0;
+
+  const entityMap: Record<string, string> = {
+    "&lt;": "<",
+    "&gt;": ">",
+    "&amp;": "&",
+    "&quot;": '"',
+    "&#39;": "'",
+    "&#60;": "<",
+    "&#62;": ">",
+  };
+
+  /**
+   * Decode entities iteratively to handle double-encoding (e.g. &amp;lt;)
+   * Limit iterations to prevent infinite loops
+   */
+  while (decoded !== previous && iterations < 5) {
+    previous = decoded;
+    decoded = decoded.replace(/&(?:lt|gt|amp|quot|#39|#60|#62);/g, (match) => entityMap[match] || match);
+    iterations++;
+  }
 
   return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
