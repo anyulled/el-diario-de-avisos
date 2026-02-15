@@ -48,9 +48,11 @@ describe("rtf-content-converter", () => {
 
     it("should limit iterations for recursive entities", () => {
       const deep = "&amp;amp;amp;amp;amp;amp;lt;";
-      // It iterates 5 times, removing one &amp; each time.
-      // Initial: 6 &amp;
-      // After 5 iterations: 1 &amp; remains -> &amp;lt;
+      /*
+       * It iterates 5 times, removing one &amp; each time.
+       * Initial: 6 &amp;
+       * After 5 iterations: 1 &amp; remains -> &amp;lt;
+       */
       expect(stripHtml(deep)).toBe("&amp;lt;");
     });
   });
