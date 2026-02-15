@@ -45,6 +45,14 @@ describe("rtf-content-converter", () => {
     it("should handle mixed entities", () => {
       expect(stripHtml("Mix &lt;b&gt;bold&lt;/b&gt; and &#x3C;i&#x3E;italic&#x3C;/i&#x3E;")).toBe("Mix bold and italic");
     });
+
+    it("should limit iterations for recursive entities", () => {
+      const deep = "&amp;amp;amp;amp;amp;amp;lt;";
+      // It iterates 5 times, removing one &amp; each time.
+      // Initial: 6 &amp;
+      // After 5 iterations: 1 &amp; remains -> &amp;lt;
+      expect(stripHtml(deep)).toBe("&amp;lt;");
+    });
   });
 
   describe("processRtfContent", () => {
