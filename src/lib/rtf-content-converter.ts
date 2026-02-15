@@ -4,7 +4,15 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
-  return html
+  // Decode common HTML entities to ensure tags are recognized and removed
+  const decoded = html
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+  return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
     .replace(/\s+/g, " ")
     .trim();
