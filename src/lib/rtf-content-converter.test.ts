@@ -40,5 +40,22 @@ describe("rtf-content-converter", () => {
       const result = await processRtfContent(null);
       expect(result).toBe("");
     });
+
+    it("should truncate content when maxLength is provided", async () => {
+      const content = Buffer.from("A very long text content that should be truncated");
+      const result = await processRtfContent(content, { maxLength: 10 });
+      expect(result).toBe("A very lon");
+    });
+
+    it("should fallback to raw content and strip HTML when RTF parsing fails", async () => {
+      const content = Buffer.from("{\\rtf1 malformed content with <b>tags</b>");
+      // Mock rtfToHtml to throw error
+      const { rtfToHtml } = await import("./rtf-encoding-handler");
+      vi.mocked(rtfToHtml).mockRejectedValueOnce(new Error("Parsing failed"));
+
+      const result = await processRtfContent(content);
+      // It should return the raw content (decoded) but stripped of HTML tags
+      expect(result).toBe("{\\rtf1 malformed content with tags");
+    });
   });
 });
