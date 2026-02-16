@@ -1,11 +1,20 @@
 import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-encoding-handler";
 
 /**
- * Strips HTML tags from a string and returns plain text
+ * Strips HTML tags from a string and returns plain text.
+ * Handles encoded entities (e.g., &lt;) by decoding them first.
  */
 export function stripHtml(html: string): string {
-  return html
-    .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
+  // Decode HTML entities
+  const decoded = html
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ");
+
+  return decoded
+    .replace(/<[^>]*>?/gm, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
