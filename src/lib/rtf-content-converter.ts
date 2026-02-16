@@ -55,7 +55,9 @@ export async function processRtfContent(content: Buffer | string | null, options
 
     if (!isRtf) {
       const cleaned = processPlainText(contentString, preserveParagraphs);
-      return maxLength ? cleaned.slice(0, maxLength) : cleaned;
+      // Ensure any HTML tags in plain text are also stripped
+      const stripped = stripHtml(cleaned);
+      return maxLength ? stripped.slice(0, maxLength) : stripped;
     }
 
     // Process RTF content
