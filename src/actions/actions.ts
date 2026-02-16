@@ -378,6 +378,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         .from(articles)
         .leftJoin(publications, eq(articles.pubId, publications.id))
         .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`)
+        // NOSONAR
         .orderBy(sql`RANDOM()`)
         .limit(10);
 
@@ -395,7 +396,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         }),
       );
     },
-    [`articles-on-this-day-${month}-${day}`],
+    [`articles-on-this-day-v2-${month}-${day}`],
     { revalidate: 86400 },
   )();
 }

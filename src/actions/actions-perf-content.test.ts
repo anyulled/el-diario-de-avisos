@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { getArticlesOnThisDay } from "./actions";
 import { db } from "@/db";
+import { processRtfContent, stripHtml } from "@/lib/rtf-content-converter";
 
 // Mock setup
 vi.mock("@/db", () => ({
@@ -18,8 +19,8 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/lib/rtf-content-converter", () => ({
-  processRtfContent: vi.fn().mockResolvedValue("extract"),
-  stripHtml: vi.fn((html: string) => html),
+  processRtfContent: vi.fn().mockResolvedValue("extract from rtf"),
+  stripHtml: vi.fn((html: string) => `stripped ${html}`),
 }));
 
 interface MockChain {
@@ -36,7 +37,7 @@ interface MockChain {
 }
 
 // Mock chain
-const createMockChain = (): MockChain => {
+const createMockChain = (data: unknown[]): MockChain => {
   const chain: Partial<MockChain> = {};
   const methods = ["from", "leftJoin", "where", "limit", "orderBy", "catch", "finally", "$dynamic"];
   methods.forEach((method) => {
@@ -46,20 +47,20 @@ const createMockChain = (): MockChain => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   chain.then = (resolve: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    resolve([{ id: 1, title: "Test Article", content: Buffer.from("content"), plainText: "text" }]);
+    resolve(data);
     return Promise.resolve();
   };
   return chain as MockChain;
 };
 
-describe("getArticlesOnThisDay Content Optimization", () => {
+describe("getArticlesOnThisDay Optimization", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("should select content conditionally", async () => {
+  it("should select content conditionally and structure query correctly", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
-    mockSelect.mockReturnValue(createMockChain());
+    mockSelect.mockReturnValue(createMockChain([]));
 
     await getArticlesOnThisDay(1, 1);
 
@@ -67,11 +68,46 @@ describe("getArticlesOnThisDay Content Optimization", () => {
     const callArgs = mockSelect.mock.calls[0][0];
 
     expect(callArgs).toBeDefined();
-
-    // Optimization: content should now be a SQL object (conditional selection), not a plain column reference.
     expect(callArgs).toHaveProperty("content");
     // Drizzle SQL objects created with sql`` template tag contain queryChunks
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(callArgs.content).toHaveProperty("queryChunks");
+  });
+
+  it("should use stripHtml when plainText is available", async () => {
+    const mockData = [
+      {
+        id: 1,
+        title: "Test Article",
+        plainText: "Some <b>HTML</b> text",
+        content: null,
+      },
+    ];
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain(mockData));
+
+    const result = await getArticlesOnThisDay(1, 1);
+
+    expect(stripHtml).toHaveBeenCalledWith("Some <b>HTML</b> text");
+    expect(processRtfContent).not.toHaveBeenCalled();
+    expect(result[0].extract).toContain("stripped Some <b>HTML</b> text");
+  });
+
+  it("should use processRtfContent when plainText is missing", async () => {
+    const mockData = [
+      {
+        id: 1,
+        title: "Test Article",
+        plainText: null,
+        content: Buffer.from("rtf content"),
+      },
+    ];
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain(mockData));
+
+    const result = await getArticlesOnThisDay(1, 1);
+
+    expect(processRtfContent).toHaveBeenCalled();
+    expect(result[0].extract).toBe("extract from rtf");
   });
 });

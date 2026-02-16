@@ -9,9 +9,10 @@ export function stripHtml(html: string): string {
   const decoded = html
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
-    .replace(/&nbsp;/g, " ");
+    .replace(/&nbsp;/g, " ")
+    // Replace &amp; last to avoid double unescaping
+    .replace(/&amp;/g, "&");
 
   return decoded
     .replace(/<[^>]*>?/gm, " ")
