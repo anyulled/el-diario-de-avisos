@@ -74,7 +74,8 @@ export async function processRtfContent(content: Buffer | string | null, options
     // Fallback: return raw content if available
     console.debug("RTF content processing failed, using fallback:", error);
     const fallback = Buffer.isBuffer(content) ? decodeBuffer(content) : String(content);
-    const result = fallback || "";
+    // Ensure fallback content is also stripped of HTML tags in case parsing failed on HTML-like content
+    const result = stripHtml(fallback || "");
     return maxLength ? result.slice(0, maxLength) : result;
   }
 }

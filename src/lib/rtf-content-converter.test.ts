@@ -2,8 +2,11 @@ import { describe, it, expect, vi } from "vitest";
 import { processRtfContent, stripHtml } from "./rtf-content-converter";
 
 vi.mock("./rtf-encoding-handler", () => ({
-  decodeBuffer: vi.fn((buf) => buf.toString()),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return
+  decodeBuffer: vi.fn((buf: any) => buf.toString()),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   repairMojibake: vi.fn((str) => str),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   unescapeRtfHex: vi.fn((str) => str),
   rtfToHtml: vi.fn().mockResolvedValue("<html><body>test</body></html>"),
 }));
@@ -22,8 +25,10 @@ describe("rtf-content-converter", () => {
 
     it("should not double unescape entities", () => {
       const html = "&amp;lt;";
-      // If double unescaped: &amp;lt; -> &lt; -> <
-      // If correct: &amp;lt; -> &lt;
+      /*
+       * If double unescaped: &amp;lt; -> &lt; -> <
+       * If correct: &amp;lt; -> &lt;
+       */
       expect(stripHtml(html)).toBe("&lt;");
     });
   });
