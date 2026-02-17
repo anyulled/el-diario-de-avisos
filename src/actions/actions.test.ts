@@ -5,8 +5,10 @@ import {
   getDevelopers,
   getEssays,
   getArticleSection,
+  getArticlesOnThisDay,
 } from "./actions";
 import { db } from "@/db";
+import { getTableColumns } from "drizzle-orm";
 
 // Mock setup
 
@@ -29,6 +31,19 @@ vi.mock("@/db", () => {
   };
 });
 
+vi.mock("drizzle-orm", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("drizzle-orm")>();
+  return {
+    ...actual,
+    getTableColumns: vi.fn(() => ({
+      plainText: "plainText",
+      content: "content",
+      searchVector: "searchVector",
+      title: "title",
+    })),
+  };
+});
+
 vi.mock("@/db/schema", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/db/schema")>();
   return {
@@ -42,6 +57,16 @@ vi.mock("@/lib/date-range", () => ({
 
 vi.mock("@/lib/news-order", () => ({
   getNewsOrderBy: () => [],
+}));
+
+vi.mock("@/lib/rtf-content-converter", () => ({
+  processRtfContent: vi.fn().mockResolvedValue("Processed Content"),
+  stripHtml: (html: string) => html.replace(/<[^>]*>/g, ""),
+}));
+
+vi.mock("next/cache", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  unstable_cache: (fn: any) => fn,
 }));
 
 describe("getNews Performance", () => {
@@ -88,5 +113,38 @@ describe("getNews Performance", () => {
 
     const result = await getEssays();
     expect(result[0].groupName).toBe("Publicación Desconocida");
+  });
+
+  it("getArticlesOnThisDay executes successfully with mocked dependencies", async () => {
+    // Mock db.select().from().leftJoin().where().orderBy().limit().then() for getArticlesOnThisDay
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockSelect = db.select as any;
+
+    const mockNewsItem = {
+      title: "Test Article",
+      plainText: "Some text",
+      content: null,
+      publicationName: "Test Pub"
+    };
+
+    // Note: Since db.select is mocked at the module level to return `mockChain`,
+    // and `mockReturnValueOnce` is a method of the mock function,
+    // we need to ensure we are calling it on the right mock.
+    // The module mock sets `db.select` to a jest/vi mock function.
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnThis(),
+      leftJoin: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+      limit: vi.fn().mockImplementation(() => Promise.resolve([mockNewsItem])),
+    });
+
+    const result = await getArticlesOnThisDay(1, 1);
+    expect(result).toHaveLength(1);
+    // @ts-expect-error - Result is partial
+    expect(result[0].title).toBe("Test Article");
   });
 });

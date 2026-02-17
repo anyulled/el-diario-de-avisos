@@ -5,13 +5,15 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
  */
 export function stripHtml(html: string): string {
   // Decode HTML entities commonly found in database text
+  // IMPORTANT: &amp; must be replaced LAST to prevent double-unescaping
+  // (e.g., &amp;lt; -> &lt; -> < which is dangerous if stripped)
   const decoded = html
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
 
   /**
    * Replace block-level tags with newlines to preserve structure (roughly)
@@ -19,16 +21,6 @@ export function stripHtml(html: string): string {
    * But for "stripHtml", collapsing to space is standard.
    * However, processPlainText relies on newlines to preserve paragraphs.
    * If stripHtml removes newlines or collapses everything, processPlainText fails.
-   */
-
-  /**
-   * The original implementation was:
-   * return html.replace(/\u003c[^\u003e]*\u003e?/gm, " ").replace(/\s+/g, " ").trim();
-   *
-   * If we want to preserve paragraphs in plain text that *might* contain HTML,
-   * we shouldn't aggressively collapse all whitespace if we are going to pass it to processPlainText later.
-   *
-   * BUT, processPlainText splits by \n\s*\n.
    */
   return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
