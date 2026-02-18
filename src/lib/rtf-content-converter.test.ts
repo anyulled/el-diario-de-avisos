@@ -21,9 +21,24 @@ describe("rtf-content-converter", () => {
       expect(stripHtml("<p>Hello <b>World</b></p>")).toBe("Hello World");
       expect(stripHtml("Multiple    spaces")).toBe("Multiple spaces");
     });
+
+    it("should handle HTML entities", () => {
+      expect(stripHtml("Hello &nbsp; World")).toBe("Hello World");
+      expect(stripHtml("Quot &quot; Apos &apos; Amp &amp;")).toBe("Quot \" Apos ' Amp &");
+    });
+
+    it("should handle encoded tags like &lt;i&gt;", () => {
+      expect(stripHtml("Hello &lt;i&gt;World&lt;/i&gt;")).toBe("Hello World");
+    });
   });
 
   describe("processRtfContent", () => {
+    it("should strip HTML from plain text", async () => {
+      const content = "Hello <i>World</i>";
+      const result = await processRtfContent(content);
+      expect(result).toBe("Hello World");
+    });
+
     it("should return empty string if content is null", async () => {
       const result = await processRtfContent(null);
       expect(result).toBe("");

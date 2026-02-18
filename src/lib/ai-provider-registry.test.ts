@@ -99,7 +99,7 @@ describe("AIProviderRegistry", () => {
   it("should return the first model if all models are unhealthy", async () => {
     const service = createService();
     // Spy on all providers and make them unhealthy
-    service["providers"].forEach(provider => {
+    service["providers"].forEach((provider) => {
       vi.spyOn(provider, "checkHealth").mockResolvedValue(false);
     });
 

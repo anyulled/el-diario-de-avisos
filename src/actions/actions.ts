@@ -393,7 +393,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         }),
       );
     },
-    [`articles-on-this-day-${month}-${day}`],
+    [`articles-on-this-day-v2-${month}-${day}`],
     { revalidate: 86400 },
   )();
 }

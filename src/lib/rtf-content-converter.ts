@@ -6,17 +6,31 @@ import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-e
 export function stripHtml(html: string): string {
   return html
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
+    .replace(/&lt;[^&]*&gt;?/gm, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/**
+ * Strips only HTML tags, preserving other whitespace characters
+ */
+function stripTagsOnly(text: string): string {
+  return text.replace(/\u003c[^\u003e]*\u003e?/gm, " ").replace(/&lt;[^&]*&gt;?/gm, " ");
 }
 
 /**
  * Processes plain text content by cleaning up whitespace
  */
 function processPlainText(text: string, preserveParagraphs: boolean): string {
-  return text
+  // Strip tags but keep newlines for paragraph splitting
+  const stripped = stripTagsOnly(text);
+  return stripped
     .split(/\n\s*\n/)
-    .map((p) => p.trim())
+    .map((p) => p.replace(/\s+/g, " ").trim())
     .filter((p) => p.length > 0)
     .join(preserveParagraphs ? "\n\n" : " ");
 }
@@ -59,10 +73,10 @@ export async function processRtfContent(content: Buffer | string | null, options
     const plainText = stripHtml(html);
     return maxLength ? plainText.slice(0, maxLength) : plainText;
   } catch (error) {
-    // Fallback: return raw content if available
+    // Fallback: return raw content if available, but still strip HTML
     console.debug("RTF content processing failed, using fallback:", error);
     const fallback = Buffer.isBuffer(content) ? decodeBuffer(content) : String(content);
-    const result = fallback || "";
+    const result = stripHtml(fallback || "");
     return maxLength ? result.slice(0, maxLength) : result;
   }
 }
