@@ -21,8 +21,13 @@ function unescapeHtml(text: string): string {
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
-  // Decode entities first to ensure tags hidden as entities (e.g., &lt;i&gt;) are exposed and stripped
-  const decoded = unescapeHtml(html);
+  // Decode entities repeatedly (up to 3 times) to handle double/triple encoding
+  const decoded = Array(3)
+    .fill(0)
+    .reduce((current) => {
+      return unescapeHtml(current);
+    }, html);
+
   return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
     .replace(/\s+/g, " ")
