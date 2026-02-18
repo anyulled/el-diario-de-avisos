@@ -1,10 +1,29 @@
 import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-encoding-handler";
 
 /**
+ * Unescapes standard HTML entities.
+ * Note: &amp; must be replaced last to avoid double-unescaping.
+ */
+function unescapeHtml(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+}
+
+/**
  * Strips HTML tags from a string and returns plain text
  */
 export function stripHtml(html: string): string {
-  return html
+  // Decode entities first to ensure tags hidden as entities (e.g., &lt;i&gt;) are exposed and stripped
+  const decoded = unescapeHtml(html);
+  return decoded
     .replace(/\u003c[^\u003e]*\u003e?/gm, " ")
     .replace(/\s+/g, " ")
     .trim();

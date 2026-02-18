@@ -21,6 +21,18 @@ describe("rtf-content-converter", () => {
       expect(stripHtml("<p>Hello <b>World</b></p>")).toBe("Hello World");
       expect(stripHtml("Multiple    spaces")).toBe("Multiple spaces");
     });
+
+    it("should decode HTML entities and strip resulting tags", () => {
+      // This is the failing case from Cypress
+      const input = "&lt;i&gt;Melodías&lt;/i&gt; &lt;i&gt;Curanas.&lt;/i&gt;";
+      // Desired behavior: returns "Melodías Curanas."
+      expect(stripHtml(input)).toBe("Melodías Curanas.");
+    });
+
+    it("should handle mixed entities and tags", () => {
+      const input = "<p>foo &lt;br&gt; bar</p>";
+      expect(stripHtml(input)).toBe("foo bar");
+    });
   });
 
   describe("processRtfContent", () => {
