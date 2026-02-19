@@ -20,6 +20,7 @@ vi.mock("@/db", () => {
 });
 
 vi.mock("next/cache", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
   unstable_cache: (fn: any) => fn,
 }));
 
@@ -36,17 +37,25 @@ describe("getArticlesOnThisDay Content Optimization", () => {
   it("should conditionally fetch content to avoid over-fetching", async () => {
     await getArticlesOnThisDay(1, 1);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
     const selectCall = (db.select as any).mock.calls[0][0];
 
     // Check that content is defined in the selection
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(selectCall.content).toBeDefined();
 
-    // With optimization, it should NOT be the raw column object.
-    // Without optimization, it IS the raw column object (from getTableColumns spread).
+    /*
+     * With optimization, it should NOT be the raw column object.
+     * Without optimization, it IS the raw column object (from getTableColumns spread).
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(selectCall.content).not.toBe(articles.content);
 
-    // Verify plainText is already optimized (substring)
-    // So it should NOT be the raw column object
+    /*
+     * Verify plainText is already optimized (substring)
+     * So it should NOT be the raw column object
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(selectCall.plainText).not.toBe(articles.plainText);
   });
 });
