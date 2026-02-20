@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const peopleSummary = people.length ? ` Participan: ${people.slice(0, 8).join(", ")}${people.length > 8 ? ", y más." : "."}` : "";
 
   const title = "Acerca del Proyecto";
-  const description = `Conoce el equipo y el trabajo detrás del Archivo de Noticias Musicales de El Diario de Avisos.${peopleSummary}`;
+  const description = `Conoce el equipo y el trabajo detrás del Archivo de Crónicas musicales de la prensa caraqueña.${peopleSummary}`;
 
   return {
     title,

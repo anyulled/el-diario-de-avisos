@@ -133,7 +133,7 @@ describe("AboutPage - generateMetadata", () => {
     const metadata = await generateMetadata();
 
     expect(metadata.title).toBe("Acerca del Proyecto");
-    expect(metadata.description).toBe("Conoce el equipo y el trabajo detrás del Archivo de Noticias Musicales de El Diario de Avisos.");
+    expect(metadata.description).toBe("Conoce el equipo y el trabajo detrás del Archivo de Crónicas musicales de la prensa caraqueña.");
   });
 
   it("filters out empty names", async () => {

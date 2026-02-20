@@ -32,22 +32,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
     title: {
-      default: "Noticias Musicales en el Diario de Avisos",
-      template: "%s | Noticias Musicales en el Diario de Avisos",
+      default: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
+      template: "%s | Crónicas Musicales en la prensa caraqueña del siglo XIX",
     },
-    description: `Noticias Musicales en el Diario de Avisos. Explora la historia de Caracas a través de sus noticias musicales. Un proyecto realizado por: ${authors}.`,
+    description: `Crónicas Musicales en la prensa caraqueña del siglo XIX. Explora la historia de Caracas a través de sus crónicas musicales. Un proyecto realizado por: ${authors}.`,
     openGraph: {
-      title: "Noticias Musicales en el Diario de Avisos",
-      description: "Archivo histórico de noticias musicales de El Diario de Avisos",
+      title: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
+      description: "Archivo histórico de crónicas musicales de la prensa caraqueña",
       url: "https://diariodeavisos-archivo.vercel.app",
-      siteName: "Noticias Musicales en el Diario de Avisos",
+      siteName: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
       locale: "es_ES",
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: "Noticias Musicales en el Diario de Avisos",
-      description: "Archivo histórico de noticias musicales de El Diario de Avisos",
+      title: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
+      description: "Archivo histórico de crónicas musicales de la prensa caraqueña",
     },
     robots: {
       index: true,

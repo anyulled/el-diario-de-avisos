@@ -102,7 +102,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
             )}
           >
             <Image src="/icon.png" alt="Logo" width={32} height={32} className="rounded-lg shadow-sm" />
-            <span className="hidden sm:inline">Noticias Musicales</span>
+            <span className="hidden sm:inline">Crónicas musicales</span>
           </Link>
 
           {/* Desktop Navigation */}

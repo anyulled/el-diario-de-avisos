@@ -2,7 +2,7 @@ import fs from "fs";
 import { ImageResponse } from "next/og";
 import path from "path";
 
-export const alt = "Noticias Musicales en el Diario de Avisos - Archivo Histórico";
+export const alt = "Crónicas musicales en la prensa caraqueña del siglo XIX - Archivo Histórico";
 export const size = {
   width: 1200,
   height: 630,
@@ -49,7 +49,7 @@ export default async function Image() {
             letterSpacing: "-0.05em",
           }}
         >
-          Noticias Musicales en el Diario de Avisos
+          Crónicas musicales en la prensa caraqueña
         </h1>
         <p
           style={{

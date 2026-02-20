@@ -3,7 +3,7 @@ import { Navbar } from "@/components/navbar";
 import { getArticleCount } from "@/lib/articles";
 
 export const metadata = {
-  title: "Asistente del Archivo | Noticias Musicales en el Diario de Avisos",
+  title: "Asistente del Archivo | Crónicas musicales en la prensa caraqueña del siglo XIX",
   description: "Conversa con la historia de nuestros archivos a través de nuestro asistente inteligente.",
 };
 

@@ -127,8 +127,8 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata();
 
     expect(metadata.title).toEqual({
-      default: "Noticias Musicales en el Diario de Avisos",
-      template: "%s | Noticias Musicales en el Diario de Avisos",
+      default: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
+      template: "%s | Crónicas Musicales en la prensa caraqueña del siglo XIX",
     });
 
     expect(metadata.description).toContain("Juan Pérez");
@@ -153,10 +153,10 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata();
 
     expect(metadata.openGraph).toEqual({
-      title: "Noticias Musicales en el Diario de Avisos",
-      description: "Archivo histórico de noticias musicales de El Diario de Avisos",
+      title: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
+      description: "Archivo histórico de crónicas musicales de la prensa caraqueña",
       url: "https://diariodeavisos-archivo.vercel.app",
-      siteName: "Noticias Musicales en el Diario de Avisos",
+      siteName: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
       locale: "es_ES",
       type: "website",
     });
@@ -170,8 +170,8 @@ describe("generateMetadata", () => {
 
     expect(metadata.twitter).toEqual({
       card: "summary_large_image",
-      title: "Noticias Musicales en el Diario de Avisos",
-      description: "Archivo histórico de noticias musicales de El Diario de Avisos",
+      title: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
+      description: "Archivo histórico de crónicas musicales de la prensa caraqueña",
     });
   });
 

@@ -23,7 +23,7 @@ describe("ComoCitarPage - Metadata", () => {
 
   it("exports correct metadata description", () => {
     expect(metadata.description).toBe(
-      "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+      "Guía para citar artículos del Archivo de Crónicas musicales en la prensa caraqueña, con ejemplos para artículos con y sin autor.",
     );
   });
 
@@ -34,7 +34,7 @@ describe("ComoCitarPage - Metadata", () => {
   it("configures OpenGraph metadata correctly", () => {
     expect(metadata.openGraph?.title).toBe("Cómo citar esta fuente");
     expect(metadata.openGraph?.description).toBe(
-      "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+      "Guía para citar artículos del Archivo de Crónicas musicales en la prensa caraqueña, con ejemplos para artículos con y sin autor.",
     );
     expect(metadata.openGraph?.url).toBe("/como-citar");
   });
@@ -42,7 +42,7 @@ describe("ComoCitarPage - Metadata", () => {
   it("configures Twitter card metadata correctly", () => {
     expect(metadata.twitter?.title).toBe("Cómo citar esta fuente");
     expect(metadata.twitter?.description).toBe(
-      "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+      "Guía para citar artículos del Archivo de Crónicas musicales en la prensa caraqueña, con ejemplos para artículos con y sin autor.",
     );
   });
 });

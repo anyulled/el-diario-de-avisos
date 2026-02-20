@@ -50,7 +50,7 @@ describe("NavbarUI", () => {
 
     it("renders the site title", () => {
       render(<NavbarUI essays={[]} />);
-      const title = screen.getByText("Noticias Musicales");
+      const title = screen.getByText("Crónicas musicales");
       expect(title).toBeDefined();
     });
 

@@ -19,7 +19,7 @@ vi.mock("@/lib/articles", () => ({
 
 describe("ChatPage - Metadata", () => {
   it("exports correct metadata title", () => {
-    expect(metadata.title).toBe("Asistente del Archivo | Noticias Musicales en el Diario de Avisos");
+    expect(metadata.title).toBe("Asistente del Archivo | Crónicas musicales en la prensa caraqueña del siglo XIX");
   });
 
   it("exports correct metadata description", () => {

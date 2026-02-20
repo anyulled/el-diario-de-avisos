@@ -23,7 +23,7 @@ describe("Footer", () => {
 
   it("displays the main heading", () => {
     render(<Footer />);
-    const heading = screen.getByText("Noticias Musicales en el Diario de Avisos");
+    const heading = screen.getByText("Crónicas Musicales en la prensa caraqueña del siglo XIX");
     expect(heading).toBeDefined();
   });
 
@@ -52,7 +52,7 @@ describe("Footer", () => {
   it("displays the current year in copyright notice", () => {
     render(<Footer />);
     const currentYear = new Date().getFullYear();
-    const copyright = screen.getByText(new RegExp(`© ${currentYear} Noticias Musicales en el Diario de Avisos`));
+    const copyright = screen.getByText(new RegExp(`© ${currentYear} Crónicas musicales en la prensa caraqueña`));
     expect(copyright).toBeDefined();
   });
 

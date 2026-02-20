@@ -6,8 +6,8 @@ import { DateTime } from "luxon";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Tal día como hoy | Noticias Musicales",
-  description: "Artículos musicales publicados tal día como hoy en el diario de avisos.",
+  title: "Tal día como hoy | Crónicas musicales en la prensa caraqueña del siglo XIX",
+  description: "Artículos musicales publicados tal día como hoy en la prensa caraqueña.",
 };
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export default async function OnThisDayPage() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-20 relative">
       <Navbar />
-      <Hero title="Tal día como hoy" subtitle={`Artículos musicales publicados el ${dateStr} en el diario de avisos.`} badge="Efemérides" />
+      <Hero title="Tal día como hoy" subtitle={`Artículos musicales publicados el ${dateStr} en la prensa caraqueña.`} badge="Efemérides" />
 
       <div className="container mx-auto px-4 mt-12 mb-20">
         <div className="flex items-center gap-4 mb-8">

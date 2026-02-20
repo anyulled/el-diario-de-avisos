@@ -76,7 +76,7 @@ describe("Source Awareness UI", () => {
 
       render(<ArticleCard item={mockItem} searchTerm={null} />);
 
-      const pubName = screen.queryByText("El Diario de Avisos");
+      const pubName = screen.queryByText("la prensa caraqueña");
       expect(pubName).toBeNull();
     });
   });

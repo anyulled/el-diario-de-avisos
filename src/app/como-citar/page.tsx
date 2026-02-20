@@ -4,20 +4,20 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Cómo citar esta fuente",
-  description: "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+  description: "Guía para citar artículos del Archivo de Crónicas musicales en la prensa caraqueña, con ejemplos para artículos con y sin autor.",
   alternates: {
     canonical: "/como-citar",
   },
   openGraph: {
     title: "Cómo citar esta fuente",
-    description: "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+    description: "Guía para citar artículos del Archivo de Crónicas musicales en la prensa caraqueña, con ejemplos para artículos con y sin autor.",
     url: "/como-citar",
     type: "article",
   },
   twitter: {
     card: "summary",
     title: "Cómo citar esta fuente",
-    description: "Guía para citar artículos del Archivo de Noticias Musicales en el Diario de Avisos, con ejemplos para artículos con y sin autor.",
+    description: "Guía para citar artículos del Archivo de Crónicas musicales en la prensa caraqueña, con ejemplos para artículos con y sin autor.",
   },
 };
 
@@ -59,7 +59,7 @@ export default function ComoCitarPage() {
               <h3 className="text-sm font-medium text-white/60 uppercase tracking-widest mb-2">Ejemplo:</h3>
               <p className="font-serif">
                 “Brindis Salas”. <em>Diario de avisos</em>, sábado 18 de noviembre de 1876, p. 3. Tomado de:{" "}
-                <strong>Raquel Campomás y Yurenia Santana, Noticias musicales en el Diario de Avisos</strong>. Base de datos disponible en:
+                <strong>Raquel Campomás y Yurenia Santana, Noticias musicales en la prensa caraqueña</strong>. Base de datos disponible en:
                 https://diario-de-avisos.vercel.app/
               </p>
             </div>

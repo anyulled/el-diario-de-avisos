@@ -127,7 +127,7 @@ export function MusicPlayer() {
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4 w-1/3">
           <div className="relative w-10 h-10 rounded overflow-hidden">
-            <Image src="/icon.png" alt="Noticias Musicales Logo" fill className="object-cover" />
+            <Image src="/icon.png" alt="Crónicas musicales Logo" fill className="object-cover" />
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-sm">{TRACKS[currentTrack].title}</span>
