@@ -35,7 +35,7 @@ describe("getArticlesOnThisDay Columns Optimization", () => {
 
     await getArticlesOnThisDay(1, 1);
 
-    const selection = mockSelect.mock.calls[0][0];
+    const selection = mockSelect.mock.calls[0][0] as Record<string, unknown>;
     const selectedKeys = Object.keys(selection);
 
     // Expected columns
