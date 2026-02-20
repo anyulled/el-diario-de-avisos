@@ -364,11 +364,13 @@ import { processRtfContent, stripHtml } from "@/lib/rtf-content-converter";
 export async function getArticlesOnThisDay(day: number, month: number) {
   return await unstable_cache(
     async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { searchVector, plainText, content, ...columns } = getTableColumns(articles);
       const news = await db
         .select({
-          ...columns,
+          id: articles.id,
+          title: articles.title,
+          subtitle: articles.subtitle,
+          date: articles.date,
+          publicationYear: articles.publicationYear,
           // Optimization: Only fetch the first 500 characters of plainText to avoid fetching large text fields
           plainText: sql<string>`substring(${articles.plainText} from 1 for 500)`,
           // Optimization: Only fetch content (bytea) if plainText is missing, to avoid transferring large blobs
