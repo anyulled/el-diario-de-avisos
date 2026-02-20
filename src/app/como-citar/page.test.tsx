@@ -123,7 +123,7 @@ describe("ComoCitarPage - Component", () => {
 
   it("renders database URL in examples", () => {
     render(<ComoCitarPage />);
-    const urls = screen.getAllByText(/https:\/\/diario-de-avisos\.vercel\.app\//);
+    const urls = screen.getAllByText(/https:\/\/(www\.)?cronicasmusicales\.com\.ve/);
     expect(urls.length).toBeGreaterThanOrEqual(2);
   });
 
