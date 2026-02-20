@@ -16,25 +16,24 @@ export interface PageExtractionResult {
  * @param content - RTF content as Buffer or string
  * @returns Extracted page reference or null
  */
+function decodeContent(content: Buffer | string): string | null {
+  try {
+    return Buffer.isBuffer(content) ? content.toString("latin1") : content;
+  } catch {
+    return null;
+  }
+}
+
 export function extractPageReference(content: Buffer | string | null): PageExtractionResult {
   if (!content) {
     return { pages: null, matched: false };
   }
 
-  // eslint-disable-next-line no-restricted-syntax -- let is necessary for try-catch assignment
-  let text: string;
-  try {
-    if (Buffer.isBuffer(content)) {
-      // Try decoding as WIN1252 (common for RTF) or UTF-8
-      text = content.toString("latin1");
-    } else {
-      text = content;
-    }
-  } catch {
+  const text = decodeContent(content);
+  if (text === null) {
     return { pages: null, matched: false };
   }
 
-  // Pattern 1: (p.3 y 4) or (P. 3 y 4) - page range with "y"
   const rangeWithY = /\(p\.?\s*(\d+)\s+y\s+(\d+)\)/i;
   const match1 = text.match(rangeWithY);
   if (match1) {
@@ -42,7 +41,6 @@ export function extractPageReference(content: Buffer | string | null): PageExtra
     return { pages: `${start}-${end}`, matched: true, pattern: "range_y" };
   }
 
-  // Pattern 2: (p.3 & 4) or (P. 3 & 4) - page range with "&"
   const rangeWithAmpersand = /\(p\.?\s*(\d+)\s+&\s+(\d+)\)/i;
   const match2 = text.match(rangeWithAmpersand);
   if (match2) {
@@ -50,17 +48,15 @@ export function extractPageReference(content: Buffer | string | null): PageExtra
     return { pages: `${start}-${end}`, matched: true, pattern: "range_ampersand" };
   }
 
-  // Pattern 3: (P. 3, 4 y 5) - multiple pages with commas and "y"
   const multiplePages = /\(p\.?\s*(\d+(?:\s*,\s*\d+)*)\s+y\s+(\d+)\)/i;
   const match3 = text.match(multiplePages);
   if (match3) {
     const [, pageList, lastPage] = match3;
-    const pages = pageList.split(",").map((p) => p.trim());
+    const pages = pageList.split(",").map((pageNum: string) => pageNum.trim());
     pages.push(lastPage);
     return { pages: pages.join(", "), matched: true, pattern: "multiple_y" };
   }
 
-  // Pattern 4: (p.4) or (P. 4) - single page
   const singlePage = /\(p\.?\s*(\d+)\)/i;
   const match4 = text.match(singlePage);
   if (match4) {

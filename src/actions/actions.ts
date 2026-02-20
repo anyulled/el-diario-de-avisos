@@ -200,11 +200,28 @@ export const getDevelopersNames = unstable_cache(
 
 const getCachedArticle = unstable_cache(
   async (id: number) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { searchVector, plainText, ...rest } = getTableColumns(articles);
     const result = await db
       .select({
-        ...rest,
+        id: articles.id,
+        title: articles.title,
+        subtitle: articles.subtitle,
+        date: articles.date,
+        dateOld: articles.dateOld,
+        columnId: articles.columnId,
+        pubId: articles.pubId,
+        issueId: articles.issueId,
+        page: articles.page,
+        content: articles.content,
+        cota: articles.cota,
+        code2: articles.code2,
+        authorId: articles.authorId,
+        isEditable: articles.isEditable,
+        observations: articles.observations,
+        publicationYear: articles.publicationYear,
+        publicationMonth: articles.publicationMonth,
+        issueNumber: articles.issueNumber,
+        series: articles.series,
+        microfilm: articles.microfilm,
         publicationName: publications.name,
       })
       .from(articles)

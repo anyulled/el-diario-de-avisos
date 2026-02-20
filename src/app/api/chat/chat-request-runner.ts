@@ -236,8 +236,7 @@ export async function executeWithFallback(
   fallbackChain: ModelConfig[],
   modelMessages: ModelMessage[],
   systemPrompt: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  lastError: any = null,
+  lastError: unknown = null,
 ): Promise<Response> {
   if (fallbackChain.length === 0) {
     throw lastError || new Error("All AI providers failed.");
@@ -266,8 +265,7 @@ export async function executeWithFallback(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function handleError(error: any, chain: ModelConfig[], messages: ModelMessage[], prompt: string): Promise<Response> {
+export async function handleError(error: unknown, chain: ModelConfig[], messages: ModelMessage[], prompt: string): Promise<Response> {
   const { provider } = chain[0];
   const err = error as { statusCode?: number; code?: string; message?: string };
   console.warn(chalk.yellow(`⚠️ [Warning] Provider ${provider} failed:`), err.message);

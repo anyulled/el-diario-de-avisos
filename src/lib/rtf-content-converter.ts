@@ -66,8 +66,7 @@ export async function processRtfContent(content: Buffer | string | null, options
     const unescapedRtf = unescapeRtfHex(contentString);
 
     const html = await rtfToHtml(unescapedRtf, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      template: (_doc: any, _defaults: any, content: string) => content,
+      template: (_doc: unknown, _defaults: unknown, content: string) => content,
     });
 
     const plainText = stripHtml(html);
