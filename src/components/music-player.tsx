@@ -25,7 +25,7 @@ export function MusicPlayer() {
 
   useEffect(() => {
     const loadSavedState = () => {
-      const saved = sessionStorage.getItem("da_music_player");
+      const saved = sessionStorage.getItem("cm_music_player");
       if (saved) {
         try {
           const { track, playing, time, volume: savedVolume } = JSON.parse(saved);
@@ -55,7 +55,7 @@ export function MusicPlayer() {
 
     const saveState = () => {
       sessionStorage.setItem(
-        "da_music_player",
+        "cm_music_player",
         JSON.stringify({
           track: currentTrack,
           playing: isPlaying,
@@ -127,7 +127,7 @@ export function MusicPlayer() {
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4 w-1/3">
           <div className="relative w-10 h-10 rounded overflow-hidden">
-            <Image src="/icon.png" alt="Crónicas musicales Logo" fill className="object-cover" />
+            <Image src="/apple-icon.png" alt="Crónicas Musicales" fill className="object-cover" />
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-sm">{TRACKS[currentTrack].title}</span>

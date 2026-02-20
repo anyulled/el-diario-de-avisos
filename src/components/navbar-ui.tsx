@@ -101,7 +101,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
               isScrolled && "text-gray-900 dark:text-white",
             )}
           >
-            <Image src="/icon.png" alt="Logo" width={32} height={32} className="rounded-lg shadow-sm" />
+            <Image src="/apple-icon.png" alt="Crónicas Musicales" width={32} height={32} className="rounded-lg shadow-sm" />
             <span className="hidden sm:inline">Crónicas musicales</span>
           </Link>
 
@@ -180,7 +180,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
       {/* Mobile Navigation Overlay */}
       <div
         className={cn(
-          "fixed inset-0 w-screen h-screen bg-black z-[999] md:hidden flex flex-col pt-24 px-6 overflow-y-auto transition-opacity duration-300 ease-in-out",
+          "fixed inset-0 w-screen h-screen bg-black z-999 md:hidden flex flex-col pt-24 px-6 overflow-y-auto transition-opacity duration-300 ease-in-out",
           isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none",
         )}
       >

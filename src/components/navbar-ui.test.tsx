@@ -43,9 +43,9 @@ describe("NavbarUI", () => {
   describe("Rendering", () => {
     it("renders the navbar with logo", () => {
       render(<NavbarUI essays={[]} />);
-      const logo = screen.getByAltText("Logo");
+      const logo = screen.getByAltText("Crónicas Musicales");
       expect(logo).toBeDefined();
-      expect(logo.getAttribute("src")).toBe("/icon.png");
+      expect(logo.getAttribute("src")).toBe("/apple-icon.png");
     });
 
     it("renders the site title", () => {
