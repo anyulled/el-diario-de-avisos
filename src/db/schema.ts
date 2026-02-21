@@ -70,6 +70,8 @@ export const articles = pgTable(
     index("articles_search_vector_idx").using("gin", table.searchVector),
     index("articles_publication_year_idx").on(table.publicationYear),
     index("articles_column_id_idx").on(table.columnId),
+    // Optimization: Index for filtering news by publication (getNews)
+    index("articles_pub_id_idx").on(table.pubId),
     index("articles_date_idx").on(table.date),
     /**
      * Functional index to optimize 'On this day' queries which filter by month and day,
