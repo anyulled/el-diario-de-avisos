@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/styles";
-import { BookOpen, Calendar, Info, Menu, MessageSquare, Quote, Search, X } from "lucide-react";
+import { BookOpen, Calendar, Info, Menu, MessageSquare, Quote, Search, X, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -80,6 +80,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
   const navLinks = [
     { href: "/tal-dia-como-hoy", icon: Calendar, label: "Tal día como hoy" },
     { href: "/chat", icon: MessageSquare, label: "Asistente" },
+    { href: "/galeria", icon: ImageIcon, label: "Galería" },
     { href: "/como-citar", icon: Quote, label: "Cómo citar" },
     { href: "/about", icon: Info, label: "Acerca de" },
   ];
