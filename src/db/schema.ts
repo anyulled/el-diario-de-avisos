@@ -81,13 +81,17 @@ export const articles = pgTable(
   ],
 );
 
-export const authors = pgTable("autores", {
-  id: serial("autor_cod").primaryKey().notNull(),
-  name: varchar("autor_nombre", { length: 255 }),
-  reference: varchar("autor_referencia", { length: 255 }),
-  pseudonymId: integer("pseudonimo_cod"),
-  pubId: integer("pub_cod"),
-});
+export const authors = pgTable(
+  "autores",
+  {
+    id: serial("autor_cod").primaryKey().notNull(),
+    name: varchar("autor_nombre", { length: 255 }),
+    reference: varchar("autor_referencia", { length: 255 }),
+    pseudonymId: integer("pseudonimo_cod"),
+    pubId: integer("pub_cod"),
+  },
+  (table) => [index("authors_pub_id_idx").on(table.pubId)],
+);
 
 export const descriptors = pgTable("descriptores", {
   id: serial("descriptor_cod").primaryKey().notNull(),
@@ -97,15 +101,19 @@ export const descriptors = pgTable("descriptores", {
   content: bytea("descriptor_contenido"),
 });
 
-export const essays = pgTable("ensayos", {
-  id: integer("ensayo_cod").primaryKey().notNull(),
-  title: varchar("ensayo_titulo", { length: 255 }),
-  subtitle: varchar("ensayo_subtitulo", { length: 255 }),
-  content: bytea("ensayo_contenido"),
-  observations: varchar("ensayo_observaciones", { length: 255 }),
-  memberId: integer("intg_cod"),
-  pubId: integer("pub_cod").references(() => publications.id),
-});
+export const essays = pgTable(
+  "ensayos",
+  {
+    id: integer("ensayo_cod").primaryKey().notNull(),
+    title: varchar("ensayo_titulo", { length: 255 }),
+    subtitle: varchar("ensayo_subtitulo", { length: 255 }),
+    content: bytea("ensayo_contenido"),
+    observations: varchar("ensayo_observaciones", { length: 255 }),
+    memberId: integer("intg_cod"),
+    pubId: integer("pub_cod").references(() => publications.id),
+  },
+  (table) => [index("essays_pub_id_idx").on(table.pubId)],
+);
 
 export const images = pgTable("imagenes", {
   id: integer("img_cod").primaryKey().notNull(),
@@ -113,20 +121,24 @@ export const images = pgTable("imagenes", {
   content: bytea("img_contenido"),
 });
 
-export const members = pgTable("integrantes", {
-  id: serial("intg_cod").primaryKey().notNull(),
-  lastName: varchar("intg_apds", { length: 255 }),
-  firstName: varchar("intg_nmbs", { length: 255 }),
-  idCard: integer("inrg_cedula"),
-  faculty: varchar("intg_facultad", { length: 255 }),
-  department: varchar("intg_departamento", { length: 255 }),
-  photo: varchar("intg_foto"),
-  linkedinUrl: varchar("intg_linkedin_url", { length: 255 }),
-  twitterUrl: varchar("intg_twitter_url", { length: 255 }),
-  resume: varchar("intg_resumen"),
-  cvUrl: varchar("cv_url", { length: 255 }),
-  pubId: integer("pub_cod").references(() => publications.id),
-});
+export const members = pgTable(
+  "integrantes",
+  {
+    id: serial("intg_cod").primaryKey().notNull(),
+    lastName: varchar("intg_apds", { length: 255 }),
+    firstName: varchar("intg_nmbs", { length: 255 }),
+    idCard: integer("inrg_cedula"),
+    faculty: varchar("intg_facultad", { length: 255 }),
+    department: varchar("intg_departamento", { length: 255 }),
+    photo: varchar("intg_foto"),
+    linkedinUrl: varchar("intg_linkedin_url", { length: 255 }),
+    twitterUrl: varchar("intg_twitter_url", { length: 255 }),
+    resume: varchar("intg_resumen"),
+    cvUrl: varchar("cv_url", { length: 255 }),
+    pubId: integer("pub_cod").references(() => publications.id),
+  },
+  (table) => [index("members_pub_id_idx").on(table.pubId)],
+);
 
 export const subjects = pgTable("materias", {
   id: serial("mat_cod").primaryKey().notNull(),
