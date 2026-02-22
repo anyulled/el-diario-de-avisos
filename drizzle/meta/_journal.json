@@ -57,6 +57,13 @@
       "when": 1770651354783,
       "tag": "0007_graceful_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1770651354784,
+      "tag": "0008_optimize_foreign_keys",
+      "breakpoints": true
     }
   ]
 }
