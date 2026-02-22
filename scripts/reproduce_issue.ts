@@ -1,15 +1,17 @@
-// scripts/reproduce_issue.ts
+// Script to reproduce the performance issue
 
 console.log('--- Performance Optimization Simulation ---\n');
 
 // Mock dependencies with delays
 async function getArticleSection(columnId: number) {
-  await new Promise(resolve => setTimeout(resolve, 100)); // Simulate DB latency
+  // Simulate DB latency
+  await new Promise((resolve) => setTimeout(resolve, 100));
   return { id: columnId, name: 'Section Name' };
 }
 
-async function processRtfContent(content: string, id: number) {
-  await new Promise(resolve => setTimeout(resolve, 150)); // Simulate CPU processing
+async function processRtfContent(content: string, _id: number) {
+  // Simulate CPU processing
+  await new Promise((resolve) => setTimeout(resolve, 150));
   return `<p>${content}</p>`;
 }
 
@@ -20,8 +22,10 @@ async function runSequential() {
   const article = { columnId: 1, content: 'rtf content', id: 123 };
 
   // Sequential execution
-  const section = article.columnId ? await getArticleSection(article.columnId) : null;
-  const rawHtmlContent = await processRtfContent(article.content, article.id);
+  if (article.columnId) {
+    await getArticleSection(article.columnId);
+  }
+  await processRtfContent(article.content, article.id);
 
   const end = performance.now();
   return end - start;
@@ -34,9 +38,9 @@ async function runConcurrent() {
   const article = { columnId: 1, content: 'rtf content', id: 123 };
 
   // Concurrent execution
-  const [section, rawHtmlContent] = await Promise.all([
+  await Promise.all([
     article.columnId ? getArticleSection(article.columnId) : Promise.resolve(null),
-    processRtfContent(article.content, article.id)
+    processRtfContent(article.content, article.id),
   ]);
 
   const end = performance.now();
