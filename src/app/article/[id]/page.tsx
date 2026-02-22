@@ -32,9 +32,10 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
     notFound();
   }
 
-  const section = article.columnId ? await getArticleSection(article.columnId) : null;
-
-  const rawHtmlContent = await processRtfContent(article.content as Buffer | string | null, id);
+  const [section, rawHtmlContent] = await Promise.all([
+    article.columnId ? getArticleSection(article.columnId) : Promise.resolve(null),
+    processRtfContent(article.content as Buffer | string | null, id),
+  ]);
 
   // Apply highlighting if search term is present
   const htmlContent = searchTerm ? highlightText(rawHtmlContent, searchTerm) : rawHtmlContent;
