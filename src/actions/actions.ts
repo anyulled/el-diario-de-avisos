@@ -362,17 +362,16 @@ export const getArticleHtml = unstable_cache(
     const article = await getCachedArticle(id);
     if (!article?.content) return "";
 
-    let contentBuffer: Buffer | string | null = article.content;
+    const contentBuffer: Buffer | string | null = article.content;
 
     // Handle the Buffer/object serialization issue
     if (contentBuffer && typeof contentBuffer === "object" && !Buffer.isBuffer(contentBuffer)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const obj = contentBuffer as { type: string; data: number[] };
       if (obj.type === "Buffer" && Array.isArray(obj.data)) {
-        contentBuffer = Buffer.from(obj.data);
+        return processRtfContentHtml(Buffer.from(obj.data), id);
       }
     } else if (typeof contentBuffer === "string") {
-      contentBuffer = Buffer.from(contentBuffer, "base64");
+      return processRtfContentHtml(Buffer.from(contentBuffer, "base64"), id);
     }
 
     return processRtfContentHtml(contentBuffer, id);
