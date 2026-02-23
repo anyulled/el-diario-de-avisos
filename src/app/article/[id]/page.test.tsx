@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import ArticlePage, { generateMetadata } from "./page";
 import * as actions from "@/actions/actions";
-import * as rtfConverter from "@/lib/rtf-html-converter";
 import * as highlighter from "@/lib/search-highlighter";
 
 // Mock dependencies
@@ -20,13 +19,9 @@ vi.mock("@/components/navbar", () => ({
 }));
 
 vi.mock("@/actions/actions", () => ({
-  getArticleById: vi.fn(),
   getArticleMetadata: vi.fn(),
+  getArticleHtml: vi.fn(),
   getArticleSection: vi.fn(),
-}));
-
-vi.mock("@/lib/rtf-html-converter", () => ({
-  processRtfContent: vi.fn(),
 }));
 
 vi.mock("@/lib/search-highlighter", () => ({
@@ -42,13 +37,13 @@ describe("ArticlePage", () => {
     id: 123,
     title: "Test Article",
     subtitle: "Test Subtitle",
-    content: "Test Content",
     publicationYear: 2023,
     page: 5,
     date: "2023-01-01",
     columnId: 1,
     publicationName: "Diario Test",
   };
+  const mockHtml = "<p>Processed Content</p>";
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -98,15 +93,15 @@ describe("ArticlePage", () => {
 
   describe("ArticleComponent", () => {
     it("renders article content correctly", async () => {
-      vi.mocked(actions.getArticleById).mockResolvedValue(mockArticle as any);
-
+      vi.mocked(actions.getArticleMetadata).mockResolvedValue(mockArticle as any);
+      vi.mocked(actions.getArticleHtml).mockResolvedValue(mockHtml);
       vi.mocked(actions.getArticleSection).mockResolvedValue({ name: "Music" } as any);
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Processed Content</p>");
 
       const params = Promise.resolve({ id: "123" }) as any;
       const searchParams = Promise.resolve({}) as any;
 
-      render(await ArticlePage({ params, searchParams }));
+      const ui = await ArticlePage({ params, searchParams });
+      render(ui);
 
       expect(screen.getByTestId("navbar")).toBeDefined();
       expect(screen.getByText("Formatted: Test Article")).toBeDefined();
@@ -123,7 +118,8 @@ describe("ArticlePage", () => {
     });
 
     it("calls notFound if article does not exist", async () => {
-      vi.mocked(actions.getArticleById).mockResolvedValue(null as any);
+      vi.mocked(actions.getArticleMetadata).mockResolvedValue(null as any);
+      vi.mocked(actions.getArticleHtml).mockResolvedValue("");
 
       const params = Promise.resolve({ id: "999" }) as any;
       const searchParams = Promise.resolve({}) as any;
@@ -138,39 +134,41 @@ describe("ArticlePage", () => {
     });
 
     it("highlights text if search term provided", async () => {
-      vi.mocked(actions.getArticleById).mockResolvedValue(mockArticle as any);
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Content with Term</p>");
+      vi.mocked(actions.getArticleMetadata).mockResolvedValue(mockArticle as any);
+      vi.mocked(actions.getArticleHtml).mockResolvedValue("<p>Content with Term</p>");
       vi.mocked(highlighter.highlightText).mockReturnValue("<p>Content with <mark>Term</mark></p>");
 
       const params = Promise.resolve({ id: "123" }) as any;
       const searchParams = Promise.resolve({ text: "Term" }) as any;
 
-      render(await ArticlePage({ params, searchParams }));
+      const ui = await ArticlePage({ params, searchParams });
+      render(ui);
 
       expect(highlighter.highlightText).toHaveBeenCalledWith("<p>Content with Term</p>", "Term");
     });
 
     it("renders default section name if none found", async () => {
-      vi.mocked(actions.getArticleById).mockResolvedValue({ ...mockArticle, columnId: null } as any);
-      // Get articleSection won't be called if columnId is null
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Content</p>");
+      vi.mocked(actions.getArticleMetadata).mockResolvedValue({ ...mockArticle, columnId: null } as any);
+      vi.mocked(actions.getArticleHtml).mockResolvedValue(mockHtml);
 
       const params = Promise.resolve({ id: "123" }) as any;
       const searchParams = Promise.resolve({}) as any;
 
-      render(await ArticlePage({ params, searchParams }));
+      const ui = await ArticlePage({ params, searchParams });
+      render(ui);
 
       expect(screen.getByText("Noticia")).toBeDefined();
     });
 
     it("renders year only if date is missing", async () => {
-      vi.mocked(actions.getArticleById).mockResolvedValue({ ...mockArticle, date: null } as any);
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Content</p>");
+      vi.mocked(actions.getArticleMetadata).mockResolvedValue({ ...mockArticle, date: null } as any);
+      vi.mocked(actions.getArticleHtml).mockResolvedValue(mockHtml);
 
       const params = Promise.resolve({ id: "123" }) as any;
       const searchParams = Promise.resolve({}) as any;
 
-      render(await ArticlePage({ params, searchParams }));
+      const ui = await ArticlePage({ params, searchParams });
+      render(ui);
 
       expect(screen.getByText("Año 2023")).toBeDefined();
     });

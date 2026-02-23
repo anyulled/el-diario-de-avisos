@@ -1,6 +1,5 @@
-import { getArticleById, getArticleMetadata, getArticleSection } from "@/actions/actions";
+import { getArticleHtml, getArticleMetadata, getArticleSection } from "@/actions/actions";
 import { Navbar } from "@/components/navbar";
-import { processRtfContent } from "@/lib/rtf-html-converter";
 import { highlightText } from "@/lib/search-highlighter";
 import { formatArticleTitle } from "@/lib/title-formatter";
 import { notFound } from "next/navigation";
@@ -26,16 +25,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ArticlePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ text?: string }> }) {
   const { id } = await params;
   const { text: searchTerm } = await searchParams;
-  const article = await getArticleById(Number(id));
+
+  const [article, rawHtmlContent] = await Promise.all([getArticleMetadata(Number(id)), getArticleHtml(Number(id))]);
 
   if (!article) {
     notFound();
   }
 
-  const [section, rawHtmlContent] = await Promise.all([
-    article.columnId ? getArticleSection(article.columnId) : Promise.resolve(null),
-    processRtfContent(article.content as Buffer | string | null, id),
-  ]);
+  const section = article.columnId ? await getArticleSection(article.columnId) : null;
 
   // Apply highlighting if search term is present
   const htmlContent = searchTerm ? highlightText(rawHtmlContent, searchTerm) : rawHtmlContent;

@@ -110,6 +110,8 @@ describe("Metadata Actions", () => {
     expect(selectArgs).toHaveProperty("date");
     expect(selectArgs).toHaveProperty("publicationYear");
     expect(selectArgs).toHaveProperty("page");
+    expect(selectArgs).toHaveProperty("columnId");
+    expect(selectArgs).toHaveProperty("publicationName");
 
     // Verify heavy columns are ABSENT
     expect(selectArgs).not.toHaveProperty("content");
