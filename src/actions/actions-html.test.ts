@@ -63,6 +63,49 @@ describe("getArticleHtml", () => {
     );
   });
 
+  it("returns processed HTML for serialized buffer object", async () => {
+    const mockData = [1, 2, 3];
+    const mockContent = { type: "Buffer", data: mockData };
+    const mockArticle = { content: mockContent };
+
+    // Mock DB response
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain([mockArticle]));
+
+    // Mock RTF conversion
+    vi.mocked(rtfHtmlConverter.processRtfContent).mockResolvedValue("<p>HTML Content</p>");
+
+    const result = await getArticleHtml(1);
+
+    expect(result).toBe("<p>HTML Content</p>");
+
+    expect(rtfHtmlConverter.processRtfContent).toHaveBeenCalledWith(
+      expect.objectContaining(Buffer.from(mockData)),
+      1,
+    );
+  });
+
+  it("returns processed HTML for base64 string content", async () => {
+    const mockData = "base64encoded";
+    const mockArticle = { content: mockData };
+
+    // Mock DB response
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain([mockArticle]));
+
+    // Mock RTF conversion
+    vi.mocked(rtfHtmlConverter.processRtfContent).mockResolvedValue("<p>HTML Content</p>");
+
+    const result = await getArticleHtml(1);
+
+    expect(result).toBe("<p>HTML Content</p>");
+
+    expect(rtfHtmlConverter.processRtfContent).toHaveBeenCalledWith(
+      expect.objectContaining(Buffer.from(mockData, "base64")),
+      1,
+    );
+  });
+
   it("returns empty string if article content is missing", async () => {
     // Mock DB response
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
