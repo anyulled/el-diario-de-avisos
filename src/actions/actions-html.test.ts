@@ -115,4 +115,14 @@ describe("getArticleHtml", () => {
 
     expect(result).toBe("");
   });
+
+  it("returns empty string if article exists but content is null", async () => {
+    // Mock DB response
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockReturnValue(createMockChain([{ id: 1, content: null }]));
+
+    const result = await getArticleHtml(1);
+
+    expect(result).toBe("");
+  });
 });
