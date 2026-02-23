@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { articles, developers, essays, members, publicationColumns, publications, tutors } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
+import { processRtfContent as processRtfContentHtml } from "@/lib/rtf-html-converter";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
@@ -343,13 +344,39 @@ export const getArticleMetadata = unstable_cache(
         date: articles.date,
         publicationYear: articles.publicationYear,
         page: articles.page,
+        columnId: articles.columnId,
+        publicationName: publications.name,
       })
       .from(articles)
+      .leftJoin(publications, eq(articles.pubId, publications.id))
       .where(eq(articles.id, id))
       .limit(1);
     return result[0];
   },
   ["article-metadata-by-id"],
+  { tags: ["articles"], revalidate: 3600 },
+);
+
+export const getArticleHtml = unstable_cache(
+  async (id: number) => {
+    const article = await getCachedArticle(id);
+    if (!article?.content) return "";
+
+    const contentBuffer: Buffer | string | null = article.content;
+
+    // Handle the Buffer/object serialization issue
+    if (contentBuffer && typeof contentBuffer === "object" && !Buffer.isBuffer(contentBuffer)) {
+      const obj = contentBuffer as { type: string; data: number[] };
+      if (obj.type === "Buffer" && Array.isArray(obj.data)) {
+        return processRtfContentHtml(Buffer.from(obj.data), id);
+      }
+    } else if (typeof contentBuffer === "string") {
+      return processRtfContentHtml(Buffer.from(contentBuffer, "base64"), id);
+    }
+
+    return processRtfContentHtml(contentBuffer, id);
+  },
+  ["article-html-v1"],
   { tags: ["articles"], revalidate: 3600 },
 );
 
