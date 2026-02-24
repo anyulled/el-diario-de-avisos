@@ -35,14 +35,20 @@ describe("getArticlesOnThisDay", () => {
       },
     ];
 
-    const mockSelect = vi.fn().mockReturnValue({
+    const mockSelect = vi.fn();
+
+    // First call (IDs)
+    mockSelect.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue([{ id: 1 }]),
+      }),
+    });
+
+    // Second call (Full details)
+    mockSelect.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         leftJoin: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue(mockArticles),
-            }),
-          }),
+          where: vi.fn().mockResolvedValue(mockArticles),
         }),
       }),
     });
