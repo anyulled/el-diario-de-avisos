@@ -6,6 +6,7 @@ import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { processRtfContent as processRtfContentHtml } from "@/lib/rtf-html-converter";
 import { and, eq, getTableColumns, sql, inArray } from "drizzle-orm";
+import crypto from "crypto";
 import { unstable_cache } from "next/cache";
 
 // GetYears removed
@@ -417,7 +418,17 @@ export async function getArticlesOnThisDay(day: number, month: number) {
       if (matchingIds.length === 0) return [];
 
       // Step 2: Sample up to 10 IDs in JavaScript
-      const shuffled = matchingIds.sort(() => 0.5 - Math.random());
+      /**
+       * Safe shuffle using crypto.getRandomValues() to avoid SonarCloud security hotspots
+       * Math.random() is flagged as insecure for cryptographic use, though fine here.
+       * We use a simple Fisher-Yates shuffle with crypto for robustness.
+       */
+      const shuffled = [...matchingIds];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = crypto.randomInt(0, i + 1);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
       const selectedIds = shuffled.slice(0, 10).map((i) => i.id);
 
       // Step 3: Fetch full details for selected IDs
@@ -439,7 +450,11 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         .where(inArray(articles.id, selectedIds));
 
       // Shuffle the results again to ensure random presentation order (inArray may return in ID order)
-      const shuffledNews = news.sort(() => 0.5 - Math.random());
+      const shuffledNews = [...news];
+      for (let i = shuffledNews.length - 1; i > 0; i--) {
+        const j = crypto.randomInt(0, i + 1);
+        [shuffledNews[i], shuffledNews[j]] = [shuffledNews[j], shuffledNews[i]];
+      }
 
       return await Promise.all(
         shuffledNews.map(async (item) => {
