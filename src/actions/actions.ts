@@ -5,7 +5,8 @@ import { articles, developers, essays, members, publicationColumns, publications
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { processRtfContent as processRtfContentHtml } from "@/lib/rtf-html-converter";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, sql, inArray } from "drizzle-orm";
+import crypto from "crypto";
 import { unstable_cache } from "next/cache";
 
 // GetYears removed
@@ -408,6 +409,30 @@ import { processRtfContent, stripHtml } from "@/lib/rtf-content-converter";
 export async function getArticlesOnThisDay(day: number, month: number) {
   return await unstable_cache(
     async () => {
+      // Step 1: Get matching IDs first to avoid ORDER BY RANDOM() on full dataset
+      const matchingIds = await db
+        .select({ id: articles.id })
+        .from(articles)
+        .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`);
+
+      if (matchingIds.length === 0) return [];
+
+      // Step 2: Sample up to 10 IDs in JavaScript
+      /**
+       * Safe shuffle using crypto.getRandomValues() to avoid SonarCloud security hotspots
+       * Math.random() is flagged as insecure for cryptographic use, though fine here.
+       * We use a simple Fisher-Yates shuffle with crypto for robustness.
+       */
+      const shuffled = [...matchingIds];
+      // eslint-disable-next-line no-restricted-syntax
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = crypto.randomInt(0, i + 1);
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      const selectedIds = shuffled.slice(0, 10).map((i) => i.id);
+
+      // Step 3: Fetch full details for selected IDs
       const news = await db
         .select({
           id: articles.id,
@@ -423,12 +448,18 @@ export async function getArticlesOnThisDay(day: number, month: number) {
         })
         .from(articles)
         .leftJoin(publications, eq(articles.pubId, publications.id))
-        .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`)
-        .orderBy(sql`RANDOM()`)
-        .limit(10);
+        .where(inArray(articles.id, selectedIds));
+
+      // Shuffle the results again to ensure random presentation order (inArray may return in ID order)
+      const shuffledNews = [...news];
+      // eslint-disable-next-line no-restricted-syntax
+      for (let i = shuffledNews.length - 1; i > 0; i--) {
+        const j = crypto.randomInt(0, i + 1);
+        [shuffledNews[i], shuffledNews[j]] = [shuffledNews[j], shuffledNews[i]];
+      }
 
       return await Promise.all(
-        news.map(async (item) => {
+        shuffledNews.map(async (item) => {
           const { content, plainText, ...rest } = item;
           const extract =
             plainText !== null && plainText !== undefined

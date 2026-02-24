@@ -24,30 +24,54 @@ describe("getArticlesOnThisDay Columns Optimization", () => {
 
   it("should select only necessary columns", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
-    const mockChain = {
-        from: vi.fn().mockReturnThis(),
-        leftJoin: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        orderBy: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue([]),
+
+    // First call (IDs)
+    const idsChain = {
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockResolvedValue([{ id: 1 }]),
     };
-    mockSelect.mockReturnValue(mockChain);
+
+    // Second call (Full details)
+    const detailsChain = {
+      from: vi.fn().mockReturnThis(),
+      leftJoin: vi.fn().mockReturnThis(),
+      where: vi.fn().mockResolvedValue([]),
+    };
+
+    mockSelect.mockReturnValueOnce(idsChain).mockReturnValueOnce(detailsChain);
 
     await getArticlesOnThisDay(1, 1);
 
-    const selection = mockSelect.mock.calls[0][0] as Record<string, unknown>;
+    // Check the second call (index 1) which selects the details
+    const selection = mockSelect.mock.calls[1][0] as Record<string, unknown>;
     const selectedKeys = Object.keys(selection);
 
     // Expected columns
     const expected = ["id", "title", "subtitle", "date", "publicationYear", "plainText", "content", "publicationName"];
 
-    expect(selectedKeys).toEqual(expect.arrayContaining(expected));
+    /**
+     * The selection object keys will include the aliases used in the query
+     * We iterate over expected keys and verify they exist in the selection object
+     */
+    expected.forEach((key) => {
+      expect(selection).toHaveProperty(key);
+    });
 
     // Check for some columns that should NOT be there
-    const forbidden = ["cota", "code2", "authorId", "isEditable", "observations", "publicationMonth", "issueNumber", "series", "microfilm"];
+    const forbidden = [
+      "cota",
+      "code2",
+      "authorId",
+      "isEditable",
+      "observations",
+      "publicationMonth",
+      "issueNumber",
+      "series",
+      "microfilm",
+    ];
 
-    forbidden.forEach(key => {
-        expect(selectedKeys).not.toContain(key);
+    forbidden.forEach((key) => {
+      expect(selectedKeys).not.toContain(key);
     });
   });
 });

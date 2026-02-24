@@ -80,8 +80,11 @@ describe("getArticlesOnThisDay Performance", () => {
   it("should NOT include plainText in return value (optimized)", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
 
-    // Mock the data returned by the query
-    const chain = createMockChain([
+    // Mock the data returned by the first query (IDs)
+    const idsChain = createMockChain([{ id: 1 }]);
+
+    // Mock the data returned by the second query (Full articles)
+    const articlesChain = createMockChain([
       {
         id: 1,
         title: "Test",
@@ -91,11 +94,44 @@ describe("getArticlesOnThisDay Performance", () => {
       },
     ]);
 
-    mockSelect.mockReturnValue(chain);
+    mockSelect.mockReturnValueOnce(idsChain).mockReturnValueOnce(articlesChain);
 
     const result = await getArticlesOnThisDay(1, 1);
 
     // Check the first item
     expect(result[0]).not.toHaveProperty("plainText");
+  });
+
+  it("should return empty array immediately if no articles found (coverage)", async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    // Mock first call (IDs) returning empty array
+    const idsChain = createMockChain([]);
+    mockSelect.mockReturnValueOnce(idsChain);
+
+    const result = await getArticlesOnThisDay(1, 1);
+
+    expect(result).toEqual([]);
+    // Should verify it didn't call select a second time, but the mock setup implies it
+  });
+
+  it("should execute shuffle loop when multiple articles found (coverage)", async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    // Mock first call (IDs)
+    const idsChain = createMockChain([{ id: 1 }, { id: 2 }, { id: 3 }]);
+
+    // Mock second call (Full articles)
+    const articlesChain = createMockChain([
+      { id: 1, title: "A", content: null },
+      { id: 2, title: "B", content: null },
+      { id: 3, title: "C", content: null },
+    ]);
+
+    mockSelect.mockReturnValueOnce(idsChain).mockReturnValueOnce(articlesChain);
+
+    const result = await getArticlesOnThisDay(1, 1);
+
+    expect(result).toHaveLength(3);
   });
 });

@@ -35,10 +35,27 @@ describe("getArticlesOnThisDay Content Optimization", () => {
   });
 
   it("should conditionally fetch content to avoid over-fetching", async () => {
+    // Setup sequential mocks
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+
+    // First call (IDs)
+    mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnThis(),
+        where: vi.fn().mockResolvedValue([{ id: 1 }]),
+    });
+
+    // Second call (Content)
+    mockSelect.mockReturnValueOnce({
+        from: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockResolvedValue([]),
+    });
+
     await getArticlesOnThisDay(1, 1);
 
+    // Check second call
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const selectCall = (db.select as any).mock.calls[0][0];
+    const selectCall = (db.select as any).mock.calls[1][0];
 
     // Check that content is defined in the selection
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
