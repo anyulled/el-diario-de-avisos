@@ -49,8 +49,10 @@ describe("getArticlesOnThisDay Columns Optimization", () => {
     // Expected columns
     const expected = ["id", "title", "subtitle", "date", "publicationYear", "plainText", "content", "publicationName"];
 
-    // The selection object keys will include the aliases used in the query
-    // We iterate over expected keys and verify they exist in the selection object
+    /**
+     * The selection object keys will include the aliases used in the query
+     * We iterate over expected keys and verify they exist in the selection object
+     */
     expected.forEach((key) => {
       expect(selection).toHaveProperty(key);
     });

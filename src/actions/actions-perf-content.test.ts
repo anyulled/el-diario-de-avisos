@@ -53,8 +53,9 @@ describe("getArticlesOnThisDay Content Optimization", () => {
 
     await getArticlesOnThisDay(1, 1);
 
+    // Check second call
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    const selectCall = (db.select as any).mock.calls[1][0]; // Check second call
+    const selectCall = (db.select as any).mock.calls[1][0];
 
     // Check that content is defined in the selection
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
