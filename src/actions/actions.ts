@@ -424,6 +424,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
        * We use a simple Fisher-Yates shuffle with crypto for robustness.
        */
       const shuffled = [...matchingIds];
+      // eslint-disable-next-line no-restricted-syntax
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = crypto.randomInt(0, i + 1);
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -451,6 +452,7 @@ export async function getArticlesOnThisDay(day: number, month: number) {
 
       // Shuffle the results again to ensure random presentation order (inArray may return in ID order)
       const shuffledNews = [...news];
+      // eslint-disable-next-line no-restricted-syntax
       for (let i = shuffledNews.length - 1; i > 0; i--) {
         const j = crypto.randomInt(0, i + 1);
         [shuffledNews[i], shuffledNews[j]] = [shuffledNews[j], shuffledNews[i]];
