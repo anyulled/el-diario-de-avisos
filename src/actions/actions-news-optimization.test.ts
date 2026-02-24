@@ -80,8 +80,11 @@ describe("getArticlesOnThisDay Performance", () => {
   it("should NOT include plainText in return value (optimized)", async () => {
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
 
-    // Mock the data returned by the query
-    const chain = createMockChain([
+    // Mock the data returned by the first query (IDs)
+    const idsChain = createMockChain([{ id: 1 }]);
+
+    // Mock the data returned by the second query (Full articles)
+    const articlesChain = createMockChain([
       {
         id: 1,
         title: "Test",
@@ -91,7 +94,7 @@ describe("getArticlesOnThisDay Performance", () => {
       },
     ]);
 
-    mockSelect.mockReturnValue(chain);
+    mockSelect.mockReturnValueOnce(idsChain).mockReturnValueOnce(articlesChain);
 
     const result = await getArticlesOnThisDay(1, 1);
 
