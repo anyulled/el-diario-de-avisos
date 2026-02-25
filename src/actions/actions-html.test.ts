@@ -72,8 +72,9 @@ describe("getArticleHtml", () => {
     await getArticleHtml(1);
 
     // Verify select was called with specific columns
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const selectCall = (db.select as any).mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    const selectCall = (db.select as any).mock.calls[0][0] as Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     expect(selectCall).toEqual({ content: expect.anything() });
   });
 
