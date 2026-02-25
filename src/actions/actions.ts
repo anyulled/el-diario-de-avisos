@@ -360,22 +360,13 @@ export const getArticleMetadata = unstable_cache(
 
 export const getArticleHtml = unstable_cache(
   async (id: number) => {
-    const article = await getCachedArticle(id);
-    if (!article?.content) return "";
+    // Optimization: Only fetch content, not all columns
+    const result = await db.select({ content: articles.content }).from(articles).where(eq(articles.id, id)).limit(1);
+    const content = result[0]?.content;
 
-    const contentBuffer: Buffer | string | null = article.content;
+    if (!content) return "";
 
-    // Handle the Buffer/object serialization issue
-    if (contentBuffer && typeof contentBuffer === "object" && !Buffer.isBuffer(contentBuffer)) {
-      const obj = contentBuffer as { type: string; data: number[] };
-      if (obj.type === "Buffer" && Array.isArray(obj.data)) {
-        return processRtfContentHtml(Buffer.from(obj.data), id);
-      }
-    } else if (typeof contentBuffer === "string") {
-      return processRtfContentHtml(Buffer.from(contentBuffer, "base64"), id);
-    }
-
-    return processRtfContentHtml(contentBuffer, id);
+    return processRtfContentHtml(content, id);
   },
   ["article-html-v1"],
   { tags: ["articles"], revalidate: 3600 },
