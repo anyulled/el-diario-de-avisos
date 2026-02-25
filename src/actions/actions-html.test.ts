@@ -53,9 +53,7 @@ describe("getArticleHtml", () => {
     expect(result).toBe("<p>HTML Content</p>");
 
     /**
-     * GetCachedArticle converts buffer to base64 string, and getArticleHtml converts it back.
-     * So processRtfContent receives a Buffer (which is what we expect).
-     * The content of the buffer should be the same as mockContent.
+     * The processed buffer should be passed to the converter.
      */
     expect(rtfHtmlConverter.processRtfContent).toHaveBeenCalledWith(
       expect.objectContaining(mockContent),
@@ -63,47 +61,20 @@ describe("getArticleHtml", () => {
     );
   });
 
-  it("returns processed HTML for serialized buffer object", async () => {
-    const mockData = [1, 2, 3];
-    const mockContent = { type: "Buffer", data: mockData };
+  it("fetches only content column from database", async () => {
+    const mockContent = Buffer.from("mock content");
     const mockArticle = { content: mockContent };
 
     // Mock DB response
     const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
     mockSelect.mockReturnValue(createMockChain([mockArticle]));
 
-    // Mock RTF conversion
-    vi.mocked(rtfHtmlConverter.processRtfContent).mockResolvedValue("<p>HTML Content</p>");
+    await getArticleHtml(1);
 
-    const result = await getArticleHtml(1);
-
-    expect(result).toBe("<p>HTML Content</p>");
-
-    expect(rtfHtmlConverter.processRtfContent).toHaveBeenCalledWith(
-      expect.objectContaining(Buffer.from(mockData)),
-      1,
-    );
-  });
-
-  it("returns processed HTML for base64 string content", async () => {
-    const mockData = "base64encoded";
-    const mockArticle = { content: mockData };
-
-    // Mock DB response
-    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
-    mockSelect.mockReturnValue(createMockChain([mockArticle]));
-
-    // Mock RTF conversion
-    vi.mocked(rtfHtmlConverter.processRtfContent).mockResolvedValue("<p>HTML Content</p>");
-
-    const result = await getArticleHtml(1);
-
-    expect(result).toBe("<p>HTML Content</p>");
-
-    expect(rtfHtmlConverter.processRtfContent).toHaveBeenCalledWith(
-      expect.objectContaining(Buffer.from(mockData, "base64")),
-      1,
-    );
+    // Verify select was called with specific columns
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const selectCall = (db.select as any).mock.calls[0][0];
+    expect(selectCall).toEqual({ content: expect.anything() });
   });
 
   it("returns empty string if article content is missing", async () => {
