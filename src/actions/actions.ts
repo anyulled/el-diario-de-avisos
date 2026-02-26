@@ -390,6 +390,20 @@ export const getEssayMetadata = unstable_cache(
   { tags: ["essays"], revalidate: 3600 },
 );
 
+export const getEssayHtml = unstable_cache(
+  async (id: number) => {
+    // Optimization: Only fetch content, not all columns
+    const result = await db.select({ content: essays.content }).from(essays).where(eq(essays.id, id)).limit(1);
+    const content = result[0]?.content;
+
+    if (!content) return "";
+
+    return processRtfContentHtml(content, id);
+  },
+  ["essay-html-v1"],
+  { tags: ["essays"], revalidate: 3600 },
+);
+
 export async function getArticleSection(columnId: number) {
   const result = await db.select().from(publicationColumns).where(eq(publicationColumns.id, columnId)).limit(1);
   return result[0];

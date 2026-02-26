@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import EssayPage, { generateMetadata } from "./page";
 import * as actions from "@/actions/actions";
-import * as rtfConverter from "@/lib/rtf-html-converter";
 
 // Mock dependencies
 vi.mock("next/navigation", () => ({
@@ -19,12 +18,8 @@ vi.mock("@/components/navbar", () => ({
 }));
 
 vi.mock("@/actions/actions", () => ({
-  getEssayById: vi.fn(),
+  getEssayHtml: vi.fn(),
   getEssayMetadata: vi.fn(),
-}));
-
-vi.mock("@/lib/rtf-html-converter", () => ({
-  processRtfContent: vi.fn(),
 }));
 
 describe("EssayPage", () => {
@@ -32,7 +27,6 @@ describe("EssayPage", () => {
     id: 1,
     title: "Test Essay",
     subtitle: "Test Subtitle",
-    content: "Test Content",
     observations: "Test Observations",
   };
 
@@ -100,8 +94,8 @@ describe("EssayPage", () => {
 
   describe("EssayComponent", () => {
     it("renders essay content correctly", async () => {
-      vi.mocked(actions.getEssayById).mockResolvedValue(mockEssay as any);
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Processed Content</p>");
+      vi.mocked(actions.getEssayMetadata).mockResolvedValue(mockEssay as any);
+      vi.mocked(actions.getEssayHtml).mockResolvedValue("<p>Processed Content</p>");
 
       const params = Promise.resolve({ id: "1" });
 
@@ -116,7 +110,8 @@ describe("EssayPage", () => {
     });
 
     it("calls notFound if essay does not exist", async () => {
-      vi.mocked(actions.getEssayById).mockResolvedValue(null as any);
+      vi.mocked(actions.getEssayMetadata).mockResolvedValue(null as any);
+      vi.mocked(actions.getEssayHtml).mockResolvedValue("");
 
       const params = Promise.resolve({ id: "999" }) as any;
 
@@ -130,8 +125,8 @@ describe("EssayPage", () => {
     });
 
     it("renders default title if missing", async () => {
-      vi.mocked(actions.getEssayById).mockResolvedValue({ ...mockEssay, title: null } as any);
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Content</p>");
+      vi.mocked(actions.getEssayMetadata).mockResolvedValue({ ...mockEssay, title: null } as any);
+      vi.mocked(actions.getEssayHtml).mockResolvedValue("<p>Content</p>");
 
       const params = Promise.resolve({ id: "1" });
 
@@ -141,8 +136,8 @@ describe("EssayPage", () => {
     });
 
     it("does not render subtitle if missing", async () => {
-      vi.mocked(actions.getEssayById).mockResolvedValue({ ...mockEssay, subtitle: null } as any);
-      vi.mocked(rtfConverter.processRtfContent).mockResolvedValue("<p>Content</p>");
+      vi.mocked(actions.getEssayMetadata).mockResolvedValue({ ...mockEssay, subtitle: null } as any);
+      vi.mocked(actions.getEssayHtml).mockResolvedValue("<p>Content</p>");
 
       const params = Promise.resolve({ id: "1" });
 
