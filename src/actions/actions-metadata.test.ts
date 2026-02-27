@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getIntegrantesNames, getTutoresNames, getDevelopersNames, getArticleMetadata, getEssayMetadata } from "./actions";
+import { getArticleMetadata, getEssayMetadata } from "./actions";
+import { getIntegrantesNames, getTutoresNames, getDevelopersNames } from "./team";
 import { db } from "@/db";
 
 vi.mock("next/cache", () => ({

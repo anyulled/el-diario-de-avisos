@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { articles, developers, essays, members, publicationColumns, publications, tutors } from "@/db/schema";
+import { articles, essays, publicationColumns, publications } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { processRtfContent as processRtfContentHtml } from "@/lib/rtf-html-converter";
-import { and, eq, getTableColumns, sql, inArray } from "drizzle-orm";
+import { and, eq, sql, inArray } from "drizzle-orm";
 import crypto from "crypto";
 import { unstable_cache } from "next/cache";
 
@@ -142,63 +142,6 @@ export async function getNews(params: SearchParams) {
   };
 }
 
-export async function getIntegrantes() {
-  return await db
-    .select({
-      ...getTableColumns(members),
-      publicationName: publications.name,
-    })
-    .from(members)
-    .leftJoin(publications, eq(members.pubId, publications.id));
-}
-
-export async function getTutores() {
-  return await db.select().from(tutors);
-}
-
-export async function getDevelopers() {
-  return await db.select().from(developers);
-}
-
-export const getIntegrantesNames = unstable_cache(
-  async () => {
-    return await db
-      .select({
-        firstName: members.firstName,
-        lastName: members.lastName,
-        publicationName: publications.name,
-      })
-      .from(members)
-      .leftJoin(publications, eq(members.pubId, publications.id));
-  },
-  ["integrantes-names"],
-  { revalidate: 3600, tags: ["integrantes"] },
-);
-
-export const getTutoresNames = unstable_cache(
-  async () => {
-    return await db
-      .select({
-        names: tutors.names,
-      })
-      .from(tutors);
-  },
-  ["tutores-names"],
-  { revalidate: 3600, tags: ["tutores"] },
-);
-
-export const getDevelopersNames = unstable_cache(
-  async () => {
-    return await db
-      .select({
-        firstName: developers.firstName,
-        lastName: developers.lastName,
-      })
-      .from(developers);
-  },
-  ["developers-names"],
-  { revalidate: 3600, tags: ["developers"] },
-);
 
 const getCachedArticle = unstable_cache(
   async (id: number) => {

@@ -2,7 +2,8 @@ import { vi, describe, it, expect } from "vitest";
 import AboutPage from "./page";
 
 // Mock the actions with delay
-vi.mock("@/actions/actions", () => ({
+vi.mock("@/actions/actions", () => ({}));
+vi.mock("@/actions/team", () => ({
   getIntegrantes: vi.fn(async () => {
     await new Promise((r) => setTimeout(r, 100));
     return [];
