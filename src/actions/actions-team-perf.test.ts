@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { getIntegrantes, getTutores, getDevelopers } from "./actions";
+import { getIntegrantes, getTutores, getDevelopers } from "./team";
 import { db } from "@/db";
 
 // Mock the database
@@ -83,3 +85,5 @@ describe("Team Actions Caching Optimization", () => {
     });
   });
 });
+/* eslint-enable @typescript-eslint/no-explicit-any */
+/* eslint-enable @typescript-eslint/no-unsafe-return */
