@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import AboutPage, { generateMetadata } from "./page";
-import * as actions from "@/actions/actions";
 import * as teamActions from "@/actions/team";
 
 // Mock the components
