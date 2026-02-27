@@ -142,23 +142,35 @@ export async function getNews(params: SearchParams) {
   };
 }
 
-export async function getIntegrantes() {
-  return await db
-    .select({
-      ...getTableColumns(members),
-      publicationName: publications.name,
-    })
-    .from(members)
-    .leftJoin(publications, eq(members.pubId, publications.id));
-}
+export const getIntegrantes = unstable_cache(
+  async () => {
+    return await db
+      .select({
+        ...getTableColumns(members),
+        publicationName: publications.name,
+      })
+      .from(members)
+      .leftJoin(publications, eq(members.pubId, publications.id));
+  },
+  ["integrantes"],
+  { revalidate: 3600, tags: ["integrantes"] },
+);
 
-export async function getTutores() {
-  return await db.select().from(tutors);
-}
+export const getTutores = unstable_cache(
+  async () => {
+    return await db.select().from(tutors);
+  },
+  ["tutores"],
+  { revalidate: 3600, tags: ["tutores"] },
+);
 
-export async function getDevelopers() {
-  return await db.select().from(developers);
-}
+export const getDevelopers = unstable_cache(
+  async () => {
+    return await db.select().from(developers);
+  },
+  ["developers"],
+  { revalidate: 3600, tags: ["developers"] },
+);
 
 export const getIntegrantesNames = unstable_cache(
   async () => {
