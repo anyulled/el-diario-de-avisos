@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import AboutPage, { generateMetadata } from "./page";
 import * as actions from "@/actions/actions";
+import * as teamActions from "@/actions/team";
 
 // Mock the components
 vi.mock("@/components/member-card", () => ({
@@ -29,7 +30,8 @@ vi.mock("@/components/navbar", () => ({
 }));
 
 // Mock the actions
-vi.mock("@/actions/actions", () => ({
+vi.mock("@/actions/actions", () => ({}));
+vi.mock("@/actions/team", () => ({
   getIntegrantes: vi.fn(),
   getTutores: vi.fn(),
   getDevelopers: vi.fn(),
@@ -51,9 +53,9 @@ describe("AboutPage - generateMetadata", () => {
     const mockTutores = [{ names: "Dr. Carlos Rodríguez" }];
     const mockDevelopers = [{ firstName: "Ana", lastName: "Martínez" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue(mockDevelopers);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue(mockDevelopers);
 
     const metadata = await generateMetadata();
 
@@ -65,9 +67,9 @@ describe("AboutPage - generateMetadata", () => {
   });
 
   it("sets correct canonical URL", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -75,9 +77,9 @@ describe("AboutPage - generateMetadata", () => {
   });
 
   it("configures OpenGraph metadata with image", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -94,9 +96,9 @@ describe("AboutPage - generateMetadata", () => {
   });
 
   it("configures Twitter card metadata", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -116,9 +118,9 @@ describe("AboutPage - generateMetadata", () => {
     }));
     const mockDevelopers = [{ firstName: "Dev", lastName: "One" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue(mockDevelopers);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue(mockDevelopers);
 
     const metadata = await generateMetadata();
 
@@ -126,9 +128,9 @@ describe("AboutPage - generateMetadata", () => {
   });
 
   it("handles empty team members gracefully", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -144,9 +146,9 @@ describe("AboutPage - generateMetadata", () => {
     const mockTutores = [{ names: "Valid Tutor" }, { names: "" }];
     const mockDevelopers = [{ firstName: "", lastName: "" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
-    vi.mocked(actions.getDevelopersNames).mockResolvedValue(mockDevelopers);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getDevelopersNames).mockResolvedValue(mockDevelopers);
 
     const metadata = await generateMetadata();
 
@@ -163,9 +165,9 @@ describe("AboutPage - Component", () => {
   });
 
   it("renders the page with navbar", async () => {
-    vi.mocked(actions.getIntegrantes).mockResolvedValue([]);
-    vi.mocked(actions.getTutores).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopers).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutores).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue([]);
 
     const page = await AboutPage();
     render(page);
@@ -175,9 +177,9 @@ describe("AboutPage - Component", () => {
   });
 
   it("displays the main heading", async () => {
-    vi.mocked(actions.getIntegrantes).mockResolvedValue([]);
-    vi.mocked(actions.getTutores).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopers).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutores).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue([]);
 
     const page = await AboutPage();
     render(page);
@@ -235,9 +237,9 @@ describe("AboutPage - Component", () => {
       },
     ];
 
-    vi.mocked(actions.getIntegrantes).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutores).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopers).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutores).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue([]);
 
     const page = await AboutPage();
     render(page);
@@ -265,9 +267,9 @@ describe("AboutPage - Component", () => {
       },
     ];
 
-    vi.mocked(actions.getIntegrantes).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutores).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopers).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutores).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue([]);
 
     const page = await AboutPage();
     render(page);
@@ -289,9 +291,9 @@ describe("AboutPage - Component", () => {
       },
     ];
 
-    vi.mocked(actions.getIntegrantes).mockResolvedValue([]);
-    vi.mocked(actions.getTutores).mockResolvedValue(mockTutores);
-    vi.mocked(actions.getDevelopers).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutores).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue([]);
 
     const page = await AboutPage();
     render(page);
@@ -315,9 +317,9 @@ describe("AboutPage - Component", () => {
       },
     ];
 
-    vi.mocked(actions.getIntegrantes).mockResolvedValue([]);
-    vi.mocked(actions.getTutores).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopers).mockResolvedValue(mockDevelopers);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutores).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue(mockDevelopers);
 
     const page = await AboutPage();
     render(page);
@@ -372,9 +374,9 @@ describe("AboutPage - Component", () => {
       },
     ];
 
-    vi.mocked(actions.getIntegrantes).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutores).mockResolvedValue(mockTutores);
-    vi.mocked(actions.getDevelopers).mockResolvedValue(mockDevelopers);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutores).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue(mockDevelopers);
 
     const page = await AboutPage();
     render(page);
@@ -385,14 +387,14 @@ describe("AboutPage - Component", () => {
   });
 
   it("fetches all data in parallel", async () => {
-    vi.mocked(actions.getIntegrantes).mockResolvedValue([]);
-    vi.mocked(actions.getTutores).mockResolvedValue([]);
-    vi.mocked(actions.getDevelopers).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantes).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutores).mockResolvedValue([]);
+    vi.mocked(teamActions.getDevelopers).mockResolvedValue([]);
 
     await AboutPage();
 
-    expect(actions.getIntegrantes).toHaveBeenCalledTimes(1);
-    expect(actions.getTutores).toHaveBeenCalledTimes(1);
-    expect(actions.getDevelopers).toHaveBeenCalledTimes(1);
+    expect(teamActions.getIntegrantes).toHaveBeenCalledTimes(1);
+    expect(teamActions.getTutores).toHaveBeenCalledTimes(1);
+    expect(teamActions.getDevelopers).toHaveBeenCalledTimes(1);
   });
 });

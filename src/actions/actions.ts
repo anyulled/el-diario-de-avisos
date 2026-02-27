@@ -142,7 +142,6 @@ export async function getNews(params: SearchParams) {
   };
 }
 
-export { getIntegrantes, getTutores, getDevelopers, getIntegrantesNames, getTutoresNames, getDevelopersNames } from "./team";
 
 const getCachedArticle = unstable_cache(
   async (id: number) => {

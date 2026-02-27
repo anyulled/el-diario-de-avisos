@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getIntegrantes, getTutores, getDevelopers, getEssays, getArticleSection } from "./actions";
+import { getEssays, getArticleSection } from "./actions";
 import { db } from "@/db";
 
 vi.mock("@/db", () => {
@@ -50,20 +50,6 @@ describe("getNews Performance", () => {
     // This test is empty in the original file as well
   });
 
-  it("getIntegrantes returns data", async () => {
-    const result = await getIntegrantes();
-    expect(result).toBeDefined();
-  });
-
-  it("getTutores returns data", async () => {
-    const result = await getTutores();
-    expect(result).toBeDefined();
-  });
-
-  it("getDevelopers returns data", async () => {
-    const result = await getDevelopers();
-    expect(result).toBeDefined();
-  });
 
   it("getEssays returns data with fallback groupName", async () => {
     // Mock db.select().from().leftJoin().then()

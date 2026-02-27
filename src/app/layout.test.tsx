@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import RootLayout, { generateMetadata } from "./layout";
 import * as actions from "@/actions/actions";
+import * as teamActions from "@/actions/team";
 
 // Mock all the components and dependencies
 vi.mock("@/components/chat-widget", () => ({
@@ -26,7 +27,8 @@ vi.mock("next/font/google", () => ({
   Playfair_Display: () => ({ variable: "--font-playfair" }),
 }));
 
-vi.mock("@/actions/actions", () => ({
+vi.mock("@/actions/actions", () => ({}));
+vi.mock("@/actions/team", () => ({
   getIntegrantesNames: vi.fn(),
   getTutoresNames: vi.fn(),
 }));
@@ -121,8 +123,8 @@ describe("generateMetadata", () => {
 
     const mockTutores = [{ names: "Dr. Carlos Rodríguez" }, { names: "Dra. Ana Martínez" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
 
     const metadata = await generateMetadata();
 
@@ -138,8 +140,8 @@ describe("generateMetadata", () => {
   });
 
   it("sets correct metadataBase URL", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -147,8 +149,8 @@ describe("generateMetadata", () => {
   });
 
   it("configures OpenGraph metadata correctly", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -163,8 +165,8 @@ describe("generateMetadata", () => {
   });
 
   it("configures Twitter card metadata correctly", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -176,8 +178,8 @@ describe("generateMetadata", () => {
   });
 
   it("sets robots to index and follow", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -191,8 +193,8 @@ describe("generateMetadata", () => {
     const mockIntegrantes = [{ firstName: "Test", lastName: "User", publicationName: null }];
     const mockTutores = [{ names: "Test Tutor" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
 
     const metadata = await generateMetadata();
 
@@ -203,8 +205,8 @@ describe("generateMetadata", () => {
   });
 
   it("handles empty integrantes and tutores arrays", async () => {
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue([]);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue([]);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue([]);
 
     const metadata = await generateMetadata();
 
@@ -223,8 +225,8 @@ describe("generateMetadata", () => {
 
     const mockTutores = [{ names: "Valid Tutor" }, { names: "" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
 
     const metadata = await generateMetadata();
 
@@ -236,12 +238,12 @@ describe("generateMetadata", () => {
     const mockIntegrantes = [{ firstName: "Test", lastName: "User", publicationName: null }];
     const mockTutores = [{ names: "Test Tutor" }];
 
-    vi.mocked(actions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
-    vi.mocked(actions.getTutoresNames).mockResolvedValue(mockTutores);
+    vi.mocked(teamActions.getIntegrantesNames).mockResolvedValue(mockIntegrantes);
+    vi.mocked(teamActions.getTutoresNames).mockResolvedValue(mockTutores);
 
     await generateMetadata();
 
-    expect(actions.getIntegrantesNames).toHaveBeenCalledTimes(1);
-    expect(actions.getTutoresNames).toHaveBeenCalledTimes(1);
+    expect(teamActions.getIntegrantesNames).toHaveBeenCalledTimes(1);
+    expect(teamActions.getTutoresNames).toHaveBeenCalledTimes(1);
   });
 });
