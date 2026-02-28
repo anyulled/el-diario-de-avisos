@@ -75,7 +75,13 @@ function createAccentInsensitivePattern(char: string): string {
   return char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+const patternCache = new Map<string, string>();
+
 function createSearchPattern(searchTerm: string): RegExp {
+  if (patternCache.has(searchTerm)) {
+    return new RegExp(`(${patternCache.get(searchTerm)})`, "gi");
+  }
+
   const pattern = searchTerm
     .split("")
     .map((char) => {
@@ -86,6 +92,13 @@ function createSearchPattern(searchTerm: string): RegExp {
     })
     .join("");
 
+  // Prevent memory leaks by limiting cache size
+  if (patternCache.size > 100) {
+    const firstKey = patternCache.keys().next().value;
+    if (firstKey !== undefined) patternCache.delete(firstKey);
+  }
+
+  patternCache.set(searchTerm, pattern);
   return new RegExp(`(${pattern})`, "gi");
 }
 
