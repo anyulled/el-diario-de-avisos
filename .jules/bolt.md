@@ -52,3 +52,8 @@
 
 **Learning:** Cached `getEssayById` using `unstable_cache`. Since `essay.content` is a `Buffer` (bytea), it must be manually converted to Base64 before caching and back to Buffer after retrieval, as `unstable_cache` serializes to JSON inefficiently for Buffers.
 **Action:** Always handle Buffer serialization manually when using `unstable_cache` with Drizzle `bytea` columns.
+
+## 2026-03-01 - Article Section Caching
+
+**Learning:** \`getArticleSection\` was being queried on every visit to an article detail page (\`/article/[id]\`). The section names change very rarely and are perfect for caching.
+**Action:** Wrapped \`getArticleSection\` with \`unstable_cache\`, linking it to the \`news-types\` cache tag so it remains synchronized if the sections table updates.

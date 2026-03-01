@@ -333,10 +333,14 @@ export const getEssayMetadata = unstable_cache(
   { tags: ["essays"], revalidate: 3600 },
 );
 
-export async function getArticleSection(columnId: number) {
-  const result = await db.select().from(publicationColumns).where(eq(publicationColumns.id, columnId)).limit(1);
-  return result[0];
-}
+export const getArticleSection = unstable_cache(
+  async (columnId: number) => {
+    const result = await db.select().from(publicationColumns).where(eq(publicationColumns.id, columnId)).limit(1);
+    return result[0];
+  },
+  ["article-section"],
+  { tags: ["news-types"], revalidate: 3600 },
+);
 
 import { processRtfContent, stripHtml } from "@/lib/rtf-content-converter";
 

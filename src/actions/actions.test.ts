@@ -31,6 +31,11 @@ vi.mock("@/lib/date-range", () => ({
   normalizeDateRange: () => ({ start: null, end: null, isValidRange: true }),
 }));
 
+vi.mock("next/cache", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
+  unstable_cache: (fn: any) => fn,
+}));
+
 vi.mock("@/lib/news-order", () => ({
   getNewsOrderBy: () => [],
 }));
