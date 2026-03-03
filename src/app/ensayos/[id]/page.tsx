@@ -1,6 +1,5 @@
-import { getEssayById, getEssayMetadata } from "@/actions/actions";
+import { getEssayHtml, getEssayMetadata } from "@/actions/actions";
 import { Navbar } from "@/components/navbar";
-import { processRtfContent } from "@/lib/rtf-html-converter";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
@@ -22,13 +21,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function EssayPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const essay = await getEssayById(Number(id));
+
+  const [essay, htmlContent] = await Promise.all([getEssayMetadata(Number(id)), getEssayHtml(Number(id))]);
 
   if (!essay) {
     notFound();
   }
-
-  const htmlContent = await processRtfContent(essay.content as Buffer | string | null, id);
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950 pb-20">

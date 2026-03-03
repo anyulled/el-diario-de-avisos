@@ -1,5 +1,5 @@
 import { vi, describe, it, expect } from "vitest";
-import { getEssayById } from "./actions";
+import { getEssayById, getEssayHtml } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -36,9 +36,14 @@ vi.mock("@/db", () => ({
 vi.mock("@/db/schema", () => ({
   essays: {
     id: "id",
+    content: "content",
   },
   eq: () => {},
   and: () => {},
+}));
+
+vi.mock("@/lib/rtf-html-converter", () => ({
+  processRtfContent: vi.fn().mockResolvedValue("<p>Processed HTML</p>"),
 }));
 
 vi.mock("drizzle-orm", () => ({
@@ -55,6 +60,14 @@ describe("getEssayById", () => {
     expect(result?.id).toBe(1);
     expect(Buffer.isBuffer(result?.content)).toBe(true);
     expect(result?.content?.toString()).toBe("test content");
+  });
+});
+
+describe("getEssayHtml", () => {
+  it("should return processed html content", async () => {
+    const result = await getEssayHtml(1);
+    expect(result).toBeDefined();
+    expect(result).toBe("<p>Processed HTML</p>");
   });
 });
 
