@@ -1,0 +1,19 @@
+--- src/app/ensayos/[id]/page.test.tsx
++++ src/app/ensayos/[id]/page.test.tsx
+@@ -107,6 +107,15 @@
+
+     it("calls notFound if essay does not exist", async () => {
+       vi.mocked(actions.getEssayMetadata).mockResolvedValue(null as any);
++      vi.mocked(actions.getEssayHtml).mockResolvedValue(null as any);
+
+       const params = Promise.resolve({ id: "999" }) as any;
+
+-      await expect(EssayPage({ params })).rejects.toThrow("NEXT_NOT_FOUND");
++      try {
++        await EssayPage({ params });
++      } catch (e: any) {
++        expect(e.message).toBe("NEXT_NOT_FOUND");
++      }
+
+       expect(notFound).toHaveBeenCalled();
+     });

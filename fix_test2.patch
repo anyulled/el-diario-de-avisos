@@ -1,0 +1,15 @@
+--- src/app/ensayos/[id]/page.test.tsx
++++ src/app/ensayos/[id]/page.test.tsx
+@@ -112,11 +112,7 @@
+
+       const params = Promise.resolve({ id: "999" }) as any;
+
+-      try {
+-        await EssayPage({ params });
+-      } catch {
+-        // Expected
+-      }
++      await expect(EssayPage({ params })).rejects.toThrow("NEXT_NOT_FOUND");
+
+       expect(notFound).toHaveBeenCalled();
+     });

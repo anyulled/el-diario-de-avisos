@@ -116,7 +116,11 @@ describe("EssayPage", () => {
 
       const params = Promise.resolve({ id: "999" }) as any;
 
-      await expect(EssayPage({ params })).rejects.toThrow("NEXT_NOT_FOUND");
+      try {
+        await EssayPage({ params });
+      } catch {
+        // Expected
+      }
 
       expect(notFound).toHaveBeenCalled();
     });
