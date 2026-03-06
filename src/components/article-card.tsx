@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { articles } from "@/db/schema";
 import { highlightText } from "@/lib/search-highlighter";
 import { formatArticleTitle } from "@/lib/title-formatter";
@@ -13,8 +14,10 @@ export function ArticleCard({
   const href = searchTerm ? `/article/${item.id}?text=${encodeURIComponent(searchTerm)}` : `/article/${item.id}`;
   const title = formatArticleTitle(item.title);
   const subtitle = item.subtitle || "";
-  const highlightedTitle = searchTerm ? highlightText(title, searchTerm) : title;
-  const highlightedSubtitle = searchTerm ? highlightText(subtitle, searchTerm) : subtitle;
+
+  // ⚡ Bolt: Memoize expensive highlight computations to prevent recalculating on re-renders
+  const highlightedTitle = useMemo(() => (searchTerm ? highlightText(title, searchTerm) : title), [searchTerm, title]);
+  const highlightedSubtitle = useMemo(() => (searchTerm ? highlightText(subtitle, searchTerm) : subtitle), [searchTerm, subtitle]);
 
   return (
     <Link href={href} className="block group">
