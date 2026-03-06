@@ -57,3 +57,7 @@
 
 **Learning:** \`getArticleSection\` was being queried on every visit to an article detail page (\`/article/[id]\`). The section names change very rarely and are perfect for caching.
 **Action:** Wrapped \`getArticleSection\` with \`unstable_cache\`, linking it to the \`news-types\` cache tag so it remains synchronized if the sections table updates.
+
+## 2024-05-30 - [Memoizing highlightText]
+**Learning:** In the `ArticleCard` component, `highlightText` was being executed directly on every render, which becomes a bottleneck when processing large numbers of results or during fast re-renders (like user typing in the search bar). This codebase uses a custom `highlightText` function with complex regular expression generation.
+**Action:** Use `useMemo` for any string manipulations that rely on regex or loop operations (like `highlightText` or `formatArticleTitle`) within list items or frequently re-rendered components, using `searchTerm` and `title`/`subtitle` as dependencies.
