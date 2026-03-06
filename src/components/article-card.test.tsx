@@ -97,4 +97,13 @@ describe("ArticleCard", () => {
 
     expect(screen.getByText("2020")).toBeDefined();
   });
+
+  it("handles missing subtitle gracefully", () => {
+    const itemWithoutSubtitle = { ...mockItem, subtitle: null };
+
+    render(<ArticleCard item={itemWithoutSubtitle as any} searchTerm="search" />);
+
+    // Since subtitle is null, it should use "" and highlightText should be called with ""
+    expect(highlightText).toHaveBeenCalledWith("", "search");
+  });
 });
