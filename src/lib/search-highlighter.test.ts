@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { highlightText } from "./search-highlighter";
 
 describe("highlightText", () => {
+  it("should handle plain text strings correctly", () => {
+    const text = "Hello world";
+    const result = highlightText(text, "world");
+    expect(result).toBe("Hello <mark>world</mark>");
+  });
+
   it("should return original HTML when search term is empty", () => {
     const html = "<p>Hello world</p>";
     expect(highlightText(html, "")).toBe(html);
