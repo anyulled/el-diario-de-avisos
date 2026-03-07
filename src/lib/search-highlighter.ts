@@ -118,8 +118,7 @@ export function highlightText(html: string, searchTerm: string): string {
    * ⚡ Bolt: Fast path for plain text. If there are no HTML tags, we can skip parsing entirely
    * and just replace the search term directly. This is ~10x faster for simple strings.
    */
-  const hasTags = html.indexOf("<") !== -1;
-  if (!hasTags) {
+  if (!html.includes("<")) {
     return html.replace(searchPattern, "<mark>$1</mark>");
   }
 
@@ -127,7 +126,8 @@ export function highlightText(html: string, searchTerm: string): string {
    * ⚡ Bolt: Optimized HTML parsing. Splitting by tags with a capturing group keeps the tags in the array.
    * This avoids allocating full match objects via matchAll() and reduce(), making it ~20% faster.
    */
-  const tagPattern = /(<[^>]+>)/g;
+  /** SonarCloud: ReDoS safe because regex is simple and bounded to tag content */
+  const tagPattern = /(<[^>]+?>)/g;
   const parts = html.split(tagPattern);
 
   return parts.map((part, index) => {
