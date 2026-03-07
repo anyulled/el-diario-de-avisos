@@ -114,20 +114,24 @@ export function highlightText(html: string, searchTerm: string): string {
 
   const searchPattern = createSearchPattern(trimmedTerm);
 
-  // ⚡ Bolt: Fast path for plain text. If there are no HTML tags, we can skip parsing entirely
-  // and just replace the search term directly. This is ~10x faster for simple strings.
+  /**
+   * ⚡ Bolt: Fast path for plain text. If there are no HTML tags, we can skip parsing entirely
+   * and just replace the search term directly. This is ~10x faster for simple strings.
+   */
   const hasTags = html.indexOf("<") !== -1;
   if (!hasTags) {
     return html.replace(searchPattern, "<mark>$1</mark>");
   }
 
-  // ⚡ Bolt: Optimized HTML parsing. Splitting by tags with a capturing group keeps the tags in the array.
-  // This avoids allocating full match objects via matchAll() and reduce(), making it ~20% faster.
+  /**
+   * ⚡ Bolt: Optimized HTML parsing. Splitting by tags with a capturing group keeps the tags in the array.
+   * This avoids allocating full match objects via matchAll() and reduce(), making it ~20% faster.
+   */
   const tagPattern = /(<[^>]+>)/g;
   const parts = html.split(tagPattern);
 
   return parts.map((part, index) => {
-    // Text nodes are at even indices, tags are at odd indices
+    /** Text nodes are at even indices, tags are at odd indices */
     if (index % 2 === 0 && part) {
       return part.replace(searchPattern, "<mark>$1</mark>");
     }
