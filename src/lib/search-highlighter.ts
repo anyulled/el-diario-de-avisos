@@ -126,8 +126,10 @@ export function highlightText(html: string, searchTerm: string): string {
    * ⚡ Bolt: Optimized HTML parsing. Splitting by tags with a capturing group keeps the tags in the array.
    * This avoids allocating full match objects via matchAll() and reduce(), making it ~20% faster.
    */
-  /** SonarCloud: ReDoS safe because regex is simple and bounded to tag content */
-  const tagPattern = /(<[^>]+?>)/g;
+  /**
+   * SonarCloud: ReDoS safe because regex is simple and bounded to tag content
+   */
+  const tagPattern = /(<[^>]*>)/g;
   const parts = html.split(tagPattern);
 
   return parts.map((part, index) => {
