@@ -9,8 +9,9 @@
   · clientTraceMetadata
 
 ✓ Starting...
-✓ Ready in 2.3s
-(node:21182) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+✓ Ready in 8.9s
+○ Compiling / ...
+(node:26797) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -19,28 +20,27 @@ To prepare for this change:
 
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
- GET / 200 in 4.1s (compile: 1277ms, render: 2.9s)
- GET / 200 in 524ms (compile: 17ms, render: 507ms)
- GET /?page=1&text=Titulo 200 in 209ms (compile: 7ms, render: 202ms)
- GET / 200 in 1262ms (compile: 12ms, render: 1250ms)
- GET /?page=1&text=Titulo 200 in 465ms (compile: 14ms, render: 451ms)
- GET / 200 in 470ms (compile: 6ms, render: 463ms)
- GET /?page=1&text=Jose 200 in 343ms (compile: 8ms, render: 335ms)
- GET / 200 in 480ms (compile: 7ms, render: 474ms)
- GET /?page=1&text=Titulo 200 in 486ms (compile: 8ms, render: 478ms)
- GET /article/39862 200 in 1074ms (compile: 988ms, render: 85ms)
- GET / 200 in 465ms (compile: 6ms, render: 459ms)
- GET /?page=1&text=Titulo 200 in 431ms (compile: 7ms, render: 425ms)
- GET /article/39862?text=Titulo 200 in 102ms (compile: 39ms, render: 63ms)
- GET / 200 in 472ms (compile: 5ms, render: 466ms)
- GET /?page=1 200 in 127ms (compile: 7ms, render: 120ms)
- GET / 200 in 469ms (compile: 5ms, render: 464ms)
- GET /?page=1&text=xyzabc123nonexistent 200 in 280ms (compile: 6ms, render: 273ms)
- GET / 200 in 596ms (compile: 11ms, render: 585ms)
- GET /?page=1&text=Titulo 200 in 381ms (compile: 10ms, render: 371ms)
- GET /?page=1 200 in 156ms (compile: 7ms, render: 149ms)
- GET / 200 in 449ms (compile: 5ms, render: 444ms)
- GET /?page=1&text=%28P.+4%29 200 in 139ms (compile: 8ms, render: 131ms)
- GET / 200 in 460ms (compile: 5ms, render: 455ms)
- GET /?page=1&text=Titulo 200 in 186ms (compile: 8ms, render: 178ms)
-[?25h
+ GET / 200 in 9.2s (compile: 5.2s, render: 4.0s)
+ GET / 200 in 531ms (compile: 11ms, render: 520ms)
+ GET /?page=1&text=Titulo 200 in 245ms (compile: 10ms, render: 234ms)
+ GET / 200 in 1174ms (compile: 6ms, render: 1168ms)
+ GET /?page=1&text=Titulo 200 in 446ms (compile: 7ms, render: 439ms)
+ GET / 200 in 461ms (compile: 6ms, render: 455ms)
+ GET /?page=1&text=Jose 200 in 316ms (compile: 9ms, render: 307ms)
+ GET / 200 in 452ms (compile: 5ms, render: 447ms)
+ GET /?page=1&text=Titulo 200 in 757ms (compile: 8ms, render: 748ms)
+ GET /article/39862 200 in 1451ms (compile: 1351ms, render: 99ms)
+ GET / 200 in 470ms (compile: 5ms, render: 465ms)
+ GET /?page=1&text=Titulo 200 in 441ms (compile: 9ms, render: 432ms)
+ GET /article/39862?text=Titulo 200 in 136ms (compile: 49ms, render: 87ms)
+ GET / 200 in 488ms (compile: 6ms, render: 481ms)
+ GET /?page=1 200 in 126ms (compile: 5ms, render: 121ms)
+ GET / 200 in 1151ms (compile: 5ms, render: 1146ms)
+ GET /?page=1&text=xyzabc123nonexistent 200 in 146ms (compile: 7ms, render: 138ms)
+ GET / 200 in 1168ms (compile: 5ms, render: 1163ms)
+ GET /?page=1 200 in 162ms (compile: 6ms, render: 156ms)
+ GET /?page=1&text=Titulo 200 in 414ms (compile: 5ms, render: 409ms)
+ GET / 200 in 440ms (compile: 5ms, render: 436ms)
+ GET /?page=1&text=%28P.+4%29 200 in 273ms (compile: 11ms, render: 263ms)
+ GET / 200 in 633ms (compile: 8ms, render: 625ms)
+ GET /?page=1&text=Titulo 200 in 166ms (compile: 6ms, render: 160ms)
