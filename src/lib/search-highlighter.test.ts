@@ -125,5 +125,7 @@ describe("highlightText", () => {
     Array.from({ length: 50 }).forEach((_, i) => {
       highlightText("test", `term_b${i}`);
     });
+    // Add assertion to satisfy SonarCloud testing rules
+    expect(highlightText("test term_b49", "term_b49")).toBe("test <mark>term_b49</mark>");
   });
 });

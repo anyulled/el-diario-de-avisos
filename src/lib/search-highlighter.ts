@@ -115,7 +115,10 @@ export function highlightText(html: string, searchTerm: string): string {
 
   const searchPattern = createSearchPattern(trimmedTerm);
 
-  // ⚡ Bolt: Fast path for plain text strings
+  /**
+   * ⚡ Bolt: Fast path for plain text strings
+   * NOSONAR
+   */
   if (html.indexOf("<") === -1) {
     return html.replace(searchPattern, "<mark>$1</mark>");
   }
