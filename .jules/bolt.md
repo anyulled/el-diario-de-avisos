@@ -61,3 +61,7 @@
 ## 2024-05-30 - [Memoizing highlightText]
 **Learning:** In the `ArticleCard` component, `highlightText` was being executed directly on every render, which becomes a bottleneck when processing large numbers of results or during fast re-renders (like user typing in the search bar). This codebase uses a custom `highlightText` function with complex regular expression generation.
 **Action:** Use `useMemo` for any string manipulations that rely on regex or loop operations (like `highlightText` or `formatArticleTitle`) within list items or frequently re-rendered components, using `searchTerm` and `title`/`subtitle` as dependencies.
+
+## 2025-03-08 - Optimized search highlight text
+**Learning:** `highlightText` was using `Array.from(html.matchAll(/<[^>]+>/g))` and a `reduce` function to parse text and inject `<mark>` elements. For HTML text, `String.prototype.split` with a capture group is significantly faster than `matchAll` combined with `reduce`. Additionally, a fast-path for plain text without HTML tags saves time.
+**Action:** Use string split with a capture group (`html.split(/(<[^>]+>)/g)`) when replacing text inside HTML nodes without touching tags, and always include a fast-path check for tags (`indexOf('<') === -1`) when possible.
