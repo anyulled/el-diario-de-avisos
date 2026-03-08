@@ -95,7 +95,8 @@ function createSearchPattern(searchTerm: string): RegExp {
   // Prevent memory leaks by limiting cache size
   if (patternCache.size > 100) {
     const firstKey = patternCache.keys().next().value;
-    if (firstKey !== undefined) patternCache.delete(firstKey);
+    // @ts-expect-error - Map keys iterator can theoretically be undefined but practically won't be here
+    patternCache.delete(firstKey);
   }
 
   patternCache.set(searchTerm, pattern);

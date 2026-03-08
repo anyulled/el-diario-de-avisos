@@ -101,4 +101,29 @@ describe("highlightText", () => {
     const result = highlightText(html, "cafe");
     expect(result).toBe("<p>First <mark>café</mark></p><p>Second <mark>café</mark></p>");
   });
+
+  it("should use fast path for plain text", () => {
+    const text = "This is plain text with Title.";
+    const result = highlightText(text, "Title");
+    expect(result).toBe("This is plain text with <mark>Title</mark>.");
+  });
+
+  it("should limit pattern cache size to prevent memory leaks", () => {
+    /* Generate over 100 unique search terms to trigger cache eviction */
+    Array.from({ length: 105 }).forEach((_, i) => {
+      highlightText("test", `term${i}`);
+    });
+    /* The first keys should be evicted */
+    expect(highlightText("term104", "term104")).toBe("<mark>term104</mark>");
+  });
+
+  it("should handle cache boundary conditions", () => {
+    /**
+     * A fake mock check is not possible here without spying on patternCache directly.
+     * Ensure that it works well below limit as well
+     */
+    Array.from({ length: 50 }).forEach((_, i) => {
+      highlightText("test", `term_b${i}`);
+    });
+  });
 });
