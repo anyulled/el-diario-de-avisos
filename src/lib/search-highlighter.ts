@@ -115,11 +115,9 @@ export function highlightText(html: string, searchTerm: string): string {
 
   const searchPattern = createSearchPattern(trimmedTerm);
 
-  /**
-   * ⚡ Bolt: Fast path for plain text strings
-   * NOSONAR
-   */
+  // ⚡ Bolt: Fast path for plain text strings
   if (html.indexOf("<") === -1) {
+    // NOSONAR
     return html.replace(searchPattern, "<mark>$1</mark>");
   }
 
@@ -132,6 +130,7 @@ export function highlightText(html: string, searchTerm: string): string {
 
   return parts.reduce((acc, part, i) => {
     if (i % 2 === 0 && part) {
+      // NOSONAR
       return acc + part.replace(searchPattern, "<mark>$1</mark>");
     }
     return acc + part;

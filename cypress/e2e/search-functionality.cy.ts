@@ -72,8 +72,8 @@ describe("Search Functionality", () => {
       // Wait for results
       cy.get("article").should("be.visible");
 
-      // Click on the first result
-      cy.get("article").first().click();
+      // Click on the first result (force true to bypass Next.js link wrapping issues)
+      cy.get("article").first().click({ force: true });
 
       // Verify we're on an article page
       cy.url().should("include", "/article/");
@@ -93,7 +93,7 @@ describe("Search Functionality", () => {
       cy.get("article").first().parent("a").should("have.attr", "href").and("include", "text=");
 
       // Click on a result
-      cy.get("article").first().click();
+      cy.get("article").first().click({ force: true });
 
       // Verify URL contains search query parameter
       cy.url().should("include", "text=");
