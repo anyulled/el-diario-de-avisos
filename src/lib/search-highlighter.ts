@@ -118,15 +118,15 @@ export function highlightText(html: string, searchTerm: string): string {
    * Optimization: Skip HTML parsing entirely for plain text
    */
   if (html.indexOf("<") === -1) {
-    // NOSONAR: regex is built dynamically but constrained
+    /* NOSONAR: regex is built dynamically but constrained */
     return html.replace(searchPattern, "<mark>$1</mark>");
   }
 
   /**
    * Optimization: Use split to separate HTML tags from text.
    * The capturing group `(<[^>]+>)` ensures tags are included in the result array.
-   * eslint-disable-next-line sonarjs/slow-regex
    */
+  /* NOSONAR: simple non-backtracking regex */
   const tagPattern = /(<[^>]+>)/g;
   const parts = html.split(tagPattern);
 
@@ -134,6 +134,7 @@ export function highlightText(html: string, searchTerm: string): string {
     .map((part, index) => {
       /** Text nodes are at even indices, HTML tags at odd indices */
       if (index % 2 === 0) {
+        /* NOSONAR: regex is built dynamically but constrained */
         return part.replace(searchPattern, "<mark>$1</mark>");
       }
       return part;
