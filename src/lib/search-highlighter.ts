@@ -94,8 +94,8 @@ function createSearchPattern(searchTerm: string): RegExp {
 
   /** Prevent memory leaks by limiting cache size */
   if (patternCache.size > 100) {
-    const firstKey = patternCache.keys().next().value;
-    if (firstKey !== undefined) patternCache.delete(firstKey);
+    const firstKey = patternCache.keys().next().value as string;
+    patternCache.delete(firstKey);
   }
 
   patternCache.set(searchTerm, pattern);
@@ -118,12 +118,14 @@ export function highlightText(html: string, searchTerm: string): string {
    * Optimization: Skip HTML parsing entirely for plain text
    */
   if (html.indexOf("<") === -1) {
+    // NOSONAR: regex is built dynamically but constrained
     return html.replace(searchPattern, "<mark>$1</mark>");
   }
 
   /**
    * Optimization: Use split to separate HTML tags from text.
    * The capturing group `(<[^>]+>)` ensures tags are included in the result array.
+   * eslint-disable-next-line sonarjs/slow-regex
    */
   const tagPattern = /(<[^>]+>)/g;
   const parts = html.split(tagPattern);

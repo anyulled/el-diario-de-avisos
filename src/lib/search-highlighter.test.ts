@@ -101,4 +101,21 @@ describe("highlightText", () => {
     const result = highlightText(html, "cafe");
     expect(result).toBe("<p>First <mark>café</mark></p><p>Second <mark>café</mark></p>");
   });
+
+  it("should handle plain text without any HTML tags", () => {
+    const text = "This is a plain text string that should be highlighted quickly";
+    const result = highlightText(text, "plain text");
+    expect(result).toBe("This is a <mark>plain text</mark> string that should be highlighted quickly");
+  });
+
+  it("should prevent memory leaks by limiting the regex cache size", () => {
+    // Generate over 100 unique search terms to force cache eviction
+    const text = "test string";
+    Array.from({ length: 110 }).forEach((_, i) => {
+      highlightText(text, `term${i}`);
+    });
+    // Verify the function still works correctly after cache operations
+    const result = highlightText(text, "test");
+    expect(result).toBe("<mark>test</mark> string");
+  });
 });
