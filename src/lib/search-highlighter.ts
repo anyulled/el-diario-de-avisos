@@ -92,7 +92,7 @@ function createSearchPattern(searchTerm: string): RegExp {
     })
     .join("");
 
-  // Prevent memory leaks by limiting cache size
+  /** Prevent memory leaks by limiting cache size */
   if (patternCache.size > 100) {
     const firstKey = patternCache.keys().next().value;
     if (firstKey !== undefined) patternCache.delete(firstKey);
@@ -114,27 +114,27 @@ export function highlightText(html: string, searchTerm: string): string {
 
   const searchPattern = createSearchPattern(trimmedTerm);
 
-  const tagPattern = /<[^>]+>/g;
-  const matches = Array.from(html.matchAll(tagPattern));
-
-  const { parts } = matches.reduce(
-    (acc, match) => {
-      if (match.index !== undefined && match.index > acc.lastIndex) {
-        const textContent = html.slice(acc.lastIndex, match.index);
-        acc.parts.push(textContent.replace(searchPattern, "<mark>$1</mark>"));
-      }
-      acc.parts.push(match[0]);
-      acc.lastIndex = (match.index || 0) + match[0].length;
-      return acc;
-    },
-    { parts: [] as string[], lastIndex: 0 },
-  );
-
-  const finalLastIndex = matches.length > 0 ? (matches[matches.length - 1].index || 0) + matches[matches.length - 1][0].length : 0;
-  if (finalLastIndex < html.length) {
-    const textContent = html.slice(finalLastIndex);
-    parts.push(textContent.replace(searchPattern, "<mark>$1</mark>"));
+  /**
+   * Optimization: Skip HTML parsing entirely for plain text
+   */
+  if (html.indexOf("<") === -1) {
+    return html.replace(searchPattern, "<mark>$1</mark>");
   }
 
-  return parts.join("");
+  /**
+   * Optimization: Use split to separate HTML tags from text.
+   * The capturing group `(<[^>]+>)` ensures tags are included in the result array.
+   */
+  const tagPattern = /(<[^>]+>)/g;
+  const parts = html.split(tagPattern);
+
+  return parts
+    .map((part, index) => {
+      /** Text nodes are at even indices, HTML tags at odd indices */
+      if (index % 2 === 0) {
+        return part.replace(searchPattern, "<mark>$1</mark>");
+      }
+      return part;
+    })
+    .join("");
 }
