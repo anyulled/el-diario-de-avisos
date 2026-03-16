@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/date-formatter";
 import { useMemo } from "react";
 import { articles } from "@/db/schema";
 import { highlightText } from "@/lib/search-highlighter";
@@ -25,7 +26,7 @@ export function ArticleCard({
         <div className="p-6 flex-1 flex flex-col">
           <div className="flex justify-between items-start mb-4">
             <span className="text-[10px] font-bold tracking-widest text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-100 dark:border-amber-900/50 uppercase transition-all group-hover:bg-amber-100 dark:group-hover:bg-amber-900/60">
-              {item.date ? new Date(item.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" }) : item.publicationYear}
+              {item.date ? formatDate(item.date) : item.publicationYear}
             </span>
           </div>
           <h3
