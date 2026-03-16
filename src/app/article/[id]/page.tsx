@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/date-formatter";
 import { getArticleHtml, getArticleMetadata, getArticleSection } from "@/actions/actions";
 import { Navbar } from "@/components/navbar";
 import { highlightText } from "@/lib/search-highlighter";
@@ -52,7 +53,7 @@ export default async function ArticlePage({ params, searchParams }: { params: Pr
               </span>
               <span className="text-white/80 font-mono text-xs uppercase tracking-[0.2em] flex items-center">
                 {article.date
-                  ? new Date(article.date).toLocaleDateString("es-VE", { year: "numeric", month: "long", day: "numeric" })
+                  ? formatDate(article.date)
                   : `Año ${article.publicationYear}`}
               </span>
               {article.publicationName && (
