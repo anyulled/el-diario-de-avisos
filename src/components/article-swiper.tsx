@@ -10,7 +10,7 @@ import { Autoplay, Navigation, Pagination, Parallax } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import { formatArticleTitle } from "@/lib/title-formatter";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { type Swiper as SwiperType } from "swiper";
 
 export function ArticleSwiper({
@@ -23,6 +23,20 @@ export function ArticleSwiper({
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
+
+  /*
+   * ⚡ Bolt: Memoize expensive computations (Regex formatting and Date object creation)
+   * to avoid recalculating on every slide change (which triggers state updates and re-renders)
+   */
+  const processedArticles = useMemo(() => {
+    return news.map((item) => ({
+      ...item,
+      formattedTitle: formatArticleTitle(item.title),
+      year: item.publicationYear && item.publicationYear > 0
+        ? item.publicationYear
+        : item.date ? new Date(item.date).getFullYear() : "N/A"
+    }));
+  }, [news]);
 
   return (
     <div className="relative group max-w-5xl mx-auto">
@@ -59,9 +73,7 @@ export function ArticleSwiper({
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
         </div>
 
-        {news.map((item) => {
-          const year = item.publicationYear && item.publicationYear > 0 ? item.publicationYear : item.date ? new Date(item.date).getFullYear() : "N/A";
-
+        {processedArticles.map((item) => {
           return (
             <SwiperSlide key={item.id} className="min-h-[500px] flex items-center justify-center py-20">
               <div className="relative z-10 p-8 md:p-16 text-center text-white max-w-3xl mx-auto" data-swiper-parallax="-300">
@@ -73,12 +85,12 @@ export function ArticleSwiper({
                       </span>
                     )}
                     <span className="inline-block px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-500/30 text-xs font-bold uppercase tracking-wider">
-                      {year}
+                      {item.year}
                     </span>
                   </div>
                   <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight drop-shadow-lg">
                     <Link href={`/article/${item.id}`} className="hover:text-amber-300 transition-colors">
-                      {formatArticleTitle(item.title) || "Sin Título"}
+                      {item.formattedTitle || "Sin Título"}
                     </Link>
                   </h3>
                   {item.subtitle && <h4 className="text-xl text-zinc-300 font-light mb-6">{item.subtitle}</h4>}
