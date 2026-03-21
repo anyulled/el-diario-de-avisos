@@ -3,6 +3,7 @@
 import { db } from "@/db";
 import { articles, essays, publicationColumns, publications } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
+import { getArticleCount } from "@/lib/articles";
 import { getNewsOrderBy } from "@/lib/news-order";
 import { processRtfContent as processRtfContentHtml } from "@/lib/rtf-html-converter";
 import { and, eq, sql, inArray } from "drizzle-orm";
@@ -97,13 +98,15 @@ export async function getNews(params: SearchParams) {
 
   const conditions = getNewsConditions(year, type, text, dateFrom, dateTo, pubId);
 
-  // Count total results
-  const countQuery = db
-    .select({ count: sql<number>`count(*)` })
-    .from(articles)
-    .$dynamic();
-
-  const countWithConditions = conditions.length > 0 ? countQuery.where(and(...conditions)) : countQuery;
+  // ⚡ Bolt: Use cached total count for empty searches to avoid expensive full table scans
+  const countPromise =
+    conditions.length === 0
+      ? getArticleCount()
+      : db
+          .select({ count: sql<number>`count(*)` })
+          .from(articles)
+          .where(and(...conditions))
+          .then((res) => Number(res[0]?.count || 0));
 
   // Build query with conditional fields and ordering
   const query = db
@@ -126,15 +129,13 @@ export async function getNews(params: SearchParams) {
 
   const orderBy = getNewsOrderBy(sort, text);
 
-  const [countResult, data] = await Promise.all([
-    countWithConditions,
+  const [total, data] = await Promise.all([
+    countPromise,
     queryWithConditions
       .orderBy(...orderBy)
       .limit(pageSize)
       .offset((page - 1) * pageSize),
   ]);
-
-  const total = Number(countResult[0]?.count || 0);
 
   return {
     data,

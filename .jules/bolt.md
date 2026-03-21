@@ -66,3 +66,8 @@
 
 **Learning:** Separating text and HTML tags using `Array.from(String.prototype.matchAll())` and iterating manually with `slice` is extremely slow. Using `String.prototype.split(/(<[^>]+>)/g)` instead is up to 10x faster because it leverages the highly optimized V8 split engine, which automatically captures tags at odd indices and text at even indices. Adding a fast path `indexOf('<') === -1` skips regex entirely for plain text strings.
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
+
+## 2026-03-24 - PostgreSQL count(*) Full Table Scans for Pagination
+
+**Learning:** Doing an unconstrained `select count(*) from "articulos"` for pagination triggers a slow full table scan on PostgreSQL. For a 22,900+ row table, this introduces latency on the main home page load (empty search).
+**Action:** Bypass unconstrained `count(*)` queries for large tables by checking if `conditions.length === 0` and falling back to a pre-cached counter (e.g. `getArticleCount()` which uses `unstable_cache`).
