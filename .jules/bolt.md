@@ -66,3 +66,18 @@
 
 **Learning:** Separating text and HTML tags using `Array.from(String.prototype.matchAll())` and iterating manually with `slice` is extremely slow. Using `String.prototype.split(/(<[^>]+>)/g)` instead is up to 10x faster because it leverages the highly optimized V8 split engine, which automatically captures tags at odd indices and text at even indices. Adding a fast path `indexOf('<') === -1` skips regex entirely for plain text strings.
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
+
+## 2026-03-24 - PostgreSQL count(*) Full Table Scans for Pagination
+
+**Learning:** Doing an unconstrained `select count(*) from "articulos"` for pagination triggers a slow full table scan on PostgreSQL. For a 22,900+ row table, this introduces latency on the main home page load (empty search).
+**Action:** Bypass unconstrained `count(*)` queries for large tables by checking if `conditions.length === 0` and falling back to a pre-cached counter (e.g. `getArticleCount()` which uses `unstable_cache`).
+
+## 2026-03-25 - Neon compute quota limit bypass during build
+
+**Learning:** To prevent Next.js static prerendering (`next build`) from triggering 'compute time quota exceeded' errors on rate-limited databases (e.g., Neon), add `export const dynamic = "force-dynamic";` to database-heavy route segments (like `src/app/layout.tsx` or `src/app/page.tsx`) to force runtime execution instead of build-time static generation. DO NOT USE THIS as it causes global performance regressions by disabling SSG.
+**Action:** Avoid masking transient DB failures with hacks. It is better to let the CI fail due to DB quotas than to introduce global performance regressions or poison the cache.
+
+## 2026-03-26 - Unstable Cache Poisoning
+
+**Learning:** Do not wrap database queries inside Next.js `unstable_cache` with `try/catch` blocks that return empty arrays or mock data on transient errors (like DB compute quotas), as this will poison the cache with empty data for the TTL duration.
+**Action:** Let the build fail or trigger an Error Boundary instead of catching DB exceptions inside `unstable_cache`.
