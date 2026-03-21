@@ -71,3 +71,8 @@
 
 **Learning:** Doing an unconstrained `select count(*) from "articulos"` for pagination triggers a slow full table scan on PostgreSQL. For a 22,900+ row table, this introduces latency on the main home page load (empty search).
 **Action:** Bypass unconstrained `count(*)` queries for large tables by checking if `conditions.length === 0` and falling back to a pre-cached counter (e.g. `getArticleCount()` which uses `unstable_cache`).
+
+## 2026-03-25 - Neon compute quota limit bypass during build
+
+**Learning:** To prevent Next.js static prerendering (`next build`) from triggering 'compute time quota exceeded' errors on rate-limited databases (e.g., Neon), add `export const dynamic = "force-dynamic";` to database-heavy route segments (like `src/app/layout.tsx` or `src/app/page.tsx`) to force runtime execution instead of build-time static generation.
+**Action:** Check if the CI is using static prerendering to trigger database quotas and use `force-dynamic` to avoid running DB queries during `npm run build`.
