@@ -147,8 +147,12 @@ export async function getNews(params: SearchParams) {
 
 export const getTotalArticlesCount = unstable_cache(
   async () => {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(articles);
-    return Number(result[0]?.count || 0);
+    /**
+     * Optimization: Use pg_class to get an estimated count of rows in the articles table instead of executing a full table scan with count(*).
+     * This prevents expensive compute quota usage on large datasets in Neon DB.
+     */
+    const result = await db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'articulos'`);
+    return Number(result.rows[0]?.estimate || 0);
   },
   ["total-articles-count"],
   { tags: ["articles"], revalidate: 3600 },

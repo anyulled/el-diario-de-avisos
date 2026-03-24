@@ -14,6 +14,7 @@ vi.mock("@/db", () => {
   };
   return {
     db: {
+      execute: vi.fn().mockResolvedValue({ rows: [{ estimate: 1000 }] }),
       select: vi.fn().mockReturnValue(mockChain),
     },
   };

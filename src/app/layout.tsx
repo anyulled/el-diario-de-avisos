@@ -25,9 +25,21 @@ import { Analytics } from "@vercel/analytics/react";
 import { getIntegrantesNames, getTutoresNames } from "@/actions/team";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
+  const getAuthorsString = async () => {
+    try {
+      const [integrantesNames, tutoresNames] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
+      return [...integrantesNames.map((i) => `${i.firstName} ${i.lastName}`), ...tutoresNames.map((t) => t.names)].filter(Boolean).join(", ");
+    } catch (error) {
+      /**
+       * Suppress DB errors in metadata generation to allow Error Boundaries
+       * to catch the render errors instead of failing the static build.
+       */
+      console.error("Failed to load metadata authors", error);
+      return "Universidad Central de Venezuela";
+    }
+  };
 
-  const authors = [...integrantes.map((i) => `${i.firstName} ${i.lastName}`), ...tutores.map((t) => t.names)].filter(Boolean).join(", ");
+  const authors = await getAuthorsString();
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
@@ -54,8 +66,7 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     other: {
-      "project:integrants": integrantes.map((i) => `${i.firstName} ${i.lastName}`).join(", "),
-      "project:tutors": tutores.map((t) => t.names).join(", "),
+      "project:integrants": authors,
     },
   };
 }
