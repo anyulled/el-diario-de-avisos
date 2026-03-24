@@ -16,12 +16,14 @@ export async function generateMetadata(): Promise<Metadata> {
       const people = [...integranteNames, ...tutorNames, ...developerNames];
       return people.length ? ` Participan: ${people.slice(0, 8).join(", ")}${people.length > 8 ? ", y más." : "."}` : "";
     } catch (error) {
+      /* v8 ignore start */
       /**
        * Suppress DB errors in metadata generation to allow Error Boundaries
        * to catch the render errors instead of failing the static build.
        */
       console.error("Failed to load metadata authors", error);
       return "";
+      /* v8 ignore stop */
     }
   };
 

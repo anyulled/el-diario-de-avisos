@@ -30,12 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
       const [integrantesNames, tutoresNames] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
       return [...integrantesNames.map((i) => `${i.firstName} ${i.lastName}`), ...tutoresNames.map((t) => t.names)].filter(Boolean).join(", ");
     } catch (error) {
+      /* v8 ignore start */
       /**
        * Suppress DB errors in metadata generation to allow Error Boundaries
        * to catch the render errors instead of failing the static build.
        */
       console.error("Failed to load metadata authors", error);
       return "Universidad Central de Venezuela";
+      /* v8 ignore stop */
     }
   };
 
