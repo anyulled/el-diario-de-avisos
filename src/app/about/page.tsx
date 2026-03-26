@@ -6,13 +6,28 @@ import { getDevelopers, getDevelopersNames, getIntegrantes, getIntegrantesNames,
 const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
+  const getAuthorsSummary = async () => {
+    try {
+      const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
 
-  const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean);
-  const tutorNames = tutores.map((t) => t.names).filter(Boolean);
-  const developerNames = desarrolladores.map((d) => `${d.firstName} ${d.lastName}`.trim()).filter(Boolean);
-  const people = [...integranteNames, ...tutorNames, ...developerNames];
-  const peopleSummary = people.length ? ` Participan: ${people.slice(0, 8).join(", ")}${people.length > 8 ? ", y más." : "."}` : "";
+      const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean);
+      const tutorNames = tutores.map((t) => t.names).filter(Boolean);
+      const developerNames = desarrolladores.map((d) => `${d.firstName} ${d.lastName}`.trim()).filter(Boolean);
+      const people = [...integranteNames, ...tutorNames, ...developerNames];
+      return people.length ? ` Participan: ${people.slice(0, 8).join(", ")}${people.length > 8 ? ", y más." : "."}` : "";
+    } catch (error) {
+      /* v8 ignore start */
+      /**
+       * Suppress DB errors in metadata generation to allow Error Boundaries
+       * to catch the render errors instead of failing the static build.
+       */
+      console.error("Failed to load metadata authors", error);
+      return "";
+      /* v8 ignore stop */
+    }
+  };
+
+  const peopleSummary = await getAuthorsSummary();
 
   const title = "Acerca del Proyecto";
   const description = `Conoce el equipo y el trabajo detrás del Archivo de Crónicas musicales de la prensa caraqueña.${peopleSummary}`;
@@ -45,6 +60,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+
+export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
   const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);

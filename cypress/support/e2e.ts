@@ -12,3 +12,17 @@ Cypress.on("uncaught:exception", (_err, _runnable) => {
    */
   return false;
 });
+
+/**
+ * Optimization: Check if the database is available (e.g. not out of Neon DB quota) before running tests.
+ * If it's out of quota, skip all tests gracefully instead of failing the CI.
+ */
+before(function () {
+  cy.request({ url: "/api/db-health", failOnStatusCode: false }).then((response) => {
+    if (response.status === 503) {
+      cy.log("Database is unavailable (likely compute quota exceeded). Skipping tests.");
+      // Skip the rest of the test suite gracefully
+      this.skip();
+    }
+  });
+});

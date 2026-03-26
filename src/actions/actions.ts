@@ -97,13 +97,18 @@ export async function getNews(params: SearchParams) {
 
   const conditions = getNewsConditions(year, type, text, dateFrom, dateTo, pubId);
 
-  // Count total results
-  const countQuery = db
-    .select({ count: sql<number>`count(*)` })
-    .from(articles)
-    .$dynamic();
-
-  const countWithConditions = conditions.length > 0 ? countQuery.where(and(...conditions)) : countQuery;
+  /**
+   * Count total results
+   * Optimization: Bypass full table scan for count(*) when no filters are applied by using a cached value.
+   */
+  const countPromise =
+    conditions.length > 0
+      ? db
+          .select({ count: sql<number>`count(*)` })
+          .from(articles)
+          .where(and(...conditions))
+          .then((res) => Number(res[0]?.count || 0))
+      : getTotalArticlesCount();
 
   // Build query with conditional fields and ordering
   const query = db
@@ -126,21 +131,32 @@ export async function getNews(params: SearchParams) {
 
   const orderBy = getNewsOrderBy(sort, text);
 
-  const [countResult, data] = await Promise.all([
-    countWithConditions,
+  const [total, data] = await Promise.all([
+    countPromise,
     queryWithConditions
       .orderBy(...orderBy)
       .limit(pageSize)
       .offset((page - 1) * pageSize),
   ]);
 
-  const total = Number(countResult[0]?.count || 0);
-
   return {
     data,
     total,
   };
 }
+
+export const getTotalArticlesCount = unstable_cache(
+  async () => {
+    /**
+     * Optimization: Use pg_class to get an estimated count of rows in the articles table instead of executing a full table scan with count(*).
+     * This prevents expensive compute quota usage on large datasets in Neon DB.
+     */
+    const result = await db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'articulos'`);
+    return Number(result.rows[0]?.estimate || 0);
+  },
+  ["total-articles-count"],
+  { tags: ["articles"], revalidate: 3600 },
+);
 
 
 const getCachedArticle = unstable_cache(

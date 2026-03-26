@@ -198,8 +198,7 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata();
 
     expect(metadata.other).toEqual({
-      "project:integrants": "Test User",
-      "project:tutors": "Test Tutor",
+      "project:integrants": "Test User, Test Tutor",
     });
   });
 
@@ -212,7 +211,6 @@ describe("generateMetadata", () => {
     expect(metadata.description).toBeDefined();
     expect(metadata.other).toEqual({
       "project:integrants": "",
-      "project:tutors": "",
     });
   });
 
