@@ -1,13 +1,17 @@
 import { unstable_cache } from "next/cache";
-import { count } from "drizzle-orm";
 import { db } from "@/db";
-import { articles } from "@/db/schema";
+
+import { sql } from "drizzle-orm";
 
 export const getArticleCount = unstable_cache(
   async () => {
     try {
-      const result = await db.select({ value: count() }).from(articles);
-      return result[0].value;
+      /*
+       * ⚡ Bolt: Use pg_class to get an estimated row count instead of a full table scan
+       * This avoids Neon DB compute quota exhaustion on large tables.
+       */
+      const result = await db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'articulos'`);
+      return Number(result.rows[0]?.estimate || 0);
     } catch (error) {
       console.error("Error fetching article count:", error);
       // Return 0 to prevent the UI from crashing if the database is unavailable
