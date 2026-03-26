@@ -3,10 +3,18 @@ import { Navbar } from "@/components/navbar";
 import type { Metadata } from "next";
 import { getDevelopers, getDevelopersNames, getIntegrantes, getIntegrantesNames, getTutores, getTutoresNames } from "@/actions/team";
 
+// Defer rendering due to expected transient database errors on this page during build
+export const dynamic = "force-dynamic";
+
 const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
+  const { integrantes, tutores, desarrolladores } = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()])
+    .then(([i, t, d]) => ({ integrantes: i, tutores: t, desarrolladores: d }))
+    .catch((error) => {
+      console.error("Failed to fetch team names for about metadata:", error);
+      return { integrantes: [], tutores: [], desarrolladores: [] };
+    });
 
   const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean);
   const tutorNames = tutores.map((t) => t.names).filter(Boolean);

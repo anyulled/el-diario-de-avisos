@@ -25,7 +25,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { getIntegrantesNames, getTutoresNames } from "@/actions/team";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
+  const { integrantes, tutores } = await Promise.all([getIntegrantesNames(), getTutoresNames()])
+    .then(([i, t]) => ({ integrantes: i, tutores: t }))
+    .catch((error) => {
+      console.error("Failed to fetch team names for metadata:", error);
+      return { integrantes: [], tutores: [] };
+    });
 
   const authors = [...integrantes.map((i) => `${i.firstName} ${i.lastName}`), ...tutores.map((t) => t.names)].filter(Boolean).join(", ");
 

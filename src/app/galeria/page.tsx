@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "Galería de imágenes históricas restauradas",
 };
 
+// Defer rendering due to expected transient database errors on this page during build
+export const dynamic = "force-dynamic";
+
 export default async function GalleryPage() {
   const imagesDir = path.join(process.cwd(), "public/images/restored");
 

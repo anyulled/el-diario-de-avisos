@@ -7,6 +7,9 @@ export const metadata = {
   description: "Conversa con la historia de nuestros archivos a través de nuestro asistente inteligente.",
 };
 
+// Defer rendering due to expected transient database errors on this page during build
+export const dynamic = "force-dynamic";
+
 export default async function ChatPage() {
   const articleCount = await getArticleCount();
   // Fallback static number if DB fails or returns 0, matching the user's intent

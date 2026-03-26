@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
   const { id } = await params;
-  const essay = await getEssayMetadata(Number(id));
+  const essay = await getEssayMetadata(Number(id)).catch((error) => {
+    console.error("Failed to fetch essay metadata:", error);
+    return null;
+  });
 
   if (!essay) return {};
 
