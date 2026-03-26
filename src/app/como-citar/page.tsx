@@ -21,9 +21,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Defer rendering due to expected transient database errors on this page during build
-export const dynamic = "force-dynamic";
-
 export default function ComoCitarPage() {
   return (
     <main className="min-h-screen bg-black text-white p-4 md:p-8">

@@ -7,10 +7,7 @@ import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<import("next").Metadata> {
   const { id } = await params;
-  const article = await getArticleMetadata(Number(id)).catch((error) => {
-    console.error("Failed to fetch article metadata:", error);
-    return null;
-  });
+  const article = await getArticleMetadata(Number(id));
 
   if (!article) return {};
 

@@ -6,8 +6,6 @@ import { ScrollToResults } from "@/components/scroll-to-results";
 import { SearchFilters } from "@/components/search-filters";
 import { getNews, getNewsTypes, getPublications, SearchParams } from "@/actions/actions";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home({ searchParams }: Readonly<{ searchParams: Promise<SearchParams> }>) {
   const typesPromise = getNewsTypes();
   const pubsPromise = getPublications();
