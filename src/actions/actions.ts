@@ -97,14 +97,6 @@ export async function getNews(params: SearchParams) {
 
   const conditions = getNewsConditions(year, type, text, dateFrom, dateTo, pubId);
 
-  // Count total results
-  const countQuery = db
-    .select({ count: sql<number>`count(*)` })
-    .from(articles)
-    .$dynamic();
-
-  const countWithConditions = conditions.length > 0 ? countQuery.where(and(...conditions)) : countQuery;
-
   // Build query with conditional fields and ordering
   const query = db
     .select({
@@ -126,15 +118,25 @@ export async function getNews(params: SearchParams) {
 
   const orderBy = getNewsOrderBy(sort, text);
 
-  const [countResult, data] = await Promise.all([
-    countWithConditions,
+  /*
+   * ⚡ Bolt: Fast-path for count without filters to avoid slow count(*) queries
+   * This uses pg_class for an estimate, avoiding Neon DB compute quota exhaustion
+   */
+  const totalPromise = conditions.length === 0
+    ? db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'articulos'`)
+        .then((res) => Number(res.rows[0]?.estimate || 0))
+    : db.select({ count: sql<number>`count(*)` })
+        .from(articles)
+        .where(and(...conditions))
+        .then((res) => Number(res[0]?.count || 0));
+
+  const [total, data] = await Promise.all([
+    totalPromise,
     queryWithConditions
       .orderBy(...orderBy)
       .limit(pageSize)
       .offset((page - 1) * pageSize),
   ]);
-
-  const total = Number(countResult[0]?.count || 0);
 
   return {
     data,
