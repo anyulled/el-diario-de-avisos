@@ -12,15 +12,3 @@ Cypress.on("uncaught:exception", (_err, _runnable) => {
    */
   return false;
 });
-
-before(function () {
-  cy.request({
-    url: "/api/db-health",
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status === 503) {
-      cy.log("Skipping tests due to DB limits");
-      this.skip();
-    }
-  });
-});

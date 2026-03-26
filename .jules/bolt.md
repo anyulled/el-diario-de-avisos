@@ -67,6 +67,11 @@
 **Learning:** Separating text and HTML tags using `Array.from(String.prototype.matchAll())` and iterating manually with `slice` is extremely slow. Using `String.prototype.split(/(<[^>]+>)/g)` instead is up to 10x faster because it leverages the highly optimized V8 split engine, which automatically captures tags at odd indices and text at even indices. Adding a fast path `indexOf('<') === -1` skips regex entirely for plain text strings.
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
 
+## 2026-03-10 - count(*) Performance and Quota Exhaustion
+
+**Learning:** Using `count(*)` on large tables (like `articulos`) for general statistics or pagination without filters causes a full table scan. In serverless environments like Neon DB, executing multiple such queries concurrently (e.g. during CI builds) exhausts the compute time quota and crashes the application with transient 500 errors.
+**Action:** When an exact row count is not strictly required (or filters are absent), use `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'table_name'\`)` to retrieve a near-instant estimate, drastically reducing query time and preventing compute quota exhaustion.
+
 ## 2026-03-10 - Regex Overhead on Plain Text
 
 **Learning:** Running regex tests or replacements (like `match` or `replace` with regex) on plain text that doesn't contain the target sequence is surprisingly expensive, particularly in processing loops like RTF extraction (`repairMojibake` and `unescapeRtfHex`).
