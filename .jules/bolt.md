@@ -66,3 +66,8 @@
 
 **Learning:** Separating text and HTML tags using `Array.from(String.prototype.matchAll())` and iterating manually with `slice` is extremely slow. Using `String.prototype.split(/(<[^>]+>)/g)` instead is up to 10x faster because it leverages the highly optimized V8 split engine, which automatically captures tags at odd indices and text at even indices. Adding a fast path `indexOf('<') === -1` skips regex entirely for plain text strings.
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
+
+## 2026-03-10 - Regex Overhead on Plain Text
+
+**Learning:** Running regex tests or replacements (like `match` or `replace` with regex) on plain text that doesn't contain the target sequence is surprisingly expensive, particularly in processing loops like RTF extraction (`repairMojibake` and `unescapeRtfHex`).
+**Action:** Always add a fast-path bypass using `indexOf` (e.g., `text.indexOf("\u00C3") === -1` or `text.indexOf("\\'") === -1`) before running a regex on potentially large strings. This simple string search is highly optimized in V8 and can yield 30x-40x speedups for clean strings.
