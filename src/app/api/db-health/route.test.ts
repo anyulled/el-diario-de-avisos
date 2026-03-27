@@ -10,11 +10,13 @@ vi.mock("@/db", () => ({
 
 describe("Database Health Check API", () => {
   it("should return status 200 with ok message when DB is healthy", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(db.execute).mockResolvedValueOnce({} as any);
 
     const response = await GET();
     expect(response.status).toBe(200);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const body = await response.json();
     expect(body).toEqual({ status: "ok" });
   });
@@ -26,6 +28,7 @@ describe("Database Health Check API", () => {
     const response = await GET();
     expect(response.status).toBe(503);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const body = await response.json();
     expect(body).toEqual({ status: "error", message: errorMsg });
   });

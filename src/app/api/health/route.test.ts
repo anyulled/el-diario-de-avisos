@@ -6,6 +6,7 @@ describe("Health Check API", () => {
     const response = await GET();
     expect(response.status).toBe(200);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const body = await response.json();
     expect(body).toEqual({ status: "ok" });
   });
