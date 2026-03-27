@@ -25,7 +25,14 @@ import { Analytics } from "@vercel/analytics/react";
 import { getIntegrantesNames, getTutoresNames } from "@/actions/team";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
+  let integrantes: { firstName: string | null; lastName: string | null }[] = [];
+  let tutores: { names: string | null }[] = [];
+
+  try {
+    [integrantes, tutores] = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
+  } catch (error) {
+    // Expected transient database errors during build
+  }
 
   const authors = [...integrantes.map((i) => `${i.firstName} ${i.lastName}`), ...tutores.map((t) => t.names)].filter(Boolean).join(", ");
 
@@ -35,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
       template: "%s | Crónicas Musicales en la prensa caraqueña del siglo XIX",
     },
-    description: `Crónicas Musicales en la prensa caraqueña del siglo XIX. Explora la historia de Caracas a través de sus crónicas musicales. Un proyecto realizado por: ${authors}.`,
+    description: `Crónicas Musicales en la prensa caraqueña del siglo XIX. Explora la historia de Caracas a través de sus crónicas musicales. Un proyecto realizado por: ${authors || "nuestro equipo"}.`,
     openGraph: {
       title: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
       description: "Archivo histórico de crónicas musicales de la prensa caraqueña",
@@ -54,8 +61,8 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     other: {
-      "project:integrants": integrantes.map((i) => `${i.firstName} ${i.lastName}`).join(", "),
-      "project:tutors": tutores.map((t) => t.names).join(", "),
+      "project:integrants": integrantes.map((i) => `${i.firstName} ${i.lastName}`).join(", ") || "n/a",
+      "project:tutors": tutores.map((t) => t.names).join(", ") || "n/a",
     },
   };
 }
