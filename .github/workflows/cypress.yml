@@ -36,6 +36,8 @@ jobs:
           wait-on: "http://localhost:3000/api/health"
           record: true
           parallel: true
+          group: "UI - Cypress"
+          ci-build-id: "${{ github.sha }}-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
