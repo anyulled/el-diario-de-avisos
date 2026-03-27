@@ -97,20 +97,20 @@ export async function getNews(params: SearchParams) {
 
   const conditions = getNewsConditions(year, type, text, dateFrom, dateTo, pubId);
 
-  // Optimization: When no filters are applied, use pg_class to get an estimated row count instead of
-  // executing a full COUNT(*) query. This prevents compute quota exhaustion on large PostgreSQL
-  // databases (e.g., Neon DB) and vastly improves load time for the default view.
-  let countPromise;
-  if (conditions.length === 0) {
-    countPromise = db
-      .execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'articulos'`)
-      .then((res) => [{ count: Number((res.rows[0] as { estimate: string | number })?.estimate || 0) }]);
-  } else {
-    countPromise = db
-      .select({ count: sql<number>`count(*)` })
-      .from(articles)
-      .where(and(...conditions));
-  }
+  /*
+   * Optimization: When no filters are applied, use pg_class to get an estimated row count instead of
+   * executing a full COUNT(*) query. This prevents compute quota exhaustion on large PostgreSQL
+   * databases (e.g., Neon DB) and vastly improves load time for the default view.
+   */
+  const countPromise =
+    conditions.length === 0
+      ? db
+          .execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE relname = 'articulos'`)
+          .then((res) => [{ count: Number((res.rows[0] as { estimate: string | number })?.estimate || 0) }])
+      : db
+          .select({ count: sql<number>`count(*)` })
+          .from(articles)
+          .where(and(...conditions));
 
   // Build query with conditional fields and ordering
   const query = db

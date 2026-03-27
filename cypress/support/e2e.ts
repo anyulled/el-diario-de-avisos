@@ -12,3 +12,15 @@ Cypress.on("uncaught:exception", (_err, _runnable) => {
    */
   return false;
 });
+
+before(function () {
+  cy.request({
+    url: "/api/db-health",
+    failOnStatusCode: false,
+  }).then((response) => {
+    if (response.status === 503) {
+      cy.log("Database health check failed (e.g. Neon DB compute quota exceeded). Skipping all E2E tests.");
+      this.skip();
+    }
+  });
+});
