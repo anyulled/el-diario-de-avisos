@@ -5,8 +5,18 @@ import { getDevelopers, getDevelopersNames, getIntegrantes, getIntegrantesNames,
 
 const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=2071&auto=format&fit=crop";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
-  const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
+  let integrantes: { firstName: string | null; lastName: string | null }[] = [];
+  let tutores: { names: string | null }[] = [];
+  let desarrolladores: { firstName: string | null; lastName: string | null }[] = [];
+
+  try {
+    [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
+  } catch (error) {
+    // Expected transient database errors during build
+  }
 
   const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean);
   const tutorNames = tutores.map((t) => t.names).filter(Boolean);

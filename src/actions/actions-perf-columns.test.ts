@@ -6,6 +6,7 @@ import { db } from "@/db";
 vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
+    execute: vi.fn().mockResolvedValue({ rows: [{ estimate: 123 }] }),
   },
 }));
 
@@ -63,9 +64,9 @@ describe("getNews Column Optimization", () => {
 
     await getNews({});
 
-    // The second call to db.select is the main query (the first is count)
+    // The first call to db.select is the main query now, because count is db.execute
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const callArgs = mockSelect.mock.calls[1][0];
+    const callArgs = mockSelect.mock.calls[0][0];
 
     expect(callArgs).toBeDefined();
 

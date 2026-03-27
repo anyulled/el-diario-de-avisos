@@ -22,10 +22,6 @@ jobs:
     env:
       CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -33,9 +29,10 @@ jobs:
         uses: cypress-io/github-action@v7
         with:
           start: npm run dev
-          wait-on: "http://localhost:3000"
+          wait-on: "http://localhost:3000/api/health"
           record: true
-          parallel: true
+          group: "UI - Cypress"
+          ci-build-id: "${{ github.sha }}-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
