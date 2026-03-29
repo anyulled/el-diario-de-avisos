@@ -75,7 +75,8 @@ describe("AIProviderRegistry", () => {
     await service.getWorkingModel();
     await service.getWorkingModel();
 
-    expect(checkHealthSpy).toHaveBeenCalledTimes(1);
+    // The concurrent checks will call checkHealth for both groq models in the fallback chain.
+    expect(checkHealthSpy).toHaveBeenCalledTimes(2);
   });
 
   it("should re-check health after cache expiration", async () => {
@@ -84,14 +85,15 @@ describe("AIProviderRegistry", () => {
     if (!groqProvider) throw new Error("Groq provider not found");
     const checkHealthSpy = vi.spyOn(groqProvider, "checkHealth").mockResolvedValue(true);
 
-    // Initial check
+    // Initial check (2 calls due to 2 groq models in chain)
     await service.getWorkingModel();
 
     // Fast-forward time (5 minutes + 1 ms)
     vi.setSystemTime(Date.now() + 5 * 60 * 1000 + 1);
 
     await service.getWorkingModel();
-    expect(checkHealthSpy).toHaveBeenCalledTimes(2);
+    // Re-check will trigger 2 more calls
+    expect(checkHealthSpy).toHaveBeenCalledTimes(4);
 
     vi.useRealTimers();
   });
@@ -106,5 +108,26 @@ describe("AIProviderRegistry", () => {
     const result = await service.getWorkingModel();
     expect(result.config.provider).toBe("groq");
     expect(result.config.modelId).toBe("llama-3.3-70b-versatile");
+  });
+
+  it("should treat a provider that throws an error during health check as unhealthy", async () => {
+    const service = createService();
+
+    // Make the first provider throw an error, and the next one succeed
+    const groqProvider = service["providers"].get("groq");
+    const cerebrasProvider = service["providers"].get("cerebras");
+    if (!groqProvider || !cerebrasProvider) throw new Error("Providers not found");
+
+    vi.spyOn(groqProvider, "checkHealth").mockRejectedValue(new Error("Network timeout"));
+    vi.spyOn(cerebrasProvider, "checkHealth").mockResolvedValue(true);
+
+    const result = await service.getWorkingModel();
+
+    // It should have fallen back to cerebras
+    expect(result.config.provider).toBe("cerebras");
+
+    // The cache should have recorded groq as unhealthy
+    const cachedGroq = service["healthCache"].get("groq:llama-3.3-70b-versatile");
+    expect(cachedGroq?.healthy).toBe(false);
   });
 });

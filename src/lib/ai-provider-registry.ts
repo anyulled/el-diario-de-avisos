@@ -62,33 +62,46 @@ export class AIProviderRegistry {
   }
 
   async getWorkingModel(): Promise<{ model: LanguageModel; config: ModelConfig }> {
-    for (const config of this.fallbackChain) {
+    const now = Date.now();
+
+    /* Launch all health checks concurrently for un-cached or expired entries */
+    const pendingChecks = this.fallbackChain.map(async (config) => {
       const cacheKey = `${config.provider}:${config.modelId}`;
       const cached = this.healthCache.get(cacheKey);
-      const now = Date.now();
 
-      if (cached && now - cached.timestamp < this.CACHE_DURATION && cached.healthy) {
+      /* If we have a valid cached result (healthy or unhealthy), return it immediately */
+      if (cached && now - cached.timestamp < this.CACHE_DURATION) {
+        return { config, isHealthy: cached.healthy };
+      }
+
+      const provider = this.providers.get(config.provider);
+      if (!provider) {
+        return { config, isHealthy: false };
+      }
+
+      try {
+        const isHealthy = await provider.checkHealth(config.modelId);
+        this.healthCache.set(cacheKey, { healthy: isHealthy, timestamp: now });
+        return { config, isHealthy };
+      } catch {
+        /* Fallback robustly, catching unexpected errors as unhealthy */
+        this.healthCache.set(cacheKey, { healthy: false, timestamp: now });
+        return { config, isHealthy: false };
+      }
+    });
+
+    /* Iterate through the results in the strict fallback order */
+    for (const checkPromise of pendingChecks) {
+      const { config, isHealthy } = await checkPromise;
+      if (isHealthy) {
         return {
           model: this.getModel(config.provider, config.modelId),
           config,
         };
       }
-
-      const provider = this.providers.get(config.provider);
-      if (provider) {
-        const isHealthy = await provider.checkHealth(config.modelId);
-        this.healthCache.set(cacheKey, { healthy: isHealthy, timestamp: now });
-
-        if (isHealthy) {
-          return {
-            model: this.getModel(config.provider, config.modelId),
-            config,
-          };
-        }
-      }
     }
 
-    // If all fail, return the first one as a last resort
+    /* If all fail, return the first one as a last resort */
     const firstConfig = this.fallbackChain[0];
     return {
       model: this.getModel(firstConfig.provider, firstConfig.modelId),
