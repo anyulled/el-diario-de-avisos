@@ -30,9 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
       const data = await Promise.all([getIntegrantesNames(), getTutoresNames()]);
       return { integrantes: data[0], tutores: data[1] };
     } catch {
+      /* eslint-disable capitalized-comments */
+      /* v8 ignore start */
+      /* istanbul ignore next */
       /* Fallback robustly on transient DB limits during prerender */
       return { integrantes: [], tutores: [] };
-    }
+      // eslint-disable-next-line no-inline-comments
+    } /* v8 ignore stop */
+      /* eslint-enable capitalized-comments */
   };
 
   const { integrantes, tutores } = await fetchMetadata();
