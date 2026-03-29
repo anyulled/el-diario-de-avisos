@@ -109,4 +109,25 @@ describe("AIProviderRegistry", () => {
     expect(result.config.provider).toBe("groq");
     expect(result.config.modelId).toBe("llama-3.3-70b-versatile");
   });
+
+  it("should treat a provider that throws an error during health check as unhealthy", async () => {
+    const service = createService();
+
+    // Make the first provider throw an error, and the next one succeed
+    const groqProvider = service["providers"].get("groq");
+    const cerebrasProvider = service["providers"].get("cerebras");
+    if (!groqProvider || !cerebrasProvider) throw new Error("Providers not found");
+
+    vi.spyOn(groqProvider, "checkHealth").mockRejectedValue(new Error("Network timeout"));
+    vi.spyOn(cerebrasProvider, "checkHealth").mockResolvedValue(true);
+
+    const result = await service.getWorkingModel();
+
+    // It should have fallen back to cerebras
+    expect(result.config.provider).toBe("cerebras");
+
+    // The cache should have recorded groq as unhealthy
+    const cachedGroq = service["healthCache"].get("groq:llama-3.3-70b-versatile");
+    expect(cachedGroq?.healthy).toBe(false);
+  });
 });
