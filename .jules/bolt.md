@@ -66,3 +66,8 @@
 
 **Learning:** Separating text and HTML tags using `Array.from(String.prototype.matchAll())` and iterating manually with `slice` is extremely slow. Using `String.prototype.split(/(<[^>]+>)/g)` instead is up to 10x faster because it leverages the highly optimized V8 split engine, which automatically captures tags at odd indices and text at even indices. Adding a fast path `indexOf('<') === -1` skips regex entirely for plain text strings.
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
+
+## 2026-03-24 - Global Caching over Component Caching
+
+**Learning:** When fetching relatively static data via Server Actions (like `getEssays`), applying `unstable_cache` directly at the action definition is more efficient than wrapping the action inside individual components. Component-level caching requires redundant wraps in every component using the data, risking missed caches or inconsistent behavior.
+**Action:** Always wrap data-fetching Server Actions that query static or slow-moving data globally at the `actions.ts` export level. Update tests to verify the cache interaction directly at the source.

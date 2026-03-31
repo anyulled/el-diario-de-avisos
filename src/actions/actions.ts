@@ -216,22 +216,30 @@ export async function getArticleById(id: number) {
   return article;
 }
 
-export async function getEssays() {
-  const essaysList = await db
-    .select({
-      id: essays.id,
-      title: essays.title,
-      groupName: publications.name,
-    })
-    .from(essays)
-    .leftJoin(publications, eq(essays.pubId, publications.id));
+/*
+ * ⚡ Bolt: Cache getEssays list query globally. It is used in the Navbar on every page.
+ * The list changes very rarely, making it an ideal candidate for unstable_cache.
+ */
+export const getEssays = unstable_cache(
+  async () => {
+    const essaysList = await db
+      .select({
+        id: essays.id,
+        title: essays.title,
+        groupName: publications.name,
+      })
+      .from(essays)
+      .leftJoin(publications, eq(essays.pubId, publications.id));
 
-  return essaysList.map((essay) => ({
-    id: essay.id,
-    title: essay.title,
-    groupName: essay.groupName ?? "Publicación Desconocida",
-  }));
-}
+    return essaysList.map((essay) => ({
+      id: essay.id,
+      title: essay.title,
+      groupName: essay.groupName ?? "Publicación Desconocida",
+    }));
+  },
+  ["essays-list"],
+  { tags: ["essays"], revalidate: 3600 },
+);
 
 const getCachedEssay = unstable_cache(
   async (id: number) => {
