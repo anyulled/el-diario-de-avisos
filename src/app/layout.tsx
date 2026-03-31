@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
       template: "%s | Crónicas Musicales en la prensa caraqueña del siglo XIX",
     },
-    description: `Crónicas Musicales en la prensa caraqueña del siglo XIX. Explora la historia de Caracas a través de sus crónicas musicales. Un proyecto realizado por: ${authors}.`,
+    description: `Crónicas Musicales en la prensa caraqueña del siglo XIX. Explora la historia de Caracas a través de sus crónicas musicales.${authors ? ` Un proyecto realizado por: ${authors}.` : ""}`,
     openGraph: {
       title: "Crónicas Musicales en la prensa caraqueña del siglo XIX",
       description: "Archivo histórico de crónicas musicales de la prensa caraqueña",
