@@ -103,7 +103,19 @@ export async function getNews(params: SearchParams) {
     .from(articles)
     .$dynamic();
 
-  const countWithConditions = conditions.length > 0 ? countQuery.where(and(...conditions)) : countQuery;
+  /*
+   * ⚡ Bolt: Fast-path for total count without filters to avoid expensive full table scan.
+   * Retrieves estimated row count from pg_class, preventing DB compute quota exhaustion on large tables.
+   */
+  const countPromise =
+    conditions.length === 0 && !text
+      ? db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass`).then((res) => {
+          const estimate = Number(res.rows[0]?.estimate || 0);
+          return estimate > 0 ? [{ count: estimate }] : countQuery;
+        })
+      : conditions.length > 0
+        ? countQuery.where(and(...conditions))
+        : countQuery;
 
   // Build query with conditional fields and ordering
   const query = db
@@ -127,7 +139,7 @@ export async function getNews(params: SearchParams) {
   const orderBy = getNewsOrderBy(sort, text);
 
   const [countResult, data] = await Promise.all([
-    countWithConditions,
+    countPromise,
     queryWithConditions
       .orderBy(...orderBy)
       .limit(pageSize)

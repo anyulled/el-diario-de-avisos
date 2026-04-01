@@ -66,3 +66,7 @@
 
 **Learning:** Separating text and HTML tags using `Array.from(String.prototype.matchAll())` and iterating manually with `slice` is extremely slow. Using `String.prototype.split(/(<[^>]+>)/g)` instead is up to 10x faster because it leverages the highly optimized V8 split engine, which automatically captures tags at odd indices and text at even indices. Adding a fast path `indexOf('<') === -1` skips regex entirely for plain text strings.
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
+
+## 2026-03-09 - getNews Table Scan Optimization
+**Learning:** `getNews` was executing a full `count(*)` table scan on the `articles` table even when no search filters were applied, which is extremely expensive on large PostgreSQL tables and can exhaust DB compute quotas.
+**Action:** When counting total rows for pagination without active filters, always use `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'table_name'::regclass\`)` to get an estimated row count instead of a full table scan.

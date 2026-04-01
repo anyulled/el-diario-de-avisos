@@ -6,6 +6,8 @@ import { db } from "@/db";
 vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    execute: vi.fn().mockResolvedValue({ rows: [{ estimate: 50000 }] } as any),
   },
 }));
 
