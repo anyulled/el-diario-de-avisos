@@ -6,6 +6,7 @@ import { db } from "@/db";
 vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
+    execute: vi.fn().mockResolvedValue({ rows: [{ estimate: 50000 }] }),
   },
 }));
 
