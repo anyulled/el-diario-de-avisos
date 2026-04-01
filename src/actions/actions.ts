@@ -109,7 +109,7 @@ export async function getNews(params: SearchParams) {
    */
   const countPromise =
     conditions.length === 0 && !text
-      ? db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articles'::regclass`).then((res) => {
+      ? db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass`).then((res) => {
           const estimate = Number(res.rows[0]?.estimate || 0);
           return estimate > 0 ? [{ count: estimate }] : countQuery;
         })

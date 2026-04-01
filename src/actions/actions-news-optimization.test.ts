@@ -6,7 +6,8 @@ import { db } from "@/db";
 vi.mock("@/db", () => ({
   db: {
     select: vi.fn(),
-    execute: vi.fn().mockResolvedValue({ rows: [{ estimate: 50000 }] }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    execute: vi.fn().mockResolvedValue({ rows: [{ estimate: 50000 }] } as any),
   },
 }));
 
@@ -77,7 +78,8 @@ describe("getNews Performance", () => {
     mockSelect.mockImplementation(() => createMockChain());
 
     // Setup db.execute to return a valid estimate
-    const executeMock = vi.mocked(db.execute).mockResolvedValueOnce({ rows: [{ estimate: 10000 }] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const executeMock = vi.mocked(db.execute).mockResolvedValueOnce({ rows: [{ estimate: 10000 }] } as any);
 
     const result = await getNews({});
 
