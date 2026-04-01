@@ -113,9 +113,7 @@ export async function getNews(params: SearchParams) {
           const estimate = Number(res.rows[0]?.estimate || 0);
           return estimate > 0 ? [{ count: estimate }] : countQuery;
         })
-      : conditions.length > 0
-        ? countQuery.where(and(...conditions))
-        : countQuery;
+      : countQuery.where(and(...conditions));
 
   // Build query with conditional fields and ordering
   const query = db
