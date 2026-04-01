@@ -101,6 +101,21 @@ describe("getNews Performance", () => {
     expect(result.total).toBe(5);
     expect(executeMock).not.toHaveBeenCalled();
   });
+
+  it("should fall back to count query when pg_class estimate is 0", async () => {
+    const mockSelect = db.select as unknown as ReturnType<typeof vi.fn>;
+    mockSelect.mockImplementation(() => createMockChain([{ count: 12 }]));
+
+    // Setup db.execute to return a 0 estimate, forcing fallback to actual count
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const executeMock = vi.mocked(db.execute).mockResolvedValueOnce({ rows: [{ estimate: 0 }] } as any);
+
+    const result = await getNews({});
+
+    // Verify it used the fallback count query result
+    expect(result.total).toBe(12);
+    expect(executeMock).toHaveBeenCalled();
+  });
 });
 
 describe("getArticlesOnThisDay Performance", () => {
