@@ -70,3 +70,7 @@
 ## 2026-03-09 - getNews Table Scan Optimization
 **Learning:** `getNews` was executing a full `count(*)` table scan on the `articles` table even when no search filters were applied, which is extremely expensive on large PostgreSQL tables and can exhaust DB compute quotas.
 **Action:** When counting total rows for pagination without active filters, always use `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'table_name'::regclass\`)` to get an estimated row count instead of a full table scan.
+
+## 2026-03-09 - NavbarUI Scroll Re-renders and Grouping
+**Learning:** `NavbarUI` tracks `isScrolled` via an event listener on the window. This causes the component to re-render constantly as the user scrolls. During this constant re-rendering, `groupedEssays` was being calculated via a `.reduce()` loop on the `essays` array every single time, eating up CPU and dropping scroll frame rates.
+**Action:** Always wrap heavy list calculations (like `.reduce()` grouping) in `useMemo` when inside components that track frequent state updates like scroll position or input values.
