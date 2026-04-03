@@ -5,7 +5,7 @@ import { BookOpen, Calendar, Info, Menu, MessageSquare, Quote, Search, X, ImageI
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 
 interface Essay {
   id: number;
@@ -64,18 +64,23 @@ export function NavbarUI({ essays }: NavbarUIProps) {
     };
   }, [isEnsayosOpen]);
 
-  // Group essays by publication (groupName)
-  const groupedEssays = essays.reduce(
-    (acc, essay) => {
-      const group = essay.groupName || "Diario de Avisos";
-      if (!acc[group]) {
-        acc[group] = [];
-      }
-      acc[group].push(essay);
-      return acc;
-    },
-    {} as Record<string, Essay[]>,
-  );
+  /*
+   * Group essays by publication (groupName)
+   * ⚡ Bolt: Memoize grouping calculation to prevent recalculating on every scroll event (which triggers re-renders)
+   */
+  const groupedEssays = useMemo(() => {
+    return essays.reduce(
+      (acc, essay) => {
+        const group = essay.groupName || "Diario de Avisos";
+        if (!acc[group]) {
+          acc[group] = [];
+        }
+        acc[group].push(essay);
+        return acc;
+      },
+      {} as Record<string, Essay[]>,
+    );
+  }, [essays]);
 
   const navLinks = [
     { href: "/tal-dia-como-hoy", icon: Calendar, label: "Tal día como hoy" },
