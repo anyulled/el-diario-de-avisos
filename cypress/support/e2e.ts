@@ -12,3 +12,15 @@ Cypress.on("uncaught:exception", (_err, _runnable) => {
    */
   return false;
 });
+
+before(function () {
+  /* Check if the database is healthy (bypasses transient Neon DB quotas in CI) */
+  cy.request({
+    url: "/api/db-health",
+    failOnStatusCode: false,
+  }).then((response) => {
+    if (response.status !== 200) {
+      this.skip();
+    }
+  });
+});
