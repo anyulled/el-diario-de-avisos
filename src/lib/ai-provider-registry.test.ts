@@ -130,4 +130,23 @@ describe("AIProviderRegistry", () => {
     const cachedGroq = service["healthCache"].get("groq:llama-3.3-70b-versatile");
     expect(cachedGroq?.healthy).toBe(false);
   });
+
+  it("should treat an unregistered provider config as unhealthy", async () => {
+    const service = createService();
+
+    // Insert an invalid provider at the start of the fallback chain
+    service["fallbackChain"].unshift({
+      provider: "non-existent-provider",
+      modelId: "phantom-model",
+    });
+
+    const groqProvider = service["providers"].get("groq");
+    if (!groqProvider) throw new Error("Groq provider not found");
+    vi.spyOn(groqProvider, "checkHealth").mockResolvedValue(true);
+
+    const result = await service.getWorkingModel();
+
+    // The registry should skip the invalid provider and correctly fall back to the first valid healthy one (groq)
+    expect(result.config.provider).toBe("groq");
+  });
 });
