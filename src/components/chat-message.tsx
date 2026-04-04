@@ -2,16 +2,17 @@
 
 import { type UIMessage } from "ai";
 import { Bot, User } from "lucide-react";
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 
 function ChatMessage({ message }: { message: UIMessage }) {
-  const getMessageContent = (m: UIMessage) => {
-    return m.parts
+  // ⚡ Bolt: Memoize message content extraction to prevent array filtering, mapping, and joining on every re-render
+  const messageContent = useMemo(() => {
+    return message.parts
       .filter((part): part is { type: "text"; text: string } => part.type === "text")
       .map((part) => part.text)
       .join("");
-  };
+  }, [message.parts]);
 
   return (
     <div className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
@@ -40,11 +41,11 @@ function ChatMessage({ message }: { message: UIMessage }) {
                 ),
               }}
             >
-              {getMessageContent(message)}
+              {messageContent}
             </ReactMarkdown>
           </div>
         ) : (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{getMessageContent(message)}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{messageContent}</p>
         )}
       </div>
     </div>
