@@ -10,7 +10,13 @@ export const metadata: Metadata = {
   description: "Artículos musicales publicados tal día como hoy en la prensa caraqueña.",
 };
 
-export const dynamic = "force-dynamic";
+/*
+ * ⚡ Bolt: Replace "force-dynamic" with ISR (revalidate) to cache the "Tal día como hoy" page.
+ * The content only changes once per day, so regenerating it on every single request
+ * causes unnecessary database queries and slower page loads. Revalidating every hour (3600s)
+ * is sufficient to keep the date relatively fresh without sacrificing performance.
+ */
+export const revalidate = 3600;
 
 export default async function OnThisDayPage() {
   // Computes the date in 'America/Caracas' timezone
