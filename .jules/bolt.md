@@ -74,3 +74,8 @@
 ## 2026-03-09 - NavbarUI Scroll Re-renders and Grouping
 **Learning:** `NavbarUI` tracks `isScrolled` via an event listener on the window. This causes the component to re-render constantly as the user scrolls. During this constant re-rendering, `groupedEssays` was being calculated via a `.reduce()` loop on the `essays` array every single time, eating up CPU and dropping scroll frame rates.
 **Action:** Always wrap heavy list calculations (like `.reduce()` grouping) in `useMemo` when inside components that track frequent state updates like scroll position or input values.
+
+## 2026-03-10 - Unnecessary Force-Dynamic
+
+**Learning:** The "Tal día como hoy" page was utilizing `export const dynamic = "force-dynamic";`, bypassing caching and SSG despite the content only changing once per day.
+**Action:** Replace `force-dynamic` with Incremental Static Regeneration (ISR) using `export const revalidate = 3600;` on pages where content changes predictably (e.g., daily) to optimize TTFB and reduce unnecessary database queries.
