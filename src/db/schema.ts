@@ -284,18 +284,32 @@ export const essayImages = pgTable(
   ],
 );
 
-export const articleEmbeddings = pgTable("articulos_embeddings", {
-  articleId: integer("arti_cod")
-    .primaryKey()
-    .references(() => articles.id),
-  embedding: vector("embedding", { dimensions: 3072 }),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const articleEmbeddings = pgTable(
+  "articulos_embeddings",
+  {
+    articleId: integer("arti_cod")
+      .primaryKey()
+      .references(() => articles.id),
+    embedding: vector("embedding", { dimensions: 3072 }),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    // ⚡ Bolt: Add HNSW index to avoid O(N) performance during vector searches
+    index("article_embeddings_hnsw_idx").using("hnsw", table.embedding.op("vector_cosine_ops")),
+  ],
+);
 
-export const essayEmbeddings = pgTable("ensayos_embeddings", {
-  essayId: integer("ensayo_cod")
-    .primaryKey()
-    .references(() => essays.id),
-  embedding: vector("embedding", { dimensions: 3072 }),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const essayEmbeddings = pgTable(
+  "ensayos_embeddings",
+  {
+    essayId: integer("ensayo_cod")
+      .primaryKey()
+      .references(() => essays.id),
+    embedding: vector("embedding", { dimensions: 3072 }),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    // ⚡ Bolt: Add HNSW index to avoid O(N) performance during vector searches
+    index("essay_embeddings_hnsw_idx").using("hnsw", table.embedding.op("vector_cosine_ops")),
+  ],
+);
