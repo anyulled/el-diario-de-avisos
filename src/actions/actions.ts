@@ -228,22 +228,30 @@ export async function getArticleById(id: number) {
   return article;
 }
 
-export async function getEssays() {
-  const essaysList = await db
-    .select({
-      id: essays.id,
-      title: essays.title,
-      groupName: publications.name,
-    })
-    .from(essays)
-    .leftJoin(publications, eq(essays.pubId, publications.id));
+// ⚡ Bolt: Apply unstable_cache globally to prevent duplicate database queries across components
+export const getEssays = unstable_cache(
+  async () => {
+    const essaysList = await db
+      .select({
+        id: essays.id,
+        title: essays.title,
+        groupName: publications.name,
+      })
+      .from(essays)
+      .leftJoin(publications, eq(essays.pubId, publications.id));
 
-  return essaysList.map((essay) => ({
-    id: essay.id,
-    title: essay.title,
-    groupName: essay.groupName ?? "Publicación Desconocida",
-  }));
-}
+    return essaysList.map((essay) => ({
+      id: essay.id,
+      title: essay.title,
+      groupName: essay.groupName ?? "Publicación Desconocida",
+    }));
+  },
+  ["essays-global"],
+  {
+    revalidate: 3600,
+    tags: ["essays"],
+  },
+);
 
 const getCachedEssay = unstable_cache(
   async (id: number) => {
