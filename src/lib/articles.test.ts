@@ -11,8 +11,7 @@ vi.mock("next/cache", () => ({
 // Mock db
 vi.mock("@/db", () => ({
   db: {
-    select: vi.fn().mockReturnThis(),
-    from: vi.fn(),
+    execute: vi.fn(),
   },
 }));
 
@@ -22,10 +21,10 @@ describe("getArticleCount", () => {
   });
 
   it("should return the article count when DB query succeeds", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    (db.select as any).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ value: 12345 }]),
-    });
+    vi.mocked(db.execute).mockResolvedValue({
+      rows: [{ estimate: 12345 }],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     const count = await getArticleCount();
     expect(count).toBe(12345);
@@ -35,10 +34,7 @@ describe("getArticleCount", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
       // Noop
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    (db.select as any).mockReturnValue({
-      from: vi.fn().mockRejectedValue(new Error("DB Error")),
-    });
+    vi.mocked(db.execute).mockRejectedValue(new Error("DB Error"));
 
     const count = await getArticleCount();
     expect(count).toBe(0);

@@ -1,13 +1,14 @@
 import { unstable_cache } from "next/cache";
-import { count } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { db } from "@/db";
-import { articles } from "@/db/schema";
 
 export const getArticleCount = unstable_cache(
   async () => {
     try {
-      const result = await db.select({ value: count() }).from(articles);
-      return result[0].value;
+      // ⚡ Bolt: Use fast-path pg_class estimate instead of full table scan count(*) to prevent DB quota exhaustion
+      const result = await db.execute(sql`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass`);
+      const estimate = Number(result.rows[0]?.estimate || 0);
+      return estimate;
     } catch (error) {
       console.error("Error fetching article count:", error);
       // Return 0 to prevent the UI from crashing if the database is unavailable
