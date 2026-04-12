@@ -79,3 +79,6 @@
 
 **Learning:** The "Tal día como hoy" page was utilizing `export const dynamic = "force-dynamic";`, bypassing caching and SSG despite the content only changing once per day.
 **Action:** Replace `force-dynamic` with Incremental Static Regeneration (ISR) using `export const revalidate = 3600;` on pages where content changes predictably (e.g., daily) to optimize TTFB and reduce unnecessary database queries.
+## 2026-03-10 - getArticleCount Table Scan Optimization
+**Learning:** `getArticleCount` was executing an exact `count(*)` using Drizzle's `count()`, which caused a full table scan on the large `articulos` table. This led to unnecessary compute quota exhaustion for a static UI metric that only needs an estimate.
+**Action:** Replaced exact count with `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass\`)` to provide an O(1) estimate, matching the fast-path pattern used in `getNews`.
