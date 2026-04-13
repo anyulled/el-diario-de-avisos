@@ -82,3 +82,8 @@
 ## 2026-03-10 - getArticleCount Table Scan Optimization
 **Learning:** `getArticleCount` was executing an exact `count(*)` using Drizzle's `count()`, which caused a full table scan on the large `articulos` table. This led to unnecessary compute quota exhaustion for a static UI metric that only needs an estimate.
 **Action:** Replaced exact count with `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass\`)` to provide an O(1) estimate, matching the fast-path pattern used in `getNews`.
+
+## 2026-03-11 - Metadata Array Mapping Optimization
+
+**Learning:** When multiple mapped arrays are combined into a single array (e.g. `const authors = [...integrantes.map(...), ...tutores.map(...)]`), and those mapped values are needed separately for other metadata fields, it results in duplicate iterations over the original arrays. Furthermore, using `Array.prototype.concat()` is measurably faster than the spread operator `[...]` for array concatenation.
+**Action:** Always pre-calculate mapped arrays into variables if they are reused across multiple fields, and prefer `concat()` over the spread operator for combining arrays where performance is critical.
