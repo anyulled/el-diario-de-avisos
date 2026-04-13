@@ -87,3 +87,8 @@
 
 **Learning:** When multiple mapped arrays are combined into a single array (e.g. `const authors = [...integrantes.map(...), ...tutores.map(...)]`), and those mapped values are needed separately for other metadata fields, it results in duplicate iterations over the original arrays. Furthermore, using `Array.prototype.concat()` is measurably faster than the spread operator `[...]` for array concatenation.
 **Action:** Always pre-calculate mapped arrays into variables if they are reused across multiple fields, and prefer `concat()` over the spread operator for combining arrays where performance is critical.
+
+## 2026-03-12 - TypeScript Array Concat Type Inference
+
+**Learning:** When using `Array.prototype.concat()` to combine arrays that have been run through `.filter(Boolean)` (which strips falsy values but leaves the TypeScript inference as a union like `(string | null)[]`), TypeScript throws a compilation error ("No overload matches this call").
+**Action:** When migrating from the spread operator to `concat()`, explicitly cast the filtered arrays using `as string[]` (or appropriate type) to satisfy TypeScript's strict overload resolution for the `concat` method.
