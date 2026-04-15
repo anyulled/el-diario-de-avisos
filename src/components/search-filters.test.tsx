@@ -329,7 +329,7 @@ describe("SearchFilters date range", () => {
 
 
 
-      const { getByLabelText, getByRole } = render(<SearchFilters types={[]} publications={[]} />);
+      const { getByLabelText } = render(<SearchFilters types={[]} publications={[]} />);
       const dateFromInput = getByLabelText("Fecha desde") as HTMLInputElement;
       const dateToInput = getByLabelText("Fecha hasta") as HTMLInputElement;
 
@@ -342,8 +342,15 @@ describe("SearchFilters date range", () => {
       const typeButton = screen.getByRole("button", { name: /Tipo/i });
       fireEvent.click(typeButton);
 
-      // Now trigger execute search when dates are already invalid to hit line 321
-      const searchButton = getByRole("button", { name: "Buscar" });
+      /*
+       * Now trigger execute search when dates are already invalid to hit line 321
+       * Test lines 212 and 282
+       */
+      const unknownPub = { id: 99, name: "Unknown pub" };
+      render(<SearchFilters types={[]} publications={[unknownPub]} />);
+
+      /* Need to click the newly rendered one */
+      const searchButton = screen.getAllByRole("button", { name: "Buscar" })[1];
       fireEvent.click(searchButton);
 
 
@@ -364,5 +371,13 @@ describe("SearchFilters date range", () => {
       fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
 
 
+  });
+
+  it('handles the onClear trigger', () => {
+      const { getByRole } = render(<SearchFilters types={[]} publications={[]} />);
+      const typeButton = getByRole("button", { name: /Tipo/i });
+      fireEvent.click(typeButton);
+      const clearRadio = screen.getByRole("radio", { name: /Mostar Todos/i });
+      fireEvent.click(clearRadio);
   });
 });
