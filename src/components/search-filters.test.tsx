@@ -288,13 +288,14 @@ describe("SearchFilters date range", () => {
 
 
 
+
   it('should handle "Enter" key down on search input', () => {
     /* Just find the search button and click it to test codecov if mock keeps failing */
     render(<SearchFilters types={[]} publications={[]} />);
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
 
     /* Changing value */
-    (input as HTMLInputElement).value = "some text";
+    input.value = "some text";
     fireEvent.change(input, { target: { value: "some text" } });
 
     /* Pressing Enter */
