@@ -289,15 +289,15 @@ describe("SearchFilters date range", () => {
 
 
   it('should handle "Enter" key down on search input', () => {
-    // Just find the search button and click it to test codecov if mock keeps failing
+    /* Just find the search button and click it to test codecov if mock keeps failing */
     render(<SearchFilters types={[]} publications={[]} />);
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
 
-    // Changing value
+    /* Changing value */
     input.value = "some text";
     fireEvent.change(input, { target: { value: "some text" } });
 
-    // Pressing Enter
+    /* Pressing Enter */
     fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
   });
 
@@ -306,14 +306,14 @@ describe("SearchFilters date range", () => {
   it('should execute search with explicit page update parameter correctly handled by the search build helper', () => {
     const { getAllByRole, getByRole } = render(<SearchFilters types={[]} publications={[]} />);
 
-    // trigger sort change, type filter expansion
+    /* Trigger sort change, type filter expansion */
     const typeButton = getByRole("button", { name: /Tipo/i });
     fireEvent.click(typeButton);
 
-    const sortSelect = getAllByRole("combobox")[0]; // assuming it finds it
+    const sortSelect = getAllByRole("combobox")[0];
     fireEvent.change(sortSelect, { target: { value: "rank" } });
 
-    // trigger handle validation dates
+    /* Trigger handle validation dates */
     const dateFromInput = screen.getByLabelText("Fecha desde");
     fireEvent.blur(dateFromInput);
 
