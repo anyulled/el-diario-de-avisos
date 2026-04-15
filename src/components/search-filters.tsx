@@ -2,7 +2,7 @@
 
 import { Calendar, ChevronDown, ChevronUp, Search, Type } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { publicationColumns, publications } from "@/db/schema";
 import { normalizeDateRange } from "@/lib/date-range";
@@ -262,7 +262,7 @@ export function SearchFilters({ types, publications: pubs }: SearchFiltersProps)
   const [isPending, startTransition] = useTransition();
 
   // Local state
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("text") || "");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [dateFrom, setDateFrom] = useState(searchParams.get("dateFrom") || "");
   const [dateTo, setDateTo] = useState(searchParams.get("dateTo") || "");
   const [selectedType, setSelectedType] = useState(searchParams.get("type") || "");
@@ -278,7 +278,9 @@ export function SearchFilters({ types, publications: pubs }: SearchFiltersProps)
   const pubParam = searchParams.get("pubId");
 
   useEffect(() => {
-    setSearchTerm(textParam || "");
+    if (searchInputRef.current && searchInputRef.current.value !== (textParam || "")) {
+      searchInputRef.current.value = textParam || "";
+    }
     setDateFrom(dateFromParam || "");
     setDateTo(dateToParam || "");
     setSelectedType(typeParam || "");
@@ -304,7 +306,7 @@ export function SearchFilters({ types, publications: pubs }: SearchFiltersProps)
   const executeSearch = (updates: Record<string, string | null> = {}) => {
     // Merge updates with current state to check validation
     const allStates: Record<string, string | null> = {
-      text: searchTerm,
+      text: searchInputRef.current?.value ?? "",
       dateFrom,
       dateTo,
       type: selectedType,
@@ -332,7 +334,7 @@ export function SearchFilters({ types, publications: pubs }: SearchFiltersProps)
 
   const handleManualSearch = () => {
     // Use trimmed value for explicit searches to align input with validation/params
-    executeSearch({ text: searchTerm.trim() });
+    executeSearch({ text: (searchInputRef.current?.value ?? "").trim() });
   };
 
   const handleSortChange = (sortValue: string) => {
@@ -352,8 +354,8 @@ export function SearchFilters({ types, publications: pubs }: SearchFiltersProps)
             type="search"
             placeholder="Buscar por palabra clave o texto..."
             className="w-full h-14 pl-12 pr-4 rounded-2xl bg-black/5 dark:bg-white/5 border-2 border-transparent focus:border-amber-500/50 focus:bg-white dark:focus:bg-zinc-900 transition-all dark:text-white outline-hidden text-lg placeholder:text-gray-400 font-medium"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            defaultValue={searchParams.get("text") || ""}
+            ref={searchInputRef}
             onKeyDown={(e) => e.key === "Enter" && handleManualSearch()}
           />
           <Search className="absolute left-4 top-4.5 text-gray-400 group-focus-within:text-amber-500 transition-colors" size={20} />
