@@ -147,7 +147,7 @@ describe("SearchFilters date range", () => {
     );
 
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
-    input.value = "  agua  ";
+    (input as HTMLInputElement).value = "  agua  ";
     fireEvent.change(input, { target: { value: "  agua  " } });
     expect(replaceMock).not.toHaveBeenCalled();
 
@@ -175,7 +175,7 @@ describe("SearchFilters date range", () => {
     );
 
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
-    input.value = "   ";
+    (input as HTMLInputElement).value = "   ";
     fireEvent.change(input, { target: { value: "   " } });
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
 
@@ -294,7 +294,7 @@ describe("SearchFilters date range", () => {
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
 
     /* Changing value */
-    input.value = "some text";
+    (input as HTMLInputElement).value = "some text";
     fireEvent.change(input, { target: { value: "some text" } });
 
     /* Pressing Enter */
