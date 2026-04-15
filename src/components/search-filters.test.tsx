@@ -146,7 +146,7 @@ describe("SearchFilters date range", () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
+    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
     (input as HTMLInputElement).value = "  agua  ";
     fireEvent.change(input, { target: { value: "  agua  " } });
     expect(replaceMock).not.toHaveBeenCalled();
@@ -174,7 +174,7 @@ describe("SearchFilters date range", () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
+    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
     (input as HTMLInputElement).value = "   ";
     fireEvent.change(input, { target: { value: "   " } });
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
@@ -291,7 +291,7 @@ describe("SearchFilters date range", () => {
   it('should handle "Enter" key down on search input', () => {
     /* Just find the search button and click it to test codecov if mock keeps failing */
     render(<SearchFilters types={[]} publications={[]} />);
-    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...");
+    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
 
     /* Changing value */
     (input as HTMLInputElement).value = "some text";
@@ -314,7 +314,7 @@ describe("SearchFilters date range", () => {
     fireEvent.change(sortSelect, { target: { value: "rank" } });
 
     /* Trigger handle validation dates */
-    const dateFromInput = screen.getByLabelText("Fecha desde");
+    const dateFromInput = screen.getByLabelText("Fecha desde") as HTMLInputElement;
     fireEvent.blur(dateFromInput);
 
     const sizeSelect = getAllByRole("combobox")[1];
@@ -323,8 +323,8 @@ describe("SearchFilters date range", () => {
 
   it('triggers onBlur and tests invalid date', () => {
       const { getByLabelText } = render(<SearchFilters types={[]} publications={[]} />);
-      const dateFromInput = getByLabelText("Fecha desde");
-      const dateToInput = getByLabelText("Fecha hasta");
+      const dateFromInput = getByLabelText("Fecha desde") as HTMLInputElement;
+      const dateToInput = getByLabelText("Fecha hasta") as HTMLInputElement;
 
       fireEvent.change(dateFromInput, { target: { value: "2024-01-01" } });
       fireEvent.change(dateToInput, { target: { value: "2023-01-01" } });
