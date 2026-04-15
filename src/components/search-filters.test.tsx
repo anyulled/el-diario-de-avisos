@@ -346,7 +346,8 @@ describe("SearchFilters date range", () => {
        * Now trigger execute search when dates are already invalid to hit line 321
        * Test lines 212 and 282
        */
-      const unknownPub = { id: 99, name: "Unknown pub" };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const unknownPub: any = { id: 99, name: "Unknown pub" };
       render(<SearchFilters types={[]} publications={[unknownPub]} />);
 
       /* Need to click the newly rendered one */
