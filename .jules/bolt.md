@@ -92,3 +92,6 @@
 
 **Learning:** When using `Array.prototype.concat()` to combine arrays that have been run through `.filter(Boolean)` (which strips falsy values but leaves the TypeScript inference as a union like `(string | null)[]`), TypeScript throws a compilation error ("No overload matches this call").
 **Action:** When migrating from the spread operator to `concat()`, explicitly cast the filtered arrays using `as string[]` (or appropriate type) to satisfy TypeScript's strict overload resolution for the `concat` method.
+## 2026-03-13 - SearchFilters Controlled Component Bottleneck
+**Learning:** `SearchFilters` used a controlled input (`useState`) for `searchTerm`, which triggered an expensive re-render of the entire filter suite (including mapping over `publications` and rendering date pickers) on every single keystroke.
+**Action:** To optimize performance in large React components containing text inputs, prefer using uncontrolled inputs with `useRef` rather than controlled components with `useState` to prevent expensive React re-renders of the entire component tree on every keystroke.
