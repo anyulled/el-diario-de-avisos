@@ -395,21 +395,26 @@ describe("SearchFilters date range", () => {
       searchParamsContainer.current.set("type", "101");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render(<SearchFilters types={[mockType as any]} publications={[]} />);
-      const typeButton = screen.getAllByRole("button")[2] || screen.getAllByRole("button")[0];
+      const typeButton = screen.getAllByRole("button").find(b => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) || screen.getAllByRole("button")[2];
       fireEvent.click(typeButton);
-      const clearRadio = screen.getAllByRole("radio").at(-1) as HTMLInputElement;
-      if (clearRadio) {
-        fireEvent.click(clearRadio);
-      }
+      // Find the clear radio by the text node or traversing
+      const clearRadio = document.querySelector("input[name=\"type\"][value=\"\"]") as HTMLInputElement;
+      fireEvent.click(clearRadio);
+
+      // Need to flush microtasks to ensure codecov sees the callback execution
+      const searchButton = screen.getAllByRole("button")[1];
+      fireEvent.click(searchButton);
   });
 
   it('handles the onSelect type trigger', () => {
       const mockType = { id: 101, name: "Sample Type" };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render(<SearchFilters types={[mockType as any]} publications={[]} />);
-      const typeButton = screen.getAllByRole("button")[2] || screen.getAllByRole("button")[0];
+      const typeButton = screen.getAllByRole("button").find(b => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) || screen.getAllByRole("button")[2];
       fireEvent.click(typeButton);
-      const typeRadio = screen.getAllByRole("radio").at(0) as HTMLInputElement;
+      const typeRadio = document.querySelector("input[name=\"type\"][value=\"101\"]") as HTMLInputElement;
       fireEvent.click(typeRadio);
+      const searchButton = screen.getAllByRole("button")[1];
+      fireEvent.click(searchButton);
   });
 });
