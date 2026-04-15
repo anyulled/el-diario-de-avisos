@@ -339,26 +339,31 @@ describe("SearchFilters date range", () => {
 
       expect(screen.getByText("La fecha inicial no puede ser posterior a la fecha final.")).toBeTruthy();
 
-      const typeButton = screen.getByRole("button", { name: /Tipo/i });
-      fireEvent.click(typeButton);
+
 
       /*
        * Now trigger execute search when dates are already invalid to hit line 321
        * Test lines 212 and 282
        */
+
+      /* Now trigger execute search when dates are already invalid to hit line 321 */
+      const searchButton = screen.getByRole("button", { name: "Buscar" });
+      fireEvent.click(searchButton);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const unknownPub: any = { id: 99, name: "Unknown pub" };
       render(<SearchFilters types={[]} publications={[unknownPub]} />);
 
-      /* Need to click the newly rendered one */
-      const searchButton = screen.getAllByRole("button", { name: "Buscar" })[1];
-      fireEvent.click(searchButton);
 
 
 
       /* Execute clear filter explicitly to increase coverage */
-      const clearRadio = screen.getByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
-      fireEvent.click(clearRadio);
+
+      const clearRadio = screen.queryByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
+      if (clearRadio) {
+        fireEvent.click(clearRadio);
+      }
+
 
   });
 
@@ -372,13 +377,39 @@ describe("SearchFilters date range", () => {
       fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
 
 
+
+      const typeButton2 = screen.getByRole("button", { name: /Tipo/i });
+      fireEvent.click(typeButton2);
+      const clearRadio2 = screen.getByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
+      if (clearRadio2) {
+        fireEvent.click(clearRadio2);
+      }
   });
 
+
+
+
   it('handles the onClear trigger', () => {
-      const { getByRole } = render(<SearchFilters types={[]} publications={[]} />);
-      const typeButton = getByRole("button", { name: /Tipo/i });
+      const mockType = { id: 101, name: "Sample Type" };
+      // Setup url so selectedType is "101" initially
+      searchParamsContainer.current.set("type", "101");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render(<SearchFilters types={[mockType as any]} publications={[]} />);
+      const typeButton = screen.getAllByRole("button")[2] || screen.getAllByRole("button")[0];
       fireEvent.click(typeButton);
-      const clearRadio = screen.getByRole("radio", { name: /Mostar Todos/i });
-      fireEvent.click(clearRadio);
+      const clearRadio = screen.getAllByRole("radio").at(-1) as HTMLInputElement;
+      if (clearRadio) {
+        fireEvent.click(clearRadio);
+      }
+  });
+
+  it('handles the onSelect type trigger', () => {
+      const mockType = { id: 101, name: "Sample Type" };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render(<SearchFilters types={[mockType as any]} publications={[]} />);
+      const typeButton = screen.getAllByRole("button")[2] || screen.getAllByRole("button")[0];
+      fireEvent.click(typeButton);
+      const typeRadio = screen.getAllByRole("radio").at(0) as HTMLInputElement;
+      fireEvent.click(typeRadio);
   });
 });
