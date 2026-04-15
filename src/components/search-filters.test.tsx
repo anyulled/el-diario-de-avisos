@@ -348,8 +348,9 @@ describe("SearchFilters date range", () => {
 
 
 
-      const radio = screen.getByRole("radio", { name: /Mostar Todos/i });
-      fireEvent.click(radio);
+      /* Execute clear filter explicitly to increase coverage */
+      const clearRadio = screen.getByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
+      fireEvent.click(clearRadio);
 
   });
 
