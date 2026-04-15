@@ -408,8 +408,8 @@ describe("SearchFilters date range", () => {
       const mockType = { id: 101, name: "Sample Type" };
       // Setup url so selectedType is "101" initially
       searchParamsContainer.current.set("type", "101");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render(<SearchFilters types={[mockType as any]} publications={[]} />);
+
+      render(<SearchFilters types={[{...mockType, pubId: null}]} publications={[]} />);
       const typeButton = screen.getAllByRole("button").find(b => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) || screen.getAllByRole("button")[2];
       fireEvent.click(typeButton);
       // Find the clear radio by the text node or traversing
@@ -423,8 +423,8 @@ describe("SearchFilters date range", () => {
 
   it('handles the onSelect type trigger', () => {
       const mockType = { id: 101, name: "Sample Type" };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      render(<SearchFilters types={[mockType as any]} publications={[]} />);
+
+      render(<SearchFilters types={[{...mockType, pubId: null}]} publications={[]} />);
       const typeButton = screen.getAllByRole("button").find(b => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) || screen.getAllByRole("button")[2];
       fireEvent.click(typeButton);
       const typeRadio = document.querySelector("input[name=\"type\"][value=\"101\"]") as HTMLInputElement;
