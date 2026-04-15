@@ -16,6 +16,21 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("SearchFilters date range", () => {
+
+  it('updates ref when text param changes and is different', () => {
+    // To hit line 282 where the input needs updating
+    searchParamsContainer.current.set("text", "initial text");
+    const { rerender } = render(<SearchFilters types={[]} publications={[]} />);
+
+    // Now simulate URL text change via params
+    searchParamsContainer.current.set("text", "new URL text");
+    // Trigger re-render which calls useEffect again
+    rerender(<SearchFilters types={[]} publications={[]} />);
+
+    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
+    expect(input.value).toBe("new URL text");
+  });
+
   beforeEach(() => {
     replaceMock.mockClear();
 
