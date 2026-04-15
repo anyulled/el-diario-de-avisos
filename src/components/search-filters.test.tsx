@@ -321,8 +321,9 @@ describe("SearchFilters date range", () => {
     fireEvent.change(sizeSelect, { target: { value: "100" } });
   });
 
-  it('triggers onBlur and tests invalid date', () => {
-      const { getByLabelText } = render(<SearchFilters types={[]} publications={[]} />);
+
+  it('triggers onBlur and tests invalid date and also execute search error', () => {
+      const { getByLabelText, getByRole } = render(<SearchFilters types={[]} publications={[]} />);
       const dateFromInput = getByLabelText("Fecha desde") as HTMLInputElement;
       const dateToInput = getByLabelText("Fecha hasta") as HTMLInputElement;
 
@@ -336,5 +337,9 @@ describe("SearchFilters date range", () => {
       fireEvent.click(typeButton);
       const radio = screen.getByRole("radio", { name: /Mostar Todos/i });
       fireEvent.click(radio);
+
+      // Now trigger execute search when dates are already invalid to hit line 321
+      const searchButton = getByRole("button", { name: "Buscar" });
+      fireEvent.click(searchButton);
   });
 });
