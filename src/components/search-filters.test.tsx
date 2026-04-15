@@ -4,20 +4,21 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SearchFilters } from "@/components/search-filters";
 
 
+const replaceMock = vi.fn();
 const searchParamsContainer = {
   current: new URLSearchParams(),
 };
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    replace: replaceMock,
-  }),
+  useRouter: () => ({ replace: replaceMock }),
+
   useSearchParams: () => searchParamsContainer.current,
 }));
 
 describe("SearchFilters date range", () => {
   beforeEach(() => {
     replaceMock.mockClear();
+
     searchParamsContainer.current = new URLSearchParams();
   });
 
@@ -55,7 +56,7 @@ describe("SearchFilters date range", () => {
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
 
     await waitFor(() => {
-
+      expect(replaceMock).toHaveBeenCalled();
     });
 
     const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
