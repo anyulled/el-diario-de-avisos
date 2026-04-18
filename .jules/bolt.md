@@ -95,3 +95,11 @@
 ## 2026-03-13 - SearchFilters Controlled Component Bottleneck
 **Learning:** `SearchFilters` used a controlled input (`useState`) for `searchTerm`, which triggered an expensive re-render of the entire filter suite (including mapping over `publications` and rendering date pickers) on every single keystroke.
 **Action:** To optimize performance in large React components containing text inputs, prefer using uncontrolled inputs with `useRef` rather than controlled components with `useState` to prevent expensive React re-renders of the entire component tree on every keystroke.
+## 2026-04-18 - Uncontrolled Input Bug Risk
+
+**Learning:** When attempting to optimize a controlled React input () into an uncontrolled input () to prevent re-renders, it is crucial to ensure that any UI logic depending on the input's state (like dynamically disabling a submit button via `disabled={!input.trim()}`) is either updated to evaluate at submission time or replaced with native browser validation (like the `required` attribute). In a previous iteration, swapping to `useRef` broke the dynamic disabled state of the send button, causing a UX regression.
+**Action:** When migrating from controlled to uncontrolled components, always audit the JSX for any dynamic attributes (like `disabled` or `className`) that rely on the state variable being removed, and refactor them appropriately.
+## 2026-04-18 - Uncontrolled Input Bug Risk
+
+**Learning:** When attempting to optimize a controlled React input (useState) into an uncontrolled input (useRef) to prevent re-renders, it is crucial to ensure that any UI logic depending on the input's state (like dynamically disabling a submit button via disabled={!input.trim()}) is either updated to evaluate at submission time or replaced with native browser validation (like the required attribute). In a previous iteration, swapping to useRef broke the dynamic disabled state of the send button, causing a UX regression.
+**Action:** When migrating from controlled to uncontrolled components, always audit the JSX for any dynamic attributes (like disabled or className) that rely on the state variable being removed, and refactor them appropriately.
