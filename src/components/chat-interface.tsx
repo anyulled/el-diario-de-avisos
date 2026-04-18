@@ -10,8 +10,8 @@ const CHAT_STORAGE_KEY = "chat-history";
 
 export default function ChatInterface({ className }: { className?: string }) {
   const { messages, sendMessage, setMessages, status } = useChat();
-  const [input, setInput] = useState("");
   const [isHydrated, setIsHydrated] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const isLoading = status === "submitted" || status === "streaming";
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -41,16 +41,16 @@ export default function ChatInterface({ className }: { className?: string }) {
     }
   }, [messages]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    const inputValue = inputRef.current?.value || "";
+    if (!inputValue.trim() || isLoading) return;
 
-    sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
-    setInput("");
+    sendMessage({ role: "user", parts: [{ type: "text", text: inputValue }] });
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
   };
 
   return (
@@ -115,15 +115,15 @@ export default function ChatInterface({ className }: { className?: string }) {
       {/* Input Area */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
         <div className="relative flex items-center">
+          {/* ⚡ Bolt: Use uncontrolled input with useRef to prevent re-rendering the entire ChatInterface on every keystroke */}
           <input
-            value={input}
-            onChange={handleInputChange}
+            ref={inputRef}
             placeholder="Escribe tu consulta sobre el archivo..."
             className="w-full bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 rounded-lg pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all dark:text-white shadow-inner"
           />
           <button
             type="submit"
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading}
             className="absolute right-2 p-2 text-amber-600 hover:text-amber-700 disabled:opacity-30 disabled:hover:text-amber-600 transition-colors"
           >
             <Send className="w-5 h-5" />
