@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ImageGallery from "./ImageGallery";
 
 vi.mock("yet-another-react-lightbox/styles.css", () => ({}));
@@ -11,7 +11,9 @@ interface MockLightboxProps {
   close: () => void;
   index: number;
 }
-vi.mock("yet-another-react-lightbox", () => {
+
+// Since we moved the import to LightboxWrapper, we mock that component instead
+vi.mock("./LightboxWrapper", () => {
   return {
     default: ({ slides, open, close, index }: MockLightboxProps) => {
       if (!open) return null;
@@ -48,7 +50,7 @@ describe("ImageGallery", () => {
     expect(imgElements[1].getAttribute("alt")).toBe("Test Image 2");
   });
 
-  it("opens lightbox when an image is clicked", () => {
+  it("opens lightbox when an image is clicked", async () => {
     const images = [
       { src: "/test1.jpg", alt: "Test Image 1" },
       { src: "/test2.jpg", alt: "Test Image 2" },
@@ -60,19 +62,25 @@ describe("ImageGallery", () => {
     const imgElements = screen.getAllByRole("img");
     fireEvent.click(imgElements[1]);
 
-    expect(screen.getByTestId("mock-lightbox")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByTestId("mock-lightbox")).toBeDefined();
+    });
     expect(screen.getByTestId("lightbox-current-index").textContent).toBe("1");
     expect(screen.getByTestId("lightbox-slides-length").textContent).toBe("2");
   });
 
-  it("closes lightbox when close button is clicked", () => {
+  it("closes lightbox when close button is clicked", async () => {
     const images = [{ src: "/test1.jpg", alt: "Test Image 1" }];
     render(<ImageGallery images={images} />);
 
     fireEvent.click(screen.getByRole("img"));
-    expect(screen.getByTestId("mock-lightbox")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByTestId("mock-lightbox")).toBeDefined();
+    });
 
     fireEvent.click(screen.getByTestId("lightbox-close"));
-    expect(screen.queryByTestId("mock-lightbox")).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByTestId("mock-lightbox")).toBeNull();
+    });
   });
 });
