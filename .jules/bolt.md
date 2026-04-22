@@ -103,3 +103,7 @@
 
 **Learning:** When attempting to optimize a controlled React input (useState) into an uncontrolled input (useRef) to prevent re-renders, it is crucial to ensure that any UI logic depending on the input's state (like dynamically disabling a submit button via disabled={!input.trim()}) is either updated to evaluate at submission time or replaced with native browser validation (like the required attribute). In a previous iteration, swapping to useRef broke the dynamic disabled state of the send button, causing a UX regression.
 **Action:** When migrating from controlled to uncontrolled components, always audit the JSX for any dynamic attributes (like disabled or className) that rely on the state variable being removed, and refactor them appropriately.
+
+## 2026-04-20 - Dynamic Imports for Heavy UI Libraries
+**Learning:** The `yet-another-react-lightbox` library and its plugins were statically imported in `ImageGallery`, bloating the initial JS bundle size for any page rendering the gallery, even though the lightbox is only visible when a user clicks an image.
+**Action:** To optimize initial JavaScript bundle size in Next.js, dynamically import heavy client-side UI libraries (e.g., lightboxes or complex widgets) using `next/dynamic` with `ssr: false` so they are only loaded upon user interaction, avoiding static top-level imports.

@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
-import "yet-another-react-lightbox/plugins/thumbnails.css";
+import dynamic from "next/dynamic";
 import Image from "next/image";
+
+/*
+ * ⚡ Bolt: Dynamically import LightboxWrapper to code-split the large yet-another-react-lightbox library
+ * and its plugins, reducing the initial bundle size for pages containing the gallery.
+ */
+const LightboxWrapper = dynamic(() => import("./LightboxWrapper"), {
+  ssr: false,
+});
 
 interface ImageGalleryProps {
   images: { src: string; alt?: string }[];
@@ -40,7 +44,9 @@ export default function ImageGallery({ images }: Readonly<ImageGalleryProps>) {
         ))}
       </div>
 
-      <Lightbox index={index} open={index >= 0} close={() => setIndex(-1)} slides={images} plugins={[Zoom, Thumbnails]} />
+      {index >= 0 && (
+        <LightboxWrapper index={index} open={index >= 0} close={() => setIndex(-1)} slides={images} />
+      )}
     </>
   );
 }
