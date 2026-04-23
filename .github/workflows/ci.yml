@@ -83,7 +83,7 @@ jobs:
       - name: Run integration tests
         run: npm run test:integration -- --run
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
