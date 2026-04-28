@@ -57,7 +57,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "markdownlint-cli": "^0.48.0",
-    "pdf2json": "^4.0.2",
+    "pdf2json": "^4.0.3",
     "prettier": "^3.8.3",
     "start-server-and-test": "^3.0.2",
     "tailwindcss": "^4",
