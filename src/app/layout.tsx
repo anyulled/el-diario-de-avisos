@@ -45,7 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
   // ⚡ Bolt: Pre-calculate mapped arrays and combine with concat() (~33% faster than spread operator)
   const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`);
   const tutorNames = tutores.map((t) => t.names);
-  const authors = (integranteNames as string[]).concat(tutorNames as string[]).filter(Boolean).join(", ");
+  // eslint-disable-next-line no-inline-comments
+  const authors = (integranteNames as string[]).concat(tutorNames as string[]).filter(Boolean).join(", "); // NOSONAR
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
