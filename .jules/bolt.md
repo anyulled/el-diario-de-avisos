@@ -107,3 +107,11 @@
 ## 2026-04-20 - Dynamic Imports for Heavy UI Libraries
 **Learning:** The `yet-another-react-lightbox` library and its plugins were statically imported in `ImageGallery`, bloating the initial JS bundle size for any page rendering the gallery, even though the lightbox is only visible when a user clicks an image.
 **Action:** To optimize initial JavaScript bundle size in Next.js, dynamically import heavy client-side UI libraries (e.g., lightboxes or complex widgets) using `next/dynamic` with `ssr: false` so they are only loaded upon user interaction, avoiding static top-level imports.
+
+## 2026-04-20 - Dynamic Imports for Stateful Chat Component
+**Learning:** When using  to code-split a heavy stateful component (like  using ), conditionally rendering it directly with  will cause it to unmount and lose all state (including chat history and input values) when hidden.
+**Action:** Use a tracking state flag (like ) that becomes  on the first interaction and remains , combining it with CSS classes (, ) to hide the component visually without unmounting it, preserving its state.
+
+## 2026-04-20 - Dynamic Imports for Stateful Chat Component
+**Learning:** When using `next/dynamic` to code-split a heavy stateful component (like `ChatInterface` using `@ai-sdk/react`), conditionally rendering it directly with `isOpen && <ChatInterface />` will cause it to unmount and lose all state (including chat history and input values) when hidden.
+**Action:** Use a tracking state flag (like `hasOpened`) that becomes `true` on the first interaction and remains `true`, combining it with CSS classes (`opacity-0`, `pointer-events-none`) to hide the component visually without unmounting it, preserving its state.
