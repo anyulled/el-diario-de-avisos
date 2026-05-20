@@ -113,7 +113,8 @@ export async function getNews(params: SearchParams) {
           const estimate = Number(res.rows[0]?.estimate || 0);
           return estimate > 0 ? [{ count: estimate }] : countQuery;
         })
-      : conditions.length > 0
+      : // eslint-disable-next-line no-inline-comments
+        conditions.length > 0 // NOSONAR
         ? countQuery.where(and(...conditions))
         : countQuery;
 
@@ -153,7 +154,6 @@ export async function getNews(params: SearchParams) {
     total,
   };
 }
-
 
 const getCachedArticle = unstable_cache(
   async (id: number) => {

@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SearchFilters } from "@/components/search-filters";
 
-
 const replaceMock = vi.fn();
 const searchParamsContainer = {
   current: new URLSearchParams(),
@@ -16,8 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("SearchFilters date range", () => {
-
-  it('updates ref when text param changes and is different', () => {
+  it("updates ref when text param changes and is different", () => {
     // To hit line 282 where the input needs updating
     searchParamsContainer.current.set("text", "initial text");
     const { rerender } = render(<SearchFilters types={[]} publications={[]} />);
@@ -61,12 +59,9 @@ describe("SearchFilters date range", () => {
     fireEvent.change(screen.getByLabelText("Fecha desde"), { target: { value: "2024-02-01" } });
     fireEvent.change(screen.getByLabelText("Fecha hasta"), { target: { value: "2024-02-10" } });
 
-
-
     fireEvent.blur(screen.getByLabelText("Fecha hasta"));
 
     // Blur should not trigger search
-
 
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
 
@@ -99,15 +94,11 @@ describe("SearchFilters date range", () => {
     fireEvent.change(screen.getByLabelText("Fecha desde"), { target: { value: "2024-03-05" } });
     fireEvent.change(screen.getByLabelText("Fecha hasta"), { target: { value: "2024-03-01" } });
 
-
-
     fireEvent.blur(screen.getByLabelText("Fecha hasta"));
 
     await waitFor(() => {
       expect(screen.getByText("La fecha inicial no puede ser posterior a la fecha final.")).toBeTruthy();
     });
-
-
   });
 
   it("uses the selected type label when present", () => {
@@ -166,9 +157,7 @@ describe("SearchFilters date range", () => {
     (input as HTMLInputElement).value = "  agua  ";
     fireEvent.change(input, { target: { value: "  agua  " } });
 
-
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
-
 
     const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
     const url = new URL(lastCall, "http://localhost");
@@ -194,7 +183,6 @@ describe("SearchFilters date range", () => {
     (input as HTMLInputElement).value = "   ";
     fireEvent.change(input, { target: { value: "   " } });
     fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
-
 
     const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
     const url = new URL(lastCall, "http://localhost");
@@ -261,7 +249,6 @@ describe("SearchFilters date range", () => {
       const diarioRadio = screen.getByRole("radio", { name: /Diario de Avisos/i });
       fireEvent.click(diarioRadio);
 
-
       const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
       const url = new URL(lastCall, "http://localhost");
       expect(url.searchParams.get("pubId")).toBe("1");
@@ -280,7 +267,6 @@ describe("SearchFilters date range", () => {
       // Select "Todas"
       const todasRadio = screen.getByRole("radio", { name: /Todas/i });
       fireEvent.click(todasRadio);
-
 
       const lastCall = replaceMock.mock.calls.at(-1)?.[0] as string;
       const url = new URL(lastCall, "http://localhost");
@@ -301,26 +287,19 @@ describe("SearchFilters date range", () => {
     });
   });
 
-
-
-
-
   it('should handle "Enter" key down on search input', () => {
     /* Just find the search button and click it to test codecov if mock keeps failing */
     render(<SearchFilters types={[]} publications={[]} />);
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
 
-
     input.value = "some text";
     fireEvent.change(input, { target: { value: "some text" } });
 
-
     fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
+    expect(replaceMock).toHaveBeenCalled();
   });
 
-
-
-  it('should execute search with explicit page update parameter correctly handled by the search build helper', () => {
+  it("should execute search with explicit page update parameter correctly handled by the search build helper", () => {
     const { getAllByRole, getByRole } = render(<SearchFilters types={[]} publications={[]} />);
 
     /* Trigger sort change, type filter expansion */
@@ -336,100 +315,89 @@ describe("SearchFilters date range", () => {
 
     const sizeSelect = getAllByRole("combobox")[1];
     fireEvent.change(sizeSelect, { target: { value: "100" } });
+    expect(replaceMock).toHaveBeenCalled();
   });
 
+  it("triggers onBlur and tests invalid date and also execute search error", () => {
+    const { getByLabelText } = render(<SearchFilters types={[]} publications={[]} />);
+    const dateFromInput = getByLabelText("Fecha desde") as HTMLInputElement;
+    const dateToInput = getByLabelText("Fecha hasta") as HTMLInputElement;
 
+    fireEvent.change(dateFromInput, { target: { value: "2024-01-01" } });
+    fireEvent.change(dateToInput, { target: { value: "2023-01-01" } });
+    fireEvent.blur(dateToInput);
 
-  it('triggers onBlur and tests invalid date and also execute search error', () => {
+    expect(screen.getByText("La fecha inicial no puede ser posterior a la fecha final.")).toBeTruthy();
 
+    /*
+     * Now trigger execute search when dates are already invalid to hit line 321
+     * Test lines 212 and 282
+     */
 
+    /* Now trigger execute search when dates are already invalid to hit line 321 */
+    const searchButton = screen.getByRole("button", { name: "Buscar" });
+    fireEvent.click(searchButton);
 
-      const { getByLabelText } = render(<SearchFilters types={[]} publications={[]} />);
-      const dateFromInput = getByLabelText("Fecha desde") as HTMLInputElement;
-      const dateToInput = getByLabelText("Fecha hasta") as HTMLInputElement;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const unknownPub: any = { id: 99, name: "Unknown pub" };
+    render(<SearchFilters types={[]} publications={[unknownPub]} />);
 
-      fireEvent.change(dateFromInput, { target: { value: "2024-01-01" } });
-      fireEvent.change(dateToInput, { target: { value: "2023-01-01" } });
-      fireEvent.blur(dateToInput);
+    /* Execute clear filter explicitly to increase coverage */
 
-      expect(screen.getByText("La fecha inicial no puede ser posterior a la fecha final.")).toBeTruthy();
-
-
-
-      /*
-       * Now trigger execute search when dates are already invalid to hit line 321
-       * Test lines 212 and 282
-       */
-
-      /* Now trigger execute search when dates are already invalid to hit line 321 */
-      const searchButton = screen.getByRole("button", { name: "Buscar" });
-      fireEvent.click(searchButton);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const unknownPub: any = { id: 99, name: "Unknown pub" };
-      render(<SearchFilters types={[]} publications={[unknownPub]} />);
-
-
-
-
-      /* Execute clear filter explicitly to increase coverage */
-
-      const clearRadio = screen.queryByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
-      if (clearRadio) {
-        fireEvent.click(clearRadio);
-      }
-
-
-  });
-
-  it('tests handle manual search directly when Enter is pressed', () => {
-
-
-      render(<SearchFilters types={[]} publications={[]} />);
-      const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
-      input.value = "my explicit search";
-      fireEvent.change(input, { target: { value: "my explicit search" } });
-      fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
-
-
-
-      const typeButton2 = screen.getByRole("button", { name: /Tipo/i });
-      fireEvent.click(typeButton2);
-      const clearRadio2 = screen.getByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
-      if (clearRadio2) {
-        fireEvent.click(clearRadio2);
-      }
-  });
-
-
-
-
-  it('handles the onClear trigger', () => {
-      const mockType = { id: 101, name: "Sample Type" };
-      // Setup url so selectedType is "101" initially
-      searchParamsContainer.current.set("type", "101");
-
-      render(<SearchFilters types={[{...mockType, pubId: null}]} publications={[]} />);
-      const typeButton = screen.getAllByRole("button").find(b => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) || screen.getAllByRole("button")[2];
-      fireEvent.click(typeButton);
-      // Find the clear radio by the text node or traversing
-      const clearRadio = document.querySelector("input[name=\"type\"][value=\"\"]") as HTMLInputElement;
+    const clearRadio = screen.queryByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
+    if (clearRadio) {
       fireEvent.click(clearRadio);
-
-      // Need to flush microtasks to ensure codecov sees the callback execution
-      const searchButton = screen.getAllByRole("button")[1];
-      fireEvent.click(searchButton);
+    }
   });
 
-  it('handles the onSelect type trigger', () => {
-      const mockType = { id: 101, name: "Sample Type" };
+  it("tests handle manual search directly when Enter is pressed", () => {
+    render(<SearchFilters types={[]} publications={[]} />);
+    const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
+    input.value = "my explicit search";
+    fireEvent.change(input, { target: { value: "my explicit search" } });
+    fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
 
-      render(<SearchFilters types={[{...mockType, pubId: null}]} publications={[]} />);
-      const typeButton = screen.getAllByRole("button").find(b => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) || screen.getAllByRole("button")[2];
-      fireEvent.click(typeButton);
-      const typeRadio = document.querySelector("input[name=\"type\"][value=\"101\"]") as HTMLInputElement;
-      fireEvent.click(typeRadio);
-      const searchButton = screen.getAllByRole("button")[1];
-      fireEvent.click(searchButton);
+    const typeButton2 = screen.getByRole("button", { name: /Tipo/i });
+    fireEvent.click(typeButton2);
+    const clearRadio2 = screen.getByRole("radio", { name: /Mostar Todos/i }) as HTMLInputElement;
+    if (clearRadio2) {
+      fireEvent.click(clearRadio2);
+    }
+    expect(replaceMock).toHaveBeenCalled();
+  });
+
+  it("handles the onClear trigger", () => {
+    const mockType = { id: 101, name: "Sample Type" };
+    // Setup url so selectedType is "101" initially
+    searchParamsContainer.current.set("type", "101");
+
+    render(<SearchFilters types={[{ ...mockType, pubId: null }]} publications={[]} />);
+    const typeButton =
+      screen.getAllByRole("button").find((b) => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) ||
+      screen.getAllByRole("button")[2];
+    fireEvent.click(typeButton);
+    // Find the clear radio by the text node or traversing
+    const clearRadio = document.querySelector('input[name="type"][value=""]') as HTMLInputElement;
+    fireEvent.click(clearRadio);
+
+    // Need to flush microtasks to ensure codecov sees the callback execution
+    const searchButton = screen.getAllByRole("button")[1];
+    fireEvent.click(searchButton);
+    expect(replaceMock).toHaveBeenCalled();
+  });
+
+  it("handles the onSelect type trigger", () => {
+    const mockType = { id: 101, name: "Sample Type" };
+
+    render(<SearchFilters types={[{ ...mockType, pubId: null }]} publications={[]} />);
+    const typeButton =
+      screen.getAllByRole("button").find((b) => b.textContent?.includes("Tipo de Noticia") || b.textContent?.includes("Sample Type")) ||
+      screen.getAllByRole("button")[2];
+    fireEvent.click(typeButton);
+    const typeRadio = document.querySelector('input[name="type"][value="101"]') as HTMLInputElement;
+    fireEvent.click(typeRadio);
+    const searchButton = screen.getAllByRole("button")[1];
+    fireEvent.click(searchButton);
+    expect(replaceMock).toHaveBeenCalled();
   });
 });

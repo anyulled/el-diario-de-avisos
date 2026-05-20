@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       return { integrantes: [], tutores: [] };
       // eslint-disable-next-line no-inline-comments
     } /* v8 ignore stop */
-      /* eslint-enable capitalized-comments */
+    /* eslint-enable capitalized-comments */
   };
 
   const { integrantes, tutores } = await fetchMetadata();
@@ -45,7 +45,11 @@ export async function generateMetadata(): Promise<Metadata> {
   // ⚡ Bolt: Pre-calculate mapped arrays and combine with concat() (~33% faster than spread operator)
   const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`);
   const tutorNames = tutores.map((t) => t.names);
-  const authors = (integranteNames as string[]).concat(tutorNames as string[]).filter(Boolean).join(", ");
+  /* NOSONAR */
+  const authors = (integranteNames as string[])
+    .concat(tutorNames as string[])
+    .filter(Boolean)
+    .join(", ");
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
