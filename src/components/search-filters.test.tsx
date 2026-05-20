@@ -316,6 +316,7 @@ describe("SearchFilters date range", () => {
 
 
     fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
+    expect(replaceMock).toHaveBeenCalled();
   });
 
 
@@ -336,6 +337,7 @@ describe("SearchFilters date range", () => {
 
     const sizeSelect = getAllByRole("combobox")[1];
     fireEvent.change(sizeSelect, { target: { value: "100" } });
+    expect(replaceMock).toHaveBeenCalled();
   });
 
 
@@ -379,7 +381,6 @@ describe("SearchFilters date range", () => {
         fireEvent.click(clearRadio);
       }
 
-
   });
 
   it('tests handle manual search directly when Enter is pressed', () => {
@@ -399,6 +400,7 @@ describe("SearchFilters date range", () => {
       if (clearRadio2) {
         fireEvent.click(clearRadio2);
       }
+      expect(replaceMock).toHaveBeenCalled();
   });
 
 
@@ -419,6 +421,7 @@ describe("SearchFilters date range", () => {
       // Need to flush microtasks to ensure codecov sees the callback execution
       const searchButton = screen.getAllByRole("button")[1];
       fireEvent.click(searchButton);
+      expect(replaceMock).toHaveBeenCalled();
   });
 
   it('handles the onSelect type trigger', () => {
@@ -431,5 +434,6 @@ describe("SearchFilters date range", () => {
       fireEvent.click(typeRadio);
       const searchButton = screen.getAllByRole("button")[1];
       fireEvent.click(searchButton);
+      expect(replaceMock).toHaveBeenCalled();
   });
 });

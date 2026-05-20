@@ -115,3 +115,11 @@
 ## 2026-04-20 - Dynamic Imports for Stateful Chat Component
 **Learning:** When using `next/dynamic` to code-split a heavy stateful component (like `ChatInterface` using `@ai-sdk/react`), conditionally rendering it directly with `isOpen && <ChatInterface />` will cause it to unmount and lose all state (including chat history and input values) when hidden.
 **Action:** Use a tracking state flag (like `hasOpened`) that becomes `true` on the first interaction and remains `true`, combining it with CSS classes (`opacity-0`, `pointer-events-none`) to hide the component visually without unmounting it, preserving its state.
+
+## 2026-04-20 - SonarCloud Test Assertions
+**Learning:** SonarCloud's Quality Gate will fail with a code smell ('Test cases should contain at least one assertion') if any Vitest  block contains only setup and interaction logic (like ) without a final  call, even if the intent is purely coverage.
+**Action:** Always ensure every  block includes at least one explicit assertion.
+
+## 2026-04-20 - SonarCloud Test Assertions
+**Learning:** SonarCloud's Quality Gate will fail with a code smell ('Test cases should contain at least one assertion') if any Vitest it() block contains only setup and interaction logic without a final expect() call, even if the intent is purely coverage.
+**Action:** Always ensure every it() block includes at least one explicit assertion.
