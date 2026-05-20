@@ -59,6 +59,7 @@
 **Action:** Wrapped \`getArticleSection\` with \`unstable_cache\`, linking it to the \`news-types\` cache tag so it remains synchronized if the sections table updates.
 
 ## 2024-05-30 - [Memoizing highlightText]
+
 **Learning:** In the `ArticleCard` component, `highlightText` was being executed directly on every render, which becomes a bottleneck when processing large numbers of results or during fast re-renders (like user typing in the search bar). This codebase uses a custom `highlightText` function with complex regular expression generation.
 **Action:** Use `useMemo` for any string manipulations that rely on regex or loop operations (like `highlightText` or `formatArticleTitle`) within list items or frequently re-rendered components, using `searchTerm` and `title`/`subtitle` as dependencies.
 
@@ -68,10 +69,12 @@
 **Action:** When parsing strings to isolate or modify text outside of HTML tags, prefer `split(/(<[^>]+>)/g)` with an array map/join over `matchAll` and `reduce`. Always include a plain text fast path.
 
 ## 2026-03-09 - getNews Table Scan Optimization
+
 **Learning:** `getNews` was executing a full `count(*)` table scan on the `articles` table even when no search filters were applied, which is extremely expensive on large PostgreSQL tables and can exhaust DB compute quotas.
 **Action:** When counting total rows for pagination without active filters, always use `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'table_name'::regclass\`)` to get an estimated row count instead of a full table scan.
 
 ## 2026-03-09 - NavbarUI Scroll Re-renders and Grouping
+
 **Learning:** `NavbarUI` tracks `isScrolled` via an event listener on the window. This causes the component to re-render constantly as the user scrolls. During this constant re-rendering, `groupedEssays` was being calculated via a `.reduce()` loop on the `essays` array every single time, eating up CPU and dropping scroll frame rates.
 **Action:** Always wrap heavy list calculations (like `.reduce()` grouping) in `useMemo` when inside components that track frequent state updates like scroll position or input values.
 
@@ -79,9 +82,11 @@
 
 **Learning:** The "Tal día como hoy" page was utilizing `export const dynamic = "force-dynamic";`, bypassing caching and SSG despite the content only changing once per day.
 **Action:** Replace `force-dynamic` with Incremental Static Regeneration (ISR) using `export const revalidate = 3600;` on pages where content changes predictably (e.g., daily) to optimize TTFB and reduce unnecessary database queries.
+
 ## 2026-03-10 - getArticleCount Table Scan Optimization
+
 **Learning:** `getArticleCount` was executing an exact `count(*)` using Drizzle's `count()`, which caused a full table scan on the large `articulos` table. This led to unnecessary compute quota exhaustion for a static UI metric that only needs an estimate.
-**Action:** Replaced exact count with `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass\`)` to provide an O(1) estimate, matching the fast-path pattern used in `getNews`.
+**Action:** Replaced exact count with `db.execute(sql\`SELECT reltuples::bigint AS estimate FROM pg_class WHERE oid = 'articulos'::regclass\`)`to provide an O(1) estimate, matching the fast-path pattern used in`getNews`.
 
 ## 2026-03-11 - Metadata Array Mapping Optimization
 
@@ -92,34 +97,43 @@
 
 **Learning:** When using `Array.prototype.concat()` to combine arrays that have been run through `.filter(Boolean)` (which strips falsy values but leaves the TypeScript inference as a union like `(string | null)[]`), TypeScript throws a compilation error ("No overload matches this call").
 **Action:** When migrating from the spread operator to `concat()`, explicitly cast the filtered arrays using `as string[]` (or appropriate type) to satisfy TypeScript's strict overload resolution for the `concat` method.
+
 ## 2026-03-13 - SearchFilters Controlled Component Bottleneck
+
 **Learning:** `SearchFilters` used a controlled input (`useState`) for `searchTerm`, which triggered an expensive re-render of the entire filter suite (including mapping over `publications` and rendering date pickers) on every single keystroke.
 **Action:** To optimize performance in large React components containing text inputs, prefer using uncontrolled inputs with `useRef` rather than controlled components with `useState` to prevent expensive React re-renders of the entire component tree on every keystroke.
+
 ## 2026-04-18 - Uncontrolled Input Bug Risk
 
 **Learning:** When attempting to optimize a controlled React input () into an uncontrolled input () to prevent re-renders, it is crucial to ensure that any UI logic depending on the input's state (like dynamically disabling a submit button via `disabled={!input.trim()}`) is either updated to evaluate at submission time or replaced with native browser validation (like the `required` attribute). In a previous iteration, swapping to `useRef` broke the dynamic disabled state of the send button, causing a UX regression.
 **Action:** When migrating from controlled to uncontrolled components, always audit the JSX for any dynamic attributes (like `disabled` or `className`) that rely on the state variable being removed, and refactor them appropriately.
+
 ## 2026-04-18 - Uncontrolled Input Bug Risk
 
 **Learning:** When attempting to optimize a controlled React input (useState) into an uncontrolled input (useRef) to prevent re-renders, it is crucial to ensure that any UI logic depending on the input's state (like dynamically disabling a submit button via disabled={!input.trim()}) is either updated to evaluate at submission time or replaced with native browser validation (like the required attribute). In a previous iteration, swapping to useRef broke the dynamic disabled state of the send button, causing a UX regression.
 **Action:** When migrating from controlled to uncontrolled components, always audit the JSX for any dynamic attributes (like disabled or className) that rely on the state variable being removed, and refactor them appropriately.
 
 ## 2026-04-20 - Dynamic Imports for Heavy UI Libraries
+
 **Learning:** The `yet-another-react-lightbox` library and its plugins were statically imported in `ImageGallery`, bloating the initial JS bundle size for any page rendering the gallery, even though the lightbox is only visible when a user clicks an image.
 **Action:** To optimize initial JavaScript bundle size in Next.js, dynamically import heavy client-side UI libraries (e.g., lightboxes or complex widgets) using `next/dynamic` with `ssr: false` so they are only loaded upon user interaction, avoiding static top-level imports.
 
 ## 2026-04-20 - Dynamic Imports for Stateful Chat Component
-**Learning:** When using  to code-split a heavy stateful component (like  using ), conditionally rendering it directly with  will cause it to unmount and lose all state (including chat history and input values) when hidden.
-**Action:** Use a tracking state flag (like ) that becomes  on the first interaction and remains , combining it with CSS classes (, ) to hide the component visually without unmounting it, preserving its state.
+
+**Learning:** When using to code-split a heavy stateful component (like using ), conditionally rendering it directly with will cause it to unmount and lose all state (including chat history and input values) when hidden.
+**Action:** Use a tracking state flag (like ) that becomes on the first interaction and remains , combining it with CSS classes (, ) to hide the component visually without unmounting it, preserving its state.
 
 ## 2026-04-20 - Dynamic Imports for Stateful Chat Component
+
 **Learning:** When using `next/dynamic` to code-split a heavy stateful component (like `ChatInterface` using `@ai-sdk/react`), conditionally rendering it directly with `isOpen && <ChatInterface />` will cause it to unmount and lose all state (including chat history and input values) when hidden.
 **Action:** Use a tracking state flag (like `hasOpened`) that becomes `true` on the first interaction and remains `true`, combining it with CSS classes (`opacity-0`, `pointer-events-none`) to hide the component visually without unmounting it, preserving its state.
 
 ## 2026-04-20 - SonarCloud Test Assertions
-**Learning:** SonarCloud's Quality Gate will fail with a code smell ('Test cases should contain at least one assertion') if any Vitest  block contains only setup and interaction logic (like ) without a final  call, even if the intent is purely coverage.
-**Action:** Always ensure every  block includes at least one explicit assertion.
+
+**Learning:** SonarCloud's Quality Gate will fail with a code smell ('Test cases should contain at least one assertion') if any Vitest block contains only setup and interaction logic (like ) without a final call, even if the intent is purely coverage.
+**Action:** Always ensure every block includes at least one explicit assertion.
 
 ## 2026-04-20 - SonarCloud Test Assertions
+
 **Learning:** SonarCloud's Quality Gate will fail with a code smell ('Test cases should contain at least one assertion') if any Vitest it() block contains only setup and interaction logic without a final expect() call, even if the intent is purely coverage.
 **Action:** Always ensure every it() block includes at least one explicit assertion.

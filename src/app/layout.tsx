@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       return { integrantes: [], tutores: [] };
       // eslint-disable-next-line no-inline-comments
     } /* v8 ignore stop */
-      /* eslint-enable capitalized-comments */
+    /* eslint-enable capitalized-comments */
   };
 
   const { integrantes, tutores } = await fetchMetadata();
@@ -46,7 +46,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`);
   const tutorNames = tutores.map((t) => t.names);
   // eslint-disable-next-line no-inline-comments
-  const authors = (integranteNames as string[]).concat(tutorNames as string[]).filter(Boolean).join(", "); // NOSONAR
+  const authors = (integranteNames as string[])
+    .concat(tutorNames as string[])
+    .filter(Boolean)
+    .join(", "); // NOSONAR
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
