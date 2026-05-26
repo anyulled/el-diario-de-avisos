@@ -27,7 +27,7 @@
     "react-dom": "19.2.6",
     "react-markdown": "^10.1.0",
     "swiper": "^12.1.4",
-    "tailwind-merge": "^3.5.0",
+    "tailwind-merge": "^3.6.0",
     "yet-another-react-lightbox": "^3.32.0"
   },
   "devDependencies": {
