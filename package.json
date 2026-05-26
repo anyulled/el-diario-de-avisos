@@ -37,7 +37,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/luxon": "^3.7.1",
     "@types/node": "^25",
-    "@types/pg": "^8.18.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
