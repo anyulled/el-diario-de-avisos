@@ -48,7 +48,8 @@ export async function generateMetadata(): Promise<Metadata> {
   // eslint-disable-next-line no-inline-comments
   const tutorNames = tutores.map((t) => t.names); // NOSONAR
 
-  const authors = (integranteNames as string[])
+  // eslint-disable-next-line no-inline-comments
+  const authors = (integranteNames as string[]) // NOSONAR
     .concat(tutorNames as string[])
     .filter(Boolean)
     .join(", ");
