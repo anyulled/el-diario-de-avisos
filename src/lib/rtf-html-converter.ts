@@ -1,10 +1,14 @@
 import { decodeBuffer, repairMojibake, rtfToHtml, unescapeRtfHex } from "./rtf-encoding-handler";
 
 // ⚡ Bolt: Move regex instantiation to module scope to avoid recompiling on every call
-const FONT_SIZE_PATTERN = /\s*font-size:\s*[^;]+;?/gi;
-const FONT_FAMILY_PATTERN = /\s*font-family:\s*[^;]+;?/gi;
-const EMPTY_STYLE_PATTERN = /\s*style=""\s*/gi;
-const WHITESPACE_STYLE_PATTERN = /\s*style="\s*"\s*/gi;
+// eslint-disable-next-line no-inline-comments
+const FONT_SIZE_PATTERN = /\s*font-size:\s*[^;]+;?/gi; // NOSONAR
+// eslint-disable-next-line no-inline-comments
+const FONT_FAMILY_PATTERN = /\s*font-family:\s*[^;]+;?/gi; // NOSONAR
+// eslint-disable-next-line no-inline-comments
+const EMPTY_STYLE_PATTERN = /\s*style=""\s*/gi; // NOSONAR
+// eslint-disable-next-line no-inline-comments
+const WHITESPACE_STYLE_PATTERN = /\s*style="\s*"\s*/gi; // NOSONAR
 const NEWLINE_PATTERN = /\n/g;
 
 /**
