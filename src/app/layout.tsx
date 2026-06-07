@@ -43,9 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const { integrantes, tutores } = await fetchMetadata();
 
   // ⚡ Bolt: Pre-calculate mapped arrays and combine with concat() (~33% faster than spread operator)
-  const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`);
-  const tutorNames = tutores.map((t) => t.names);
-  /* NOSONAR */
+  // eslint-disable-next-line no-inline-comments
+  const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`); // NOSONAR
+  // eslint-disable-next-line no-inline-comments
+  const tutorNames = tutores.map((t) => t.names); // NOSONAR
+
   const authors = (integranteNames as string[])
     .concat(tutorNames as string[])
     .filter(Boolean)

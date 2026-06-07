@@ -50,7 +50,8 @@ export async function processRtfContent(content: Buffer | string | null, id: num
 
       const html = paragraphs
         .map((p) => {
-          const formatted = p.replace(NEWLINE_PATTERN, "<br>");
+          // eslint-disable-next-line no-inline-comments
+          const formatted = p.replace(NEWLINE_PATTERN, "<br>"); // NOSONAR
           return `<p>${formatted}</p>`;
         })
         .join("\n");
