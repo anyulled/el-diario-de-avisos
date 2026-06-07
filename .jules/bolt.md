@@ -137,3 +137,8 @@
 
 **Learning:** SonarCloud's Quality Gate will fail with a code smell ('Test cases should contain at least one assertion') if any Vitest it() block contains only setup and interaction logic without a final expect() call, even if the intent is purely coverage.
 **Action:** Always ensure every it() block includes at least one explicit assertion.
+
+## 2026-05-19 - Hoisting Regex Literals
+
+**Learning:** Evaluating a regular expression literal (like `/\n/g`) inside a function or loop (e.g., inside a `.map` callback) creates a brand new `RegExp` object in memory on every execution, increasing garbage collection churn. Reusing a module-scoped regular expression is safer and more efficient if used with safe methods like `String.prototype.replace()`.
+**Action:** To prevent repeated memory allocation, move regular expression literals out of function bodies and loops into module-scoped constants, ensuring they are instantiated only once. (Ensure global `g` flags are only used safely, such as with `replace()`).
