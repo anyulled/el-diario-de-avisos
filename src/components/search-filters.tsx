@@ -196,6 +196,13 @@ const RadioGroupItem = ({ value, id, checked, onChange }: { value: string; id: s
   />
 );
 
+const getPubDescription = (name: string | null) => {
+  if (!name) return "";
+  if (name.includes("Diario de Avisos")) return "Fundado en 1837, un Semanario de las Provincias de Venezuela.";
+  if (name.includes("La Opinión Nacional")) return "Un referente histórico del periodismo venezolano.";
+  return "Todas las publicaciones disponibles.";
+};
+
 function PublicationFilter({
   publications: pubs,
   selectedPub,
@@ -205,13 +212,6 @@ function PublicationFilter({
   selectedPub: string;
   onSelect: (id: string) => void;
 }) {
-  const getPubDescription = (name: string | null) => {
-    if (!name) return "";
-    if (name.includes("Diario de Avisos")) return "Fundado en 1837, un Semanario de las Provincias de Venezuela.";
-    if (name.includes("La Opinión Nacional")) return "Un referente histórico del periodismo venezolano.";
-    return "Todas las publicaciones disponibles.";
-  };
-
   return (
     <div className="mb-8">
       <h3 className="text-[10px] font-bold mb-4 text-gray-500 uppercase tracking-[0.2em] pl-4">Filtrar por Publicación</h3>

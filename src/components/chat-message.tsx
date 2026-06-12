@@ -6,12 +6,14 @@ import React, { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 
 function ChatMessage({ message }: { message: UIMessage }) {
-  // ⚡ Bolt: Memoize message content extraction to prevent array filtering, mapping, and joining on every re-render
+  // ⚡ Bolt: Use reduce instead of filter/map/join chain to avoid creating multiple intermediate arrays
   const messageContent = useMemo(() => {
-    return message.parts
-      .filter((part): part is { type: "text"; text: string } => part.type === "text")
-      .map((part) => part.text)
-      .join("");
+    return message.parts.reduce((acc, part) => {
+      if (part.type === "text") {
+        return acc + part.text;
+      }
+      return acc;
+    }, "");
   }, [message.parts]);
 
   return (

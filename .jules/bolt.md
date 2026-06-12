@@ -142,3 +142,13 @@
 
 **Learning:** Evaluating a regular expression literal (like `/\n/g`) inside a function or loop (e.g., inside a `.map` callback) creates a brand new `RegExp` object in memory on every execution, increasing garbage collection churn. Reusing a module-scoped regular expression is safer and more efficient if used with safe methods like `String.prototype.replace()`.
 **Action:** To prevent repeated memory allocation, move regular expression literals out of function bodies and loops into module-scoped constants, ensuring they are instantiated only once. (Ensure global `g` flags are only used safely, such as with `replace()`).
+
+## 2026-06-12 - Prevent Re-allocation of Static Component Functions
+
+**Learning:** Static helper functions (like `getPubDescription` in `SearchFilters`) defined inside a React component body will be re-allocated on every single render. This adds unnecessary memory pressure and overhead, especially in components that re-render frequently (like those handling search inputs).
+**Action:** Always hoist purely static helper functions outside the React component body to ensure they are defined only once per module.
+
+## 2026-06-12 - Reduce Instead of Filter/Map/Join Chains
+
+**Learning:** Chaining array methods like `.filter().map().join("")` (as seen in `ChatMessage` for message part extraction) creates an intermediate array in memory for every method call in the chain before the final string is joined. This increases garbage collection churn.
+**Action:** To reduce memory allocation in performance-sensitive paths, combine filtering and mapping logic into a single `.reduce()` pass that constructs the final string directly.
