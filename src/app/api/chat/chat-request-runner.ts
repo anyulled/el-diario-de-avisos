@@ -21,10 +21,8 @@ export function getLatestContent(messages: UIMessage[]): string {
   if (!messages || messages.length === 0) return "";
   const latestMessage = messages[messages.length - 1];
   return (
-    latestMessage.parts
-      ?.filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("") ||
+    // ⚡ Bolt: Use a single reduce pass instead of chained filter/map/join to reduce memory allocation and GC churn
+    latestMessage.parts?.reduce((acc, part) => (part.type === "text" ? acc + part.text : acc), "") ||
     latestMessage.content ||
     ""
   );
@@ -140,12 +138,9 @@ No existe información sobre este tema en nuestros registros históricos.
  */
 export function convertToModelMessages(messages: UIMessage[]): ModelMessage[] {
   return messages.map((msg) => {
-    // Extract text from parts if present, otherwise use content
+    // ⚡ Bolt: Use a single reduce pass instead of chained filter/map/join to reduce memory allocation and GC churn
     const textContent =
-      msg.parts
-        ?.filter((part) => part.type === "text")
-        .map((part) => part.text)
-        .join("") ||
+      msg.parts?.reduce((acc, part) => (part.type === "text" ? acc + part.text : acc), "") ||
       msg.content ||
       "";
 
