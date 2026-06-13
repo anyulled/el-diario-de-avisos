@@ -152,3 +152,8 @@
 
 **Learning:** Chaining array methods like `.filter().map().join("")` (as seen in `ChatMessage` for message part extraction) creates an intermediate array in memory for every method call in the chain before the final string is joined. This increases garbage collection churn.
 **Action:** To reduce memory allocation in performance-sensitive paths, combine filtering and mapping logic into a single `.reduce()` pass that constructs the final string directly.
+
+## 2026-06-13 - Reduce Instead of Filter/Map/Join Chains
+
+**Learning:** Chaining array methods like `.filter().map().join("")` (as seen in `chat-request-runner.ts` for message part extraction) creates an intermediate array in memory for every method call in the chain before the final string is joined. This increases garbage collection churn.
+**Action:** To reduce memory allocation in performance-sensitive paths, combine filtering and mapping logic into a single `.reduce()` pass that constructs the final string directly.
