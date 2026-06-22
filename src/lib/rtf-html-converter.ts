@@ -46,19 +46,23 @@ export async function processRtfContent(content: Buffer | string | null, id: num
     const isRtf = contentString.trim().startsWith("{\\rtf");
 
     if (!isRtf) {
-      // Process plain text content
-      const paragraphs = contentString
+      /* Process plain text content */
+      /*
+       * ⚡ Bolt: Replace chained array methods (.map.filter.map.join) with a single reduce
+       * to avoid allocating intermediate arrays and minimize garbage collection.
+       */
+      const html = contentString
         .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0);
-
-      const html = paragraphs
-        .map((p) => {
-          // eslint-disable-next-line no-inline-comments
-          const formatted = p.replace(NEWLINE_PATTERN, "<br>"); // NOSONAR
-          return `<p>${formatted}</p>`;
-        })
-        .join("\n");
+        .reduce((acc, p) => {
+          const trimmed = p.trim();
+          if (trimmed.length > 0) {
+            // eslint-disable-next-line no-inline-comments
+            const formatted = trimmed.replace(NEWLINE_PATTERN, "<br>"); // NOSONAR
+            const paragraphHtml = `<p>${formatted}</p>`;
+            return acc ? `${acc}\n${paragraphHtml}` : paragraphHtml;
+          }
+          return acc;
+        }, "");
 
       return html;
     }
