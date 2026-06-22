@@ -45,13 +45,23 @@ function stripTagsOnly(text: string): string {
  * Processes plain text content by cleaning up whitespace
  */
 function processPlainText(text: string, preserveParagraphs: boolean): string {
-  // Strip tags but keep newlines for paragraph splitting
+  /* Strip tags but keep newlines for paragraph splitting */
   const stripped = stripTagsOnly(text);
+
+  /*
+   * ⚡ Bolt: Replace chained array methods (.map.filter.join) with a single reduce
+   * to avoid allocating intermediate arrays and minimize garbage collection.
+   */
   return stripped
     .split(/\n\s*\n/)
-    .map((p) => p.replace(/\s+/g, " ").trim())
-    .filter((p) => p.length > 0)
-    .join(preserveParagraphs ? "\n\n" : " ");
+    .reduce((acc, p) => {
+      const formatted = p.replace(/\s+/g, " ").trim();
+      if (formatted.length > 0) {
+        const sep = preserveParagraphs ? "\n\n" : " ";
+        return acc ? `${acc}${sep}${formatted}` : formatted;
+      }
+      return acc;
+    }, "");
 }
 
 /**
