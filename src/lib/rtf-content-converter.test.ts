@@ -3,8 +3,15 @@ import { processRtfContent, stripHtml } from "./rtf-content-converter";
 
 // Mock @iarna/rtf-to-html
 vi.mock("@iarna/rtf-to-html", () => ({
-  fromString: (rtf: string, options: unknown, cb: (err: Error | null, html: string) => void) => {
+  fromString: (
+    rtf: string,
+    options: { template?: (doc: unknown, defaults: unknown, content: string) => string } | unknown,
+    cb: (err: Error | null, html: string) => void,
+  ) => {
     const callback = (typeof options === "function" ? options : cb) as (err: Error | null, html: string) => void;
+    if (options && typeof options === "object" && "template" in options && typeof options.template === "function") {
+       (options.template as (doc: unknown, defaults: unknown, content: string) => string)({}, {}, "");
+    }
     if (rtf.includes("ERROR_PLEASE")) {
       callback(new Error("Mock Error"), "");
     } else if (rtf.includes("Hello World")) {
@@ -17,6 +24,10 @@ vi.mock("@iarna/rtf-to-html", () => ({
 
 describe("rtf-content-converter", () => {
   describe("stripHtml", () => {
+    it("should handle empty string correctly", () => {
+      expect(stripHtml("")).toBe("");
+    });
+
     it("should remove HTML tags and normalize whitespace", () => {
       expect(stripHtml("<p>Hello <b>World</b></p>")).toBe("Hello World");
       expect(stripHtml("Multiple    spaces")).toBe("Multiple spaces");
@@ -82,11 +93,43 @@ describe("rtf-content-converter", () => {
       expect(result).toContain("ERROR_PLEASE");
     });
 
+    it("should handle errors by falling back to raw content and truncate if maxLength is provided", async () => {
+      const content = "{\\rtf1 ERROR_PLEASE VERY LONG CONTENT}";
+      const result = await processRtfContent(content, { maxLength: 10 });
+      expect(result).toBe("{\\rtf1 ERR");
+    });
+
+    it("should handle errors and fallback safely when content is null/empty", async () => {
+      // Mock the decodeBuffer / process to fail even for empty, or just pass a mock object
+      const content = { mock: "object" } as unknown as Buffer;
+      const result = await processRtfContent(content, { maxLength: 5 });
+      // Since stripHtml on the stringified object will yield "[object Object]", truncated to 5 is "[obje"
+      expect(result).toBe("[obje");
+    });
+
     it("should correctly decode UTF-8 content", async () => {
       // UTF-8 representation of 'ñ' is 0xC3 0xB1
       const content = Buffer.from([0xc3, 0xb1]);
       const result = await processRtfContent(content);
       expect(result).toBe("ñ");
+    });
+
+    it("should handle error in plain text fallback when using a buffer", async () => {
+      const content = Buffer.from("{\\rtf1 ERROR_PLEASE}");
+      const result = await processRtfContent(content);
+      expect(result).toContain("ERROR_PLEASE");
+    });
+
+    it("should handle error in plain text fallback when using an object", async () => {
+      const content = { object: true } as unknown as Buffer;
+      const result = await processRtfContent(content);
+      expect(result).toContain("object");
+    });
+
+    it("should handle plain text composed entirely of whitespaces", async () => {
+      const content = "   \n\n\n ";
+      const result = await processRtfContent(content);
+      expect(result).toBe("");
     });
 
     it("should fallback to Win1252 for invalid UTF-8 content", async () => {

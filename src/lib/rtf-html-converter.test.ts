@@ -3,9 +3,16 @@ import { processRtfContent } from "./rtf-html-converter";
 
 // Mock @iarna/rtf-to-html
 vi.mock("@iarna/rtf-to-html", () => ({
-  fromString: (rtf: string, options: unknown, cb: (err: Error | null, html: string) => void) => {
+  fromString: (
+    rtf: string,
+    options: { template?: (doc: unknown, defaults: unknown, content: string) => string } | unknown,
+    cb: (err: Error | null, html: string) => void,
+  ) => {
     // Determine callback if options is omitted (though in our code we pass options)
     const callback = (typeof options === "function" ? options : cb) as (err: Error | null, html: string) => void;
+    if (options && typeof options === "object" && "template" in options && typeof options.template === "function") {
+       (options.template as (doc: unknown, defaults: unknown, content: string) => string)({}, {}, "");
+    }
 
     // Return realistic HTML with inline styles to properly test stripFontStyles
     if (rtf.includes("ERROR_PLEASE")) {
@@ -67,6 +74,31 @@ describe("processRtfContent", () => {
     const content = "{\\rtf1 ERROR_PLEASE}";
     const result = await processRtfContent(content, 1);
     // Should fallback to raw content in <pre>
+    expect(result).toContain("<pre>");
+    expect(result).toContain("ERROR_PLEASE");
+  });
+
+  it("should return error message when receiving an object instead of string or Buffer", async () => {
+    const result = await processRtfContent({ someKey: "value" } as unknown as string, 1);
+    expect(result).toBe("Error: contenido no válido");
+  });
+
+  it("should handle plain text composed entirely of whitespaces without creating empty paragraphs", async () => {
+    const content = "   \n\n\n ";
+    const result = await processRtfContent(content, 1);
+    expect(result).toBe("");
+  });
+
+  it("should process plain text correctly when passing a Buffer", async () => {
+    const content = Buffer.from("Buffer content");
+    const result = await processRtfContent(content, 1);
+    expect(result).toBe("<p>Buffer content</p>");
+  });
+
+  it("should fallback to raw content using Buffer when an error occurs", async () => {
+    // We pass a Buffer containing the error trigger
+    const content = Buffer.from("{\\rtf1 ERROR_PLEASE}");
+    const result = await processRtfContent(content, 1);
     expect(result).toContain("<pre>");
     expect(result).toContain("ERROR_PLEASE");
   });
