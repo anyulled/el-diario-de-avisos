@@ -162,3 +162,8 @@
 
 **Learning:** Using `[firstName, lastName].filter(Boolean).join(" ")` allocates a new array and invokes two array methods on every single execution. In heavily rendered components like list items (`MemberCard`), this creates noticeable memory churn and garbage collection overhead. Node benchmarks show this approach takes ~170ms per million iterations, while simple conditionals take ~3ms.
 **Action:** To prevent unnecessary memory allocation and garbage collection overhead during React renders, avoid creating intermediate arrays for simple string concatenation. Replace patterns like `[firstName, lastName].filter(Boolean).join(' ')` with conditional string interpolation (e.g., `firstName && lastName ? \`${firstName} ${lastName}\` : firstName || lastName || ''`).
+
+## 2026-06-21 - Reduce instead of Filter/Map chains in Accent Search
+
+**Learning:** When calculating accented string variations in `createAccentInsensitivePattern`, using chained array methods like `.filter().map()` creates intermediate arrays, adding overhead. While minor per call, `createAccentInsensitivePattern` is heavily used within `.map()` loops itself, amplifying GC churn.
+**Action:** Replaced `.filter().map()` with a single `.reduce()` pass when constructing the array of accented string versions to eliminate intermediate arrays and decrease garbage collection pressure.
