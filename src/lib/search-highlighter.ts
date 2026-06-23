@@ -51,17 +51,31 @@ function createAccentInsensitivePattern(char: string): string {
   if (baseChar) {
     const baseLower = baseChar.toLowerCase();
     const baseUpper = baseChar.toUpperCase();
-    const accentedVersions = Object.entries(ACCENT_MAP)
-      .filter(([, base]) => base.toLowerCase() === baseLower)
-      .map(([accented]) => accented);
+    /*
+     * ⚡ Bolt: Replace chained array methods (.filter.map) with a single reduce
+     * to avoid allocating intermediate arrays and minimize garbage collection overhead.
+     */
+    const accentedVersions = Object.entries(ACCENT_MAP).reduce((acc, [accented, base]) => {
+      if (base.toLowerCase() === baseLower) {
+        acc.push(accented);
+      }
+      return acc;
+    }, [] as string[]);
 
     const allVersions = [baseLower, baseUpper, ...accentedVersions];
     return `[${allVersions.join("")}]`;
   }
 
-  const accentedVersions = Object.entries(ACCENT_MAP)
-    .filter(([, base]) => base.toLowerCase() === lowerChar)
-    .map(([accented]) => accented);
+  /*
+   * ⚡ Bolt: Replace chained array methods (.filter.map) with a single reduce
+   * to avoid allocating intermediate arrays and minimize garbage collection overhead.
+   */
+  const accentedVersions = Object.entries(ACCENT_MAP).reduce((acc, [accented, base]) => {
+    if (base.toLowerCase() === lowerChar) {
+      acc.push(accented);
+    }
+    return acc;
+  }, [] as string[]);
 
   if (accentedVersions.length > 0) {
     const allVersions = [lowerChar, upperChar, ...accentedVersions];
