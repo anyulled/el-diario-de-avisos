@@ -167,3 +167,7 @@
 
 **Learning:** When calculating accented string variations in `createAccentInsensitivePattern`, using chained array methods like `.filter().map()` creates intermediate arrays, adding overhead. While minor per call, `createAccentInsensitivePattern` is heavily used within `.map()` loops itself, amplifying GC churn.
 **Action:** Replaced `.filter().map()` with a single `.reduce()` pass when constructing the array of accented string versions to eliminate intermediate arrays and decrease garbage collection pressure.
+
+## 2024-05-30 - Array Reduce vs Map/Filter/Join/Concat
+**Learning:** While chaining array methods like `.filter().map().join()` or `.concat()` is declarative, doing so creates an intermediate array in memory for every method call in the chain, increasing garbage collection churn. Converting these chains to a single `.reduce()` pass eliminates the intermediate arrays. When combining multiple source arrays (like in `about/page.tsx` or `layout.tsx`), the accumulator from the first reduce can be passed as the initial value to the next.
+**Action:** In performance-sensitive paths or when processing large arrays, combine filtering and mapping logic into a single `.reduce()` pass that constructs the final array or string directly to reduce memory allocation.
