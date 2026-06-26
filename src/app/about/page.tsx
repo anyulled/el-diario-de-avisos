@@ -8,14 +8,24 @@ const aboutHeroImage = "https://images.unsplash.com/photo-1524985069026-dd778a71
 export async function generateMetadata(): Promise<Metadata> {
   const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantesNames(), getTutoresNames(), getDevelopersNames()]);
 
-  // eslint-disable-next-line no-inline-comments
-  const integranteNames = integrantes.map((i) => `${i.firstName} ${i.lastName}`.trim()).filter(Boolean) as string[]; // NOSONAR
-  // eslint-disable-next-line no-inline-comments
-  const tutorNames = tutores.map((t) => t.names).filter(Boolean) as string[]; // NOSONAR
-  // eslint-disable-next-line no-inline-comments
-  const developerNames = desarrolladores.map((d) => `${d.firstName} ${d.lastName}`.trim()).filter(Boolean) as string[]; // NOSONAR
-  // ⚡ Bolt: Use concat() instead of spread operator for array merging (~33% faster)
-  const people = integranteNames.concat(tutorNames, developerNames);
+  // ⚡ Bolt: Use reduce instead of chained map/filter and concat to avoid allocating multiple intermediate arrays and minimize GC overhead.
+  const people = integrantes.reduce((acc, i) => {
+    const name = `${i.firstName} ${i.lastName}`.trim();
+    if (name) acc.push(name);
+    return acc;
+  }, [] as string[]);
+
+  tutores.reduce((acc, t) => {
+    const name = t.names;
+    if (name) acc.push(name);
+    return acc;
+  }, people);
+
+  desarrolladores.reduce((acc, d) => {
+    const name = `${d.firstName} ${d.lastName}`.trim();
+    if (name) acc.push(name);
+    return acc;
+  }, people);
   const peopleSummary = people.length ? ` Participan: ${people.slice(0, 8).join(", ")}${people.length > 8 ? ", y más." : "."}` : "";
 
   const title = "Acerca del Proyecto";

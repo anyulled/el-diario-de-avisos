@@ -48,11 +48,22 @@ export async function generateMetadata(): Promise<Metadata> {
   // eslint-disable-next-line no-inline-comments
   const tutorNames = tutores.map((t) => t.names); // NOSONAR
 
-  // eslint-disable-next-line no-inline-comments
-  const authors = (integranteNames as string[]) // NOSONAR
-    .concat(tutorNames as string[])
-    .filter(Boolean)
-    .join(", ");
+  // ⚡ Bolt: Use reduce to avoid intermediate array allocations and GC overhead
+  const baseAuthors = integranteNames.reduce((acc, name) => {
+    if (name) {
+      if (acc.length > 0) return acc + ", " + name;
+      return name as string;
+    }
+    return acc;
+  }, "");
+
+  const authors = tutorNames.reduce((acc, name) => {
+    if (name) {
+      if (acc.length > 0) return acc + ", " + name;
+      return name as string;
+    }
+    return acc;
+  }, baseAuthors as string);
 
   return {
     metadataBase: new URL("https://diariodeavisos-archivo.vercel.app"),
