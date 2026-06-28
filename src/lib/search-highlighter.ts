@@ -43,6 +43,22 @@ const ACCENT_MAP: Record<string, string> = {
   Ñ: "N",
 };
 
+/**
+ * ⚡ Bolt: Pre-compute reverse map for O(1) lookups
+ * This avoids O(N) reduce iterations over ACCENT_MAP for every character during search highlighting.
+ */
+const BASE_TO_ACCENTS = Object.entries(ACCENT_MAP).reduce(
+  (acc, [accented, base]) => {
+    const lowerBase = base.toLowerCase();
+    if (!acc[lowerBase]) {
+      acc[lowerBase] = [];
+    }
+    acc[lowerBase].push(accented);
+    return acc;
+  },
+  {} as Record<string, string[]>,
+);
+
 function createAccentInsensitivePattern(char: string): string {
   const lowerChar = char.toLowerCase();
   const upperChar = char.toUpperCase();
@@ -51,31 +67,16 @@ function createAccentInsensitivePattern(char: string): string {
   if (baseChar) {
     const baseLower = baseChar.toLowerCase();
     const baseUpper = baseChar.toUpperCase();
-    /*
-     * ⚡ Bolt: Replace chained array methods (.filter.map) with a single reduce
-     * to avoid allocating intermediate arrays and minimize garbage collection overhead.
-     */
-    const accentedVersions = Object.entries(ACCENT_MAP).reduce((acc, [accented, base]) => {
-      if (base.toLowerCase() === baseLower) {
-        acc.push(accented);
-      }
-      return acc;
-    }, [] as string[]);
+
+    // ⚡ Bolt: Use pre-computed map for O(1) lookups instead of iterating over ACCENT_MAP
+    const accentedVersions = BASE_TO_ACCENTS[baseLower] || [];
 
     const allVersions = [baseLower, baseUpper, ...accentedVersions];
     return `[${allVersions.join("")}]`;
   }
 
-  /*
-   * ⚡ Bolt: Replace chained array methods (.filter.map) with a single reduce
-   * to avoid allocating intermediate arrays and minimize garbage collection overhead.
-   */
-  const accentedVersions = Object.entries(ACCENT_MAP).reduce((acc, [accented, base]) => {
-    if (base.toLowerCase() === lowerChar) {
-      acc.push(accented);
-    }
-    return acc;
-  }, [] as string[]);
+  // ⚡ Bolt: Use pre-computed map for O(1) lookups instead of iterating over ACCENT_MAP
+  const accentedVersions = BASE_TO_ACCENTS[lowerChar] || [];
 
   if (accentedVersions.length > 0) {
     const allVersions = [lowerChar, upperChar, ...accentedVersions];
@@ -152,14 +153,13 @@ export function highlightText(html: string, searchTerm: string): string {
   const tagPattern = /(<[^>]+>)/g; // NOSONAR
   const parts = html.split(tagPattern);
 
-  return parts
-    .map((part, index) => {
-      /** Text nodes are at even indices, HTML tags at odd indices */
-      if (index % 2 === 0) {
-        // eslint-disable-next-line no-inline-comments
-        return part.replace(searchPattern, "<mark>$1</mark>"); // NOSONAR
-      }
-      return part;
-    })
-    .join("");
+  // ⚡ Bolt: Use a single reduce pass instead of chained map/join to reduce memory allocation
+  return parts.reduce((acc, part, index) => {
+    /** Text nodes are at even indices, HTML tags at odd indices */
+    if (index % 2 === 0) {
+      // eslint-disable-next-line no-inline-comments
+      return acc + part.replace(searchPattern, "<mark>$1</mark>"); // NOSONAR
+    }
+    return acc + part;
+  }, "");
 }
