@@ -167,3 +167,8 @@
 
 **Learning:** When calculating accented string variations in `createAccentInsensitivePattern`, using chained array methods like `.filter().map()` creates intermediate arrays, adding overhead. While minor per call, `createAccentInsensitivePattern` is heavily used within `.map()` loops itself, amplifying GC churn.
 **Action:** Replaced `.filter().map()` with a single `.reduce()` pass when constructing the array of accented string versions to eliminate intermediate arrays and decrease garbage collection pressure.
+
+## 2026-06-21 - Pre-compute Inverted Maps for O(1) Lookups
+
+**Learning:** Calling `Object.entries(MAP).reduce(...)` inside a function to derive a filtered array from a constant dictionary (as was done in `createAccentInsensitivePattern`) is an O(N) operation that executes on every call. If this function is inside a hot path (like iterating over every character of a search string), it creates massive CPU overhead and memory churn.
+**Action:** Always pre-compute inverted lookup tables or derived structures at the module scope for constant mappings. Use these pre-computed structures for O(1) property access inside functions instead of iterating over the source map.
