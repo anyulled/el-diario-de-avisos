@@ -172,3 +172,6 @@
 
 **Learning:** Calling `Object.entries(MAP).reduce(...)` inside a function to derive a filtered array from a constant dictionary (as was done in `createAccentInsensitivePattern`) is an O(N) operation that executes on every call. If this function is inside a hot path (like iterating over every character of a search string), it creates massive CPU overhead and memory churn.
 **Action:** Always pre-compute inverted lookup tables or derived structures at the module scope for constant mappings. Use these pre-computed structures for O(1) property access inside functions instead of iterating over the source map.
+## 2024-05-30 - unstable_cache anti-pattern
+**Learning:** Next.js `unstable_cache` relies on function references for per-request deduplication via React's `cache`. Calling it dynamically inside another function (e.g., `return await unstable_cache(async () => {...})()`) creates a new wrapper on every request, breaking deduplication and causing memory churn.
+**Action:** Always apply `unstable_cache` directly at the global action definition (e.g., `export const myAction = unstable_cache(async () => {...})`).
