@@ -45,7 +45,7 @@
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.10",
     "@vitest/ui": "^4.1.2",
-    "cspell": "^10.0.0",
+    "cspell": "^10.0.1",
     "cypress": "^15.16.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
