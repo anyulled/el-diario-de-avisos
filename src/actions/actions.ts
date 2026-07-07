@@ -378,73 +378,75 @@ export const getArticleSection = unstable_cache(
 
 import { processRtfContent, stripHtml } from "@/lib/rtf-content-converter";
 
-export async function getArticlesOnThisDay(day: number, month: number) {
-  return await unstable_cache(
-    async () => {
-      // Step 1: Get matching IDs first to avoid ORDER BY RANDOM() on full dataset
-      const matchingIds = await db
-        .select({ id: articles.id })
-        .from(articles)
-        .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`);
+/*
+ * ⚡ Bolt: Apply unstable_cache globally to prevent duplicate execution per request.
+ * Next.js automatically incorporates the function arguments into the cache key.
+ */
+export const getArticlesOnThisDay = unstable_cache(
+  async (day: number, month: number) => {
+    // Step 1: Get matching IDs first to avoid ORDER BY RANDOM() on full dataset
+    const matchingIds = await db
+      .select({ id: articles.id })
+      .from(articles)
+      .where(sql`EXTRACT(MONTH FROM ${articles.date}) = ${month} AND EXTRACT(DAY FROM ${articles.date}) = ${day}`);
 
-      if (matchingIds.length === 0) return [];
+    if (matchingIds.length === 0) return [];
 
-      // Step 2: Sample up to 10 IDs in JavaScript
-      /**
-       * Safe shuffle using crypto.getRandomValues() to avoid SonarCloud security hotspots
-       * Math.random() is flagged as insecure for cryptographic use, though fine here.
-       * We use a simple Fisher-Yates shuffle with crypto for robustness.
-       */
-      const shuffled = [...matchingIds];
-      // eslint-disable-next-line no-restricted-syntax
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = crypto.randomInt(0, i + 1);
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
+    // Step 2: Sample up to 10 IDs in JavaScript
+    /**
+     * Safe shuffle using crypto.getRandomValues() to avoid SonarCloud security hotspots
+     * Math.random() is flagged as insecure for cryptographic use, though fine here.
+     * We use a simple Fisher-Yates shuffle with crypto for robustness.
+     */
+    const shuffled = [...matchingIds];
+    // eslint-disable-next-line no-restricted-syntax
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = crypto.randomInt(0, i + 1);
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
 
-      const selectedIds = shuffled.slice(0, 10).map((i) => i.id);
+    const selectedIds = shuffled.slice(0, 10).map((i) => i.id);
 
-      // Step 3: Fetch full details for selected IDs
-      const news = await db
-        .select({
-          id: articles.id,
-          title: articles.title,
-          subtitle: articles.subtitle,
-          date: articles.date,
-          publicationYear: articles.publicationYear,
-          // Optimization: Only fetch the first 500 characters of plainText to avoid fetching large text fields
-          plainText: sql<string>`substring(${articles.plainText} from 1 for 500)`,
-          // Optimization: Only fetch content (bytea) if plainText is missing, to avoid transferring large blobs
-          content: sql<Buffer | null>`CASE WHEN ${articles.plainText} IS NULL THEN ${articles.content} ELSE NULL END`,
-          publicationName: publications.name,
-        })
-        .from(articles)
-        .leftJoin(publications, eq(articles.pubId, publications.id))
-        .where(inArray(articles.id, selectedIds));
+    // Step 3: Fetch full details for selected IDs
+    const news = await db
+      .select({
+        id: articles.id,
+        title: articles.title,
+        subtitle: articles.subtitle,
+        date: articles.date,
+        publicationYear: articles.publicationYear,
+        // Optimization: Only fetch the first 500 characters of plainText to avoid fetching large text fields
+        plainText: sql<string>`substring(${articles.plainText} from 1 for 500)`,
+        // Optimization: Only fetch content (bytea) if plainText is missing, to avoid transferring large blobs
+        content: sql<Buffer | null>`CASE WHEN ${articles.plainText} IS NULL THEN ${articles.content} ELSE NULL END`,
+        publicationName: publications.name,
+      })
+      .from(articles)
+      .leftJoin(publications, eq(articles.pubId, publications.id))
+      .where(inArray(articles.id, selectedIds));
 
-      // Shuffle the results again to ensure random presentation order (inArray may return in ID order)
-      const shuffledNews = [...news];
-      // eslint-disable-next-line no-restricted-syntax
-      for (let i = shuffledNews.length - 1; i > 0; i--) {
-        const j = crypto.randomInt(0, i + 1);
-        [shuffledNews[i], shuffledNews[j]] = [shuffledNews[j], shuffledNews[i]];
-      }
+    // Shuffle the results again to ensure random presentation order (inArray may return in ID order)
+    const shuffledNews = [...news];
+    // eslint-disable-next-line no-restricted-syntax
+    for (let i = shuffledNews.length - 1; i > 0; i--) {
+      const j = crypto.randomInt(0, i + 1);
+      [shuffledNews[i], shuffledNews[j]] = [shuffledNews[j], shuffledNews[i]];
+    }
 
-      return await Promise.all(
-        shuffledNews.map(async (item) => {
-          const { content, plainText, ...rest } = item;
-          const extract =
-            plainText !== null && plainText !== undefined
-              ? stripHtml(plainText).slice(0, 500)
-              : await processRtfContent(content as Buffer | null, { maxLength: 500 });
-          return {
-            ...rest,
-            extract,
-          };
-        }),
-      );
-    },
-    [`articles-on-this-day-v2-${month}-${day}`],
-    { revalidate: 86400 },
-  )();
-}
+    return await Promise.all(
+      shuffledNews.map(async (item) => {
+        const { content, plainText, ...rest } = item;
+        const extract =
+          plainText !== null && plainText !== undefined
+            ? stripHtml(plainText).slice(0, 500)
+            : await processRtfContent(content as Buffer | null, { maxLength: 500 });
+        return {
+          ...rest,
+          extract,
+        };
+      }),
+    );
+  },
+  ["articles-on-this-day-v3"],
+  { revalidate: 86400 }
+);
