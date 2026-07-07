@@ -17,7 +17,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "iconv-lite": "^0.7.2",
+    "iconv-lite": "^0.7.3",
     "lucide-react": "^0.577.0",
     "luxon": "^3.7.2",
     "next": "16.2.9",
