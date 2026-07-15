@@ -3,12 +3,16 @@ export type DateRangeInput = {
   end?: string | null;
 };
 
+// ⚡ Bolt: Move regex literal to module scope to prevent re-instantiation on every function call
+// eslint-disable-next-line no-inline-comments
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/; // NOSONAR
+
 function normalizeDateValue(value: string | null | undefined): string | null {
   if (!value) {
     return null;
   }
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (!DATE_PATTERN.test(value)) {
     return null;
   }
 

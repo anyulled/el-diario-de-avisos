@@ -175,3 +175,7 @@
 ## 2024-05-30 - unstable_cache anti-pattern
 **Learning:** Next.js `unstable_cache` relies on function references for per-request deduplication via React's `cache`. Calling it dynamically inside another function (e.g., `return await unstable_cache(async () => {...})()`) creates a new wrapper on every request, breaking deduplication and causing memory churn.
 **Action:** Always apply `unstable_cache` directly at the global action definition (e.g., `export const myAction = unstable_cache(async () => {...})`).
+
+## 2024-05-31 - Hoist Static Component Arrays
+**Learning:** Static arrays or objects declared inside a React component body (e.g., `const navLinks = [...]` inside `NavbarUI`) are re-allocated on every single render. This introduces unnecessary memory allocation and garbage collection overhead, particularly for components like `NavbarUI` that re-render frequently (e.g., due to scroll event listeners).
+**Action:** Always hoist static data structures like arrays and objects (e.g., navigation links) outside the React component body to prevent unnecessary memory allocation and garbage collection overhead on every render.

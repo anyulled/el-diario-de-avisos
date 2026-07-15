@@ -17,6 +17,15 @@ interface NavbarUIProps {
   essays: Essay[];
 }
 
+// ⚡ Bolt: Hoist static array outside component to prevent re-allocation on every render
+const NAV_LINKS = [
+  { href: "/tal-dia-como-hoy", icon: Calendar, label: "Tal día como hoy" },
+  { href: "/chat", icon: MessageSquare, label: "Asistente" },
+  { href: "/galeria", icon: ImageIcon, label: "Galería" },
+  { href: "/como-citar", icon: Quote, label: "Cómo citar" },
+  { href: "/about", icon: Info, label: "Acerca de" },
+];
+
 export function NavbarUI({ essays }: NavbarUIProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isEnsayosOpen, setIsEnsayosOpen] = useState(false);
@@ -82,14 +91,6 @@ export function NavbarUI({ essays }: NavbarUIProps) {
     );
   }, [essays]);
 
-  const navLinks = [
-    { href: "/tal-dia-como-hoy", icon: Calendar, label: "Tal día como hoy" },
-    { href: "/chat", icon: MessageSquare, label: "Asistente" },
-    { href: "/galeria", icon: ImageIcon, label: "Galería" },
-    { href: "/como-citar", icon: Quote, label: "Cómo citar" },
-    { href: "/about", icon: Info, label: "Acerca de" },
-  ];
-
   return (
     <>
       <nav className={cn("fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 pt-4 translate-y-0")}>
@@ -154,7 +155,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
               </div>
             </div>
 
-            {navLinks.map((item) => (
+            {NAV_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -217,7 +218,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
             </div>
           </div>
 
-          {navLinks.map((item) => (
+          {NAV_LINKS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
