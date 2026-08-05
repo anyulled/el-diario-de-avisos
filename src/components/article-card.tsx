@@ -1,11 +1,12 @@
 import { formatDate } from "@/lib/date-formatter";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { articles } from "@/db/schema";
 import { highlightText } from "@/lib/search-highlighter";
 import { formatArticleTitle } from "@/lib/title-formatter";
 import Link from "next/link";
 
-export function ArticleCard({
+// ⚡ Bolt: Use React.memo to prevent unnecessary re-renders in large lists like NewsGrid
+export const ArticleCard = memo(function ArticleCard({
   item,
   searchTerm,
 }: {
@@ -52,4 +53,4 @@ export function ArticleCard({
       </article>
     </Link>
   );
-}
+});
