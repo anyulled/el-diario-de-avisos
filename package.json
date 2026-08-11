@@ -6,7 +6,7 @@
     "@ai-sdk/moonshotai": "^3.0.30",
     "@ai-sdk/openai": "^4.0.36",
     "@ai-sdk/react": "^4.0.61",
-    "@cerebras/cerebras_cloud_sdk": "^1.64.1",
+    "@cerebras/cerebras_cloud_sdk": "^1.91.0",
     "@google/generative-ai": "^0.24.1",
     "@iarna/rtf-to-html": "^1.1.0",
     "@sentry/nextjs": "^10.69.0",
