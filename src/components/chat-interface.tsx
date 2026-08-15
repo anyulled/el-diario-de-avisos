@@ -3,10 +3,13 @@
 import { useChat } from "@ai-sdk/react";
 import { type UIMessage } from "ai";
 import { Bot, Library, Send, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatMessage from "./chat-message";
 
 const CHAT_STORAGE_KEY = "chat-history";
+
+// ⚡ Bolt: Extract and memoize message items to prevent re-rendering the entire chat history on every state change
+const MemoizedChatMessage = React.memo(ChatMessage);
 
 export default function ChatInterface({ className }: { className?: string }) {
   const { messages, sendMessage, setMessages, status } = useChat();
@@ -93,7 +96,7 @@ export default function ChatInterface({ className }: { className?: string }) {
         )}
 
         {messages.map((m: UIMessage) => (
-          <ChatMessage key={m.id} message={m} />
+          <MemoizedChatMessage key={m.id} message={m} />
         ))}
 
         {isLoading && (
