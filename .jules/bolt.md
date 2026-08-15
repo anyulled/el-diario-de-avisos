@@ -179,3 +179,6 @@
 ## 2024-05-31 - Hoist Static Component Arrays
 **Learning:** Static arrays or objects declared inside a React component body (e.g., `const navLinks = [...]` inside `NavbarUI`) are re-allocated on every single render. This introduces unnecessary memory allocation and garbage collection overhead, particularly for components like `NavbarUI` that re-render frequently (e.g., due to scroll event listeners).
 **Action:** Always hoist static data structures like arrays and objects (e.g., navigation links) outside the React component body to prevent unnecessary memory allocation and garbage collection overhead on every render.
+## 2024-05-32 - Optimize List Rendering in React
+**Learning:** Rendering complex React components (like `ChatMessage`) directly in large lists or dynamically updated structures (like chat history updates) triggers massive re-renders across the component tree. In our chat interface, appending a new message would force every previous message to re-render, consuming UI thread performance.
+**Action:** When rendering long or dynamically updated lists of components, wrap the list item component in `React.memo` (e.g., `const MemoizedItem = React.memo(MyItem)`) to prevent unnecessary re-rendering of existing items when new items are added to the state array.
