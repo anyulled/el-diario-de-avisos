@@ -182,3 +182,6 @@
 ## 2024-05-32 - Optimize List Rendering in React
 **Learning:** Rendering complex React components (like `ChatMessage`) directly in large lists or dynamically updated structures (like chat history updates) triggers massive re-renders across the component tree. In our chat interface, appending a new message would force every previous message to re-render, consuming UI thread performance.
 **Action:** When rendering long or dynamically updated lists of components, wrap the list item component in `React.memo` (e.g., `const MemoizedItem = React.memo(MyItem)`) to prevent unnecessary re-rendering of existing items when new items are added to the state array.
+## 2024-05-33 - Object.entries in Render
+**Learning:** Calling `Object.entries(grouped)` inside a React JSX render block causes unnecessary O(N) array allocation on every render. If a component re-renders frequently (like `NavbarUI` tracking scroll events), this creates excessive garbage collection overhead.
+**Action:** When grouping data with `reduce` inside a `useMemo`, pre-calculate the `Object.entries` within the `useMemo` block and return the resulting array directly, avoiding the allocation in the render cycle.
