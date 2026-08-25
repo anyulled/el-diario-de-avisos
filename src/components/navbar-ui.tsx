@@ -78,7 +78,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
    * ⚡ Bolt: Memoize grouping calculation to prevent recalculating on every scroll event (which triggers re-renders)
    */
   const groupedEssays = useMemo(() => {
-    return essays.reduce(
+    const grouped = essays.reduce(
       (acc, essay) => {
         const group = essay.groupName || "Diario de Avisos";
         if (!acc[group]) {
@@ -89,6 +89,8 @@ export function NavbarUI({ essays }: NavbarUIProps) {
       },
       {} as Record<string, Essay[]>,
     );
+    // ⚡ Bolt: Pre-calculate Object.entries inside useMemo to avoid O(N) array allocation on every render
+    return Object.entries(grouped);
   }, [essays]);
 
   return (
@@ -134,7 +136,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
                 )}
               >
                 <div className="flex flex-col gap-4">
-                  {Object.entries(groupedEssays).map(([group, groupEssays]) => (
+                  {groupedEssays.map(([group, groupEssays]) => (
                     <div key={group} className="flex flex-col gap-1">
                       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest px-2 mb-1 border-b border-gray-200 dark:border-gray-700/50 pb-1">
                         {group}
@@ -204,7 +206,7 @@ export function NavbarUI({ essays }: NavbarUIProps) {
               Ensayos
             </div>
             <div className="flex flex-col gap-2 pl-4 border-l border-white/10">
-              {Object.entries(groupedEssays).map(([group, groupEssays]) => (
+              {groupedEssays.map(([group, groupEssays]) => (
                 <div key={group} className="flex flex-col gap-1 mb-2">
                   <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-1">{group}</h4>
                   {groupEssays.map((essay) => (
