@@ -185,3 +185,7 @@
 ## 2024-05-33 - Object.entries in Render
 **Learning:** Calling `Object.entries(grouped)` inside a React JSX render block causes unnecessary O(N) array allocation on every render. If a component re-renders frequently (like `NavbarUI` tracking scroll events), this creates excessive garbage collection overhead.
 **Action:** When grouping data with `reduce` inside a `useMemo`, pre-calculate the `Object.entries` within the `useMemo` block and return the resulting array directly, avoiding the allocation in the render cycle.
+## 2024-11-20 - Array allocations during JSX rendering
+
+**Learning:** Calling data transformations like `Object.entries(myMap).map()` inline during the JSX render block, or chaining `.filter().map()` to build search params, allocates unnecessary intermediate arrays, adding memory churn during Server Component rendering.
+**Action:** Always pre-calculate structural transformations before the JSX return block in Server Components, and prefer a single `.reduce()` pass over chained array methods for data transformation.
