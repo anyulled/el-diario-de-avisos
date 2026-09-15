@@ -53,16 +53,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const [integrantes, tutores, desarrolladores] = await Promise.all([getIntegrantes(), getTutores(), getDevelopers()]);
 
-  const integrantesByPublication = integrantes.reduce(
-    (acc, member) => {
-      const pubName = member.publicationName || "Equipo de Investigación";
-      if (!acc[pubName]) {
-        acc[pubName] = [];
-      }
-      acc[pubName].push(member);
-      return acc;
-    },
-    {} as Record<string, typeof integrantes>,
+  // ⚡ Bolt: Pre-calculate Object.entries directly after reduce to avoid O(N) allocation inside the JSX render path
+  const integrantesByPublication = Object.entries(
+    integrantes.reduce(
+      (acc, member) => {
+        const pubName = member.publicationName || "Equipo de Investigación";
+        if (!acc[pubName]) {
+          acc[pubName] = [];
+        }
+        acc[pubName].push(member);
+        return acc;
+      },
+      {} as Record<string, typeof integrantes>,
+    )
   );
 
   return (
@@ -81,7 +84,7 @@ export default async function AboutPage() {
       </div>
 
       <div className="container mx-auto px-4 py-20 max-w-5xl space-y-24">
-        {Object.entries(integrantesByPublication).map(([pubName, members], index) => (
+        {integrantesByPublication.map(([pubName, members], index) => (
           <section key={pubName} className="animate-slide-up opacity-0 [animation-fill-mode:forwards]" style={{ animationDelay: `${400 + index * 200}ms` }}>
             <div className="flex items-center gap-4 mb-10">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-heading whitespace-nowrap">{pubName}</h2>
