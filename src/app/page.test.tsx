@@ -46,7 +46,7 @@ describe("Home Page Performance", () => {
 
     const start = performance.now();
     // Simulate empty search params
-    await Home({ searchParams: Promise.resolve({}) });
+    await Home({ searchParams: Promise.resolve({ text: "test", type: "1" }) });
     const end = performance.now();
     const duration = end - start;
 
@@ -56,5 +56,28 @@ describe("Home Page Performance", () => {
      * We set the threshold to 150ms to strictly require parallelism.
      */
     expect(duration).toBeLessThan(250);
+  });
+
+  it("should ignore empty search params when building scrollKey", async () => {
+    const getNewsTypesMock = vi.mocked(actions.getNewsTypes);
+    const getPublicationsMock = vi.mocked(actions.getPublications);
+    const getNewsMock = vi.mocked(actions.getNews);
+
+    getNewsTypesMock.mockResolvedValue([]);
+    getPublicationsMock.mockResolvedValue([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    getNewsMock.mockResolvedValue({ data: [{ id: 1 } as any], total: 1 });
+
+    const result = await Home({
+      searchParams: Promise.resolve({
+        text: "",
+        type: null as unknown as string,
+        page: "1",
+        pageSize: undefined as unknown as string,
+        pubId: "2",
+      }),
+    });
+
+    expect(result).toBeDefined();
   });
 });

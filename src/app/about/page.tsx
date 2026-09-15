@@ -65,7 +65,7 @@ export default async function AboutPage() {
         return acc;
       },
       {} as Record<string, typeof integrantes>,
-    )
+    ),
   );
 
   return (

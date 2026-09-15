@@ -18,12 +18,15 @@ export default async function Home({ searchParams }: Readonly<{ searchParams: Pr
   delete scrollParams.page;
   // ⚡ Bolt: Use a single reduce pass instead of chained filter/map to avoid creating multiple intermediate arrays
   const scrollKey = new URLSearchParams(
-    Object.entries(scrollParams).reduce((acc, [key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        acc[key] = String(value);
-      }
-      return acc;
-    }, {} as Record<string, string>),
+    Object.entries(scrollParams).reduce(
+      (acc, [key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          acc[key] = String(value);
+        }
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
   ).toString();
 
   return (

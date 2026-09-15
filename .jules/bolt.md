@@ -172,19 +172,27 @@
 
 **Learning:** Calling `Object.entries(MAP).reduce(...)` inside a function to derive a filtered array from a constant dictionary (as was done in `createAccentInsensitivePattern`) is an O(N) operation that executes on every call. If this function is inside a hot path (like iterating over every character of a search string), it creates massive CPU overhead and memory churn.
 **Action:** Always pre-compute inverted lookup tables or derived structures at the module scope for constant mappings. Use these pre-computed structures for O(1) property access inside functions instead of iterating over the source map.
+
 ## 2024-05-30 - unstable_cache anti-pattern
+
 **Learning:** Next.js `unstable_cache` relies on function references for per-request deduplication via React's `cache`. Calling it dynamically inside another function (e.g., `return await unstable_cache(async () => {...})()`) creates a new wrapper on every request, breaking deduplication and causing memory churn.
 **Action:** Always apply `unstable_cache` directly at the global action definition (e.g., `export const myAction = unstable_cache(async () => {...})`).
 
 ## 2024-05-31 - Hoist Static Component Arrays
+
 **Learning:** Static arrays or objects declared inside a React component body (e.g., `const navLinks = [...]` inside `NavbarUI`) are re-allocated on every single render. This introduces unnecessary memory allocation and garbage collection overhead, particularly for components like `NavbarUI` that re-render frequently (e.g., due to scroll event listeners).
 **Action:** Always hoist static data structures like arrays and objects (e.g., navigation links) outside the React component body to prevent unnecessary memory allocation and garbage collection overhead on every render.
+
 ## 2024-05-32 - Optimize List Rendering in React
+
 **Learning:** Rendering complex React components (like `ChatMessage`) directly in large lists or dynamically updated structures (like chat history updates) triggers massive re-renders across the component tree. In our chat interface, appending a new message would force every previous message to re-render, consuming UI thread performance.
 **Action:** When rendering long or dynamically updated lists of components, wrap the list item component in `React.memo` (e.g., `const MemoizedItem = React.memo(MyItem)`) to prevent unnecessary re-rendering of existing items when new items are added to the state array.
+
 ## 2024-05-33 - Object.entries in Render
+
 **Learning:** Calling `Object.entries(grouped)` inside a React JSX render block causes unnecessary O(N) array allocation on every render. If a component re-renders frequently (like `NavbarUI` tracking scroll events), this creates excessive garbage collection overhead.
 **Action:** When grouping data with `reduce` inside a `useMemo`, pre-calculate the `Object.entries` within the `useMemo` block and return the resulting array directly, avoiding the allocation in the render cycle.
+
 ## 2024-11-20 - Array allocations during JSX rendering
 
 **Learning:** Calling data transformations like `Object.entries(myMap).map()` inline during the JSX render block, or chaining `.filter().map()` to build search params, allocates unnecessary intermediate arrays, adding memory churn during Server Component rendering.
