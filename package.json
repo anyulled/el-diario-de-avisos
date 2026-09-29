@@ -46,7 +46,7 @@
     "@vitest/coverage-v8": "^4.1.11",
     "@vitest/ui": "^4.1.2",
     "cspell": "^10.3.4",
-    "cypress": "^16.0.0",
+    "cypress": "^16.1.0",
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
