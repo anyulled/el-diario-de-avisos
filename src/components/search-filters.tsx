@@ -40,19 +40,13 @@ function buildSearchParams(currentParams: URLSearchParams, allStates: Record<str
     params.delete("year");
   }
 
-  /*
-   * Apply updates to params
-   * ⚡ Bolt: Use for...in instead of Object.entries().forEach to avoid allocating intermediate arrays and lower GC churn
-   */
-  for (const key in allStates) {
+  // Apply updates to params
+  // eslint-disable-next-line no-inline-comments
+  for (const key in allStates) { // ⚡ Bolt: Use for...in instead of Object.entries().forEach to avoid allocating intermediate arrays and lower GC churn
     if (!Object.prototype.hasOwnProperty.call(allStates, key)) continue;
-
     const value = allStates[key];
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
+    if (value) params.set(key, value);
+    else params.delete(key);
   }
 
   return params;
