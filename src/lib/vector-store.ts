@@ -185,14 +185,13 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
         ...candidate,
         contentSnippet: snippet,
       };
-    } else {
-      const content = essayContentMap.get(candidate.id) ?? null;
-      const snippet = await getContentSnippet(content);
-      return {
-        ...candidate,
-        contentSnippet: snippet,
-      };
     }
+    const content = essayContentMap.get(candidate.id) ?? null;
+    const snippet = await getContentSnippet(content);
+    return {
+      ...candidate,
+      contentSnippet: snippet,
+    };
   });
 
   // Wait for all snippet generation to complete in parallel
