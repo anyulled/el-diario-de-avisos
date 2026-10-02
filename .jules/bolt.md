@@ -189,3 +189,6 @@
 
 **Learning:** Calling data transformations like `Object.entries(myMap).map()` inline during the JSX render block, or chaining `.filter().map()` to build search params, allocates unnecessary intermediate arrays, adding memory churn during Server Component rendering.
 **Action:** Always pre-calculate structural transformations before the JSX return block in Server Components, and prefer a single `.reduce()` pass over chained array methods for data transformation.
+## 2024-11-20 - Avoid micro-optimizations over object traversal
+**Learning:** Replacing declarative `.forEach()` over `Object.entries()` with imperative `for...in` loops on small state objects (like URL params) avoids small array allocations but sacrifices code readability for zero measurable performance impact. This violates the rule against unmeasurable micro-optimizations.
+**Action:** Do not replace `Object.entries().forEach()` with `for...in` loops unless there is a proven, measurable bottleneck on large objects, and prioritize readability.
