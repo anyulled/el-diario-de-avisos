@@ -40,20 +40,14 @@ function buildSearchParams(currentParams: URLSearchParams, allStates: Record<str
     params.delete("year");
   }
 
-  /*
-   * Apply updates to params
-   * ⚡ Bolt: Replace Object.entries().forEach with for...in to avoid intermediate array allocations
-   */
-  for (const key in allStates) {
-    if (Object.prototype.hasOwnProperty.call(allStates, key)) {
-      const value = allStates[key];
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
+  // Apply updates to params
+  Object.entries(allStates).forEach(([key, value]) => {
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
     }
-  }
+  });
 
   return params;
 }

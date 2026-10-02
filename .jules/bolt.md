@@ -192,3 +192,7 @@
 ## 2024-11-20 - Avoid micro-optimizations over object traversal
 **Learning:** Replacing declarative `.forEach()` over `Object.entries()` with imperative `for...in` loops on small state objects (like URL params) avoids small array allocations but sacrifices code readability for zero measurable performance impact. This violates the rule against unmeasurable micro-optimizations.
 **Action:** Do not replace `Object.entries().forEach()` with `for...in` loops unless there is a proven, measurable bottleneck on large objects, and prioritize readability.
+
+## 2024-11-20 - Slice before enrichment in vector search
+**Learning:** In the chat interface's `findSimilarArticles` function, candidate articles were being enriched with expensive RTF snippet extraction *before* being sorted and sliced to the top 5 results. This caused unnecessary CPU work and memory allocation for up to 15 items that were immediately discarded.
+**Action:** Always combine, sort, and slice candidate datasets to their final limit *before* performing heavy enrichment operations (like database fetches for large columns or RTF processing).
