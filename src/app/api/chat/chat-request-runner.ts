@@ -22,9 +22,7 @@ export function getLatestContent(messages: UIMessage[]): string {
   const latestMessage = messages[messages.length - 1];
   return (
     // ⚡ Bolt: Use a single reduce pass instead of chained filter/map/join to reduce memory allocation and GC churn
-    latestMessage.parts?.reduce((acc, part) => (part.type === "text" ? acc + part.text : acc), "") ||
-    latestMessage.content ||
-    ""
+    latestMessage.parts?.reduce((acc, part) => (part.type === "text" ? acc + part.text : acc), "") || latestMessage.content || ""
   );
 }
 
@@ -139,10 +137,7 @@ No existe información sobre este tema en nuestros registros históricos.
 export function convertToModelMessages(messages: UIMessage[]): ModelMessage[] {
   return messages.map((msg) => {
     // ⚡ Bolt: Use a single reduce pass instead of chained filter/map/join to reduce memory allocation and GC churn
-    const textContent =
-      msg.parts?.reduce((acc, part) => (part.type === "text" ? acc + part.text : acc), "") ||
-      msg.content ||
-      "";
+    const textContent = msg.parts?.reduce((acc, part) => (part.type === "text" ? acc + part.text : acc), "") || msg.content || "";
 
     return {
       role: msg.role as "system" | "user" | "assistant" | "tool",
@@ -253,6 +248,7 @@ export async function executeWithFallback(
     });
 
     // Buffer the stream to check for immediate errors (like 429 Rate Limit)
+
     const response = result.toUIMessageStreamResponse();
     return await validateAndReturnStream(response);
   } catch (error) {
