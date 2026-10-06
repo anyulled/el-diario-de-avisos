@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "@ai-sdk/deepseek": "^3.0.54",
-    "@ai-sdk/google": "^4.0.82",
-    "@ai-sdk/groq": "^4.0.50",
-    "@ai-sdk/moonshotai": "^3.0.58",
-    "@ai-sdk/openai": "^4.0.78",
-    "@ai-sdk/react": "^4.0.119",
+    "@ai-sdk/deepseek": "^3.0.58",
+    "@ai-sdk/google": "^4.0.87",
+    "@ai-sdk/groq": "^4.0.54",
+    "@ai-sdk/moonshotai": "^3.0.62",
+    "@ai-sdk/openai": "^4.0.83",
+    "@ai-sdk/react": "^4.0.130",
     "@cerebras/cerebras_cloud_sdk": "^1.91.0",
     "@google/generative-ai": "^0.24.1",
     "@iarna/rtf-to-html": "^1.1.0",
