@@ -159,40 +159,38 @@ export async function findSimilarArticles(query: string, limit = 5): Promise<Sea
     }
   }
 
-  // Fetch content for all candidates
+  // ⚡ Bolt: Combine, sort, and slice candidates BEFORE fetching expensive content and generating snippets
+  const allCandidates = [...articleCandidates, ...essayCandidates];
+  allCandidates.sort((a, b) => b.similarity - a.similarity);
+  const topCandidates = allCandidates.slice(0, limit + 2);
+
+  const topArticleCandidates = topCandidates.filter((c): c is typeof c & { type: "article" } => c.type === "article");
+  const topEssayCandidates = topCandidates.filter((c): c is typeof c & { type: "essay" } => c.type === "essay");
+
+  // Fetch content only for top candidates
   const [articleContentMap, essayContentMap] = await Promise.all([
-    fetchArticleContent(articleCandidates.map((a) => a.id)),
-    fetchEssayContent(essayCandidates.map((e) => e.id)),
+    fetchArticleContent(topArticleCandidates.map((a) => a.id)),
+    fetchEssayContent(topEssayCandidates.map((e) => e.id)),
   ]);
 
   // Build final results with content snippets (parallel processing)
-  const articleResultsPromises = articleCandidates.map(async (article) => {
-    const data = articleContentMap.get(article.id);
-    const snippet = data?.snippet ? stripHtml(data.snippet) : await getContentSnippet(data?.content ?? null);
-
-    return {
-      ...article,
-      contentSnippet: snippet,
-    };
+  const resultsPromises = topCandidates.map(async (candidate) => {
+    if (candidate.type === "article") {
+      const data = articleContentMap.get(candidate.id);
+      const snippet = data?.snippet ? stripHtml(data.snippet) : await getContentSnippet(data?.content ?? null);
+      return {
+        ...candidate,
+        contentSnippet: snippet,
+      };
+    } else {
+      const content = essayContentMap.get(candidate.id) ?? null;
+      const snippet = await getContentSnippet(content);
+      return {
+        ...candidate,
+        contentSnippet: snippet,
+      };
+    }
   });
 
-  const essayResultsPromises = essayCandidates.map(async (essay) => {
-    const content = essayContentMap.get(essay.id) ?? null;
-    const snippet = await getContentSnippet(content);
-    return {
-      ...essay,
-      contentSnippet: snippet,
-    };
-  });
-
-  // Wait for all snippet generation to complete in parallel
-  const [processedArticles, processedEssays] = await Promise.all([Promise.all(articleResultsPromises), Promise.all(essayResultsPromises)]);
-
-  const finalResults: SearchResult[] = [...processedArticles, ...processedEssays];
-
-  // Sort by similarity descending
-  finalResults.sort((a, b) => b.similarity - a.similarity);
-
-  // Return top results
-  return finalResults.slice(0, limit + 2);
+  return await Promise.all(resultsPromises);
 }

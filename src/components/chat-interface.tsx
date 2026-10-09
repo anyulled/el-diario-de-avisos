@@ -49,7 +49,7 @@ export default function ChatInterface({ className }: { className?: string }) {
     const inputValue = inputRef.current?.value || "";
     if (!inputValue.trim() || isLoading) return;
 
-    sendMessage({ role: "user", parts: [{ type: "text", text: inputValue }] });
+    void sendMessage({ role: "user", parts: [{ type: "text", text: inputValue }] });
 
     if (inputRef.current) {
       inputRef.current.value = "";

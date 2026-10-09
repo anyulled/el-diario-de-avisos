@@ -15,6 +15,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("SearchFilters date range", () => {
+  beforeEach(() => {
+    replaceMock.mockClear();
+
+    searchParamsContainer.current = new URLSearchParams();
+  });
+
   it("updates ref when text param changes and is different", () => {
     // To hit line 282 where the input needs updating
     searchParamsContainer.current.set("text", "initial text");
@@ -27,12 +33,6 @@ describe("SearchFilters date range", () => {
 
     const input = screen.getByPlaceholderText("Buscar por palabra clave o texto...") as HTMLInputElement;
     expect(input.value).toBe("new URL text");
-  });
-
-  beforeEach(() => {
-    replaceMock.mockClear();
-
-    searchParamsContainer.current = new URLSearchParams();
   });
 
   it("uses local date state when sending the range on click", async () => {
