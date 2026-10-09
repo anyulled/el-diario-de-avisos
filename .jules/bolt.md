@@ -189,3 +189,7 @@
 
 **Learning:** Calling data transformations like `Object.entries(myMap).map()` inline during the JSX render block, or chaining `.filter().map()` to build search params, allocates unnecessary intermediate arrays, adding memory churn during Server Component rendering.
 **Action:** Always pre-calculate structural transformations before the JSX return block in Server Components, and prefer a single `.reduce()` pass over chained array methods for data transformation.
+
+## 2026-11-20 - Optimize Search Candidates Aggregation
+**Learning:** In `findSimilarArticles`, content and snippets were fetched for all initial candidates (vector and keyword searches) before sorting and slicing. This resulted in wasted DB operations and CPU processing for candidates that didn't make it to the top N results.
+**Action:** Always combine, sort by similarity, and slice candidate datasets to their final limit *before* executing expensive enrichment operations like large column fetches or text formatting.
