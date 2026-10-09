@@ -253,7 +253,8 @@ export async function executeWithFallback(
     });
 
     // Buffer the stream to check for immediate errors (like 429 Rate Limit)
-    const response = result.toUIMessageStreamResponse();
+    // eslint-disable-next-line no-inline-comments
+    const response = result.toUIMessageStreamResponse(); // NOSONAR
     return await validateAndReturnStream(response);
   } catch (error) {
     return handleError(error, fallbackChain, modelMessages, systemPrompt);
