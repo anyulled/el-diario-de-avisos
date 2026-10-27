@@ -16,7 +16,7 @@
     "chalk": "^6.0.0",
     "clsx": "^2.1.1",
     "dotenv": "^18.0.4",
-    "drizzle-orm": "^0.45.3",
+    "drizzle-orm": "^0.45.4",
     "iconv-lite": "^0.7.3",
     "lucide-react": "^0.577.0",
     "luxon": "^3.7.2",
